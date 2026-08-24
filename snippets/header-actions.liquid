@@ -13,7 +13,7 @@
   {% endif %}
 
   {% if settings.cart_type == 'drawer' and template.name != 'cart' %}
-    {% render 'cart-drawer' %}
+    {% render 'cart-drawer', minicart_settings: minicart_settings %}
   {% else %}
     <a
       href="{{ routes.cart_url }}"

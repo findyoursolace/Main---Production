@@ -334,7 +334,7 @@
   ==========================
 {%- endcomment -%}
 
-{%- assign upsell = section.settings -%}
+{%- assign upsell = upsell_settings | default: section.settings -%}
 {%- if upsell and upsell.upsell_enable -%}
 
   {%- comment -%} Detect cart bandwidth and whether cart contains ONLY "Universal Fit" bandwidth items {%- endcomment -%}
@@ -370,8 +370,14 @@
   {%- assign cart_variant_id_array = cart.items | map: 'variant_id' -%}
   {%- assign shown_upsell_variant_ids = '' -%}
 
-  <div id="miniCartUpsellVariant" class="miniCartUpsellVariantSection" style="padding:30px 15px;">
-    <div id="miniCartUpsellVariantTitle" style="text-align:center;font-weight:600;margin-bottom:10px;">
+  <div
+    id="miniCartUpsellVariant"
+    class="miniCartUpsellVariantSection"
+    data-max-visible="{{ upsell.upsell_max_visible | default: 3 }}"
+    data-hide-existing-product="{{ upsell.upsell_hide_existing_product | default: false }}"
+    style="--upsell-card-radius: {{ upsell.upsell_card_radius | default: 10 }}px;"
+  >
+    <div id="miniCartUpsellVariantTitle">
       {{ upsell.upsell_variant_title | default: 'Recommended for you' }}
     </div>
 
@@ -508,9 +514,25 @@
         {%- if shown_upsell_variant_ids contains best_variant_token -%}{%- continue -%}{%- endif -%}
         {%- assign shown_upsell_variant_ids = shown_upsell_variant_ids | append: best_variant_token -%}
 
+        {%- assign normalized_fit = '' -%}
+        {%- if bandwidth_index != nil -%}
+          {%- assign fit_down = best_variant.options[bandwidth_index] | downcase -%}
+          {%- if fit_down contains 'universal' -%}
+            {%- assign normalized_fit = 'universal' -%}
+          {%- elsif fit_down contains '38/40/41/42' -%}
+            {%- assign normalized_fit = 'small' -%}
+          {%- elsif fit_down contains '44/45/46/49' -%}
+            {%- assign normalized_fit = 'large' -%}
+          {%- else -%}
+            {%- assign normalized_fit = fit_down | strip -%}
+          {%- endif -%}
+        {%- endif -%}
+
         <div class="miniCartUpsellItem miniCartUpsellItem--variant"
              data-product="{{ upsell_product.id }}"
              data-variant="{{ best_variant.id }}"
+             data-fit="{{ normalized_fit | escape }}"
+             data-fit-mode="{{ upsell.upsell_fit_mode | default: 'match' }}"
              {%- if bandwidth_index != nil -%}data-required-bandwidth="{{ best_variant.options[bandwidth_index] | escape }}"{%- endif -%}>
           {%- if best_variant.featured_image -%}
             <img class="miniCartUpsellItemImg"
@@ -523,13 +545,18 @@
           {%- endif -%}
 
           <div class="miniCartUpsellItemWrap">
+            {%- if upsell.upsell_badge_text != blank -%}
+              <span class="miniCartUpsellItemBadge">{{ upsell.upsell_badge_text }}</span>
+            {%- endif -%}
             <div class="miniCartUpsellItemWrapTitle">
               {{ upsell_product.title }}
+            </div>
+
+            <div class="miniCartUpsellItemMeta">
+              {%- if desired_color != '' and color_index != nil -%}{{ best_variant.options[color_index] }}{%- endif -%}
               {%- if bandwidth_index != nil and best_variant.options[bandwidth_index] != blank -%}
-                – {{ best_variant.options[bandwidth_index] }}
-              {%- endif -%}
-              {%- if desired_color != '' and color_index != nil -%}
-                – {{ best_variant.options[color_index] }}
+                {%- if desired_color != '' and color_index != nil -%}<span aria-hidden="true"> · </span>{%- endif -%}
+                {{ best_variant.options[bandwidth_index] | replace: 'Universal Fit', 'Fits all sizes' }}
               {%- endif -%}
             </div>
 
@@ -537,8 +564,8 @@
               {{ best_variant.price | money }}
             </div>
 
-            <button class="miniCartUpsellItemBtn" type="button" data-variant-id="{{ best_variant.id }}">
-              Add
+            <button class="miniCartUpsellItemBtn" type="button" data-variant-id="{{ best_variant.id }}" aria-label="{{ upsell.upsell_button_text | default: 'Add' | escape }} {{ upsell_product.title | escape }} to cart">
+              <span>{{ upsell.upsell_button_text | default: 'Add' }}</span>
             </button>
           </div>
         </div>

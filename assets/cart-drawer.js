@@ -15,15 +15,11 @@ class CartDrawerComponent extends DialogComponent {
 
     // Handle upsell "Add" buttons inside the drawer (event delegation)
     this.addEventListener('click', this.#handleUpsellClick);
-       // Evaluate checkout eligibility every time the drawer opens
-    this.#updateCheckoutState();
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     document.removeEventListener(CartAddEvent.eventName, this.#handleCartAdd);
-   // Evaluate checkout eligibility every time the drawer opens
-    this.#updateCheckoutState();
     this.removeEventListener('click', this.#handleUpsellClick);
   }
 
@@ -53,8 +49,6 @@ class CartDrawerComponent extends DialogComponent {
 
   close() {
     this.closeDialog();
-       // Evaluate checkout eligibility every time the drawer opens
-    this.#updateCheckoutState();
   }
 
   /**
@@ -73,6 +67,8 @@ class CartDrawerComponent extends DialogComponent {
 
     btn.disabled = true;
     btn.classList.add('is-loading');
+    btn.setAttribute('aria-busy', 'true');
+    const status = this.querySelector('[data-minicart-status]');
 
     try {
       const addResult = await this.#addVariantToCart(variantId, 1);
@@ -112,11 +108,14 @@ class CartDrawerComponent extends DialogComponent {
       this.#updateAllBubbles(itemCount);
          // Evaluate checkout eligibility every time the drawer opens
     this.#updateCheckoutState();
+      if (status) status.textContent = 'Item added to cart.';
 
     } catch (err) {
       console.error('[CartDrawer] Failed to add upsell item:', err);
+      if (status) status.textContent = 'The item could not be added. Please try again.';
     } finally {
       btn.classList.remove('is-loading');
+      btn.removeAttribute('aria-busy');
       btn.disabled = false;
     }
   };

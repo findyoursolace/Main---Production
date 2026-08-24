@@ -22,6 +22,7 @@
 
 <cart-drawer-component
   class="cart-drawer"
+  style="--minicart-logo-bar-color: {{ minicart_settings.minicart_logo_bar_color | default: '#0a0a0a' }}; --minicart-logo-width: {{ minicart_settings.minicart_logo_width | default: 80 }}px; --minicart-upsell-background: {{ minicart_settings.upsell_section_background | default: '#f8f5f0' }}; --minicart-upsell-badge-background: {{ minicart_settings.upsell_badge_background | default: '#e8dfd3' }};"
   {{ block.shopify_attributes }}
   {% if settings.auto_open_cart_drawer %}
     auto-open
@@ -45,23 +46,21 @@
     scroll-lock
   >
     <div class="cart-drawer__inner">
+      <div class="visually-hidden" aria-live="polite" aria-atomic="true" data-minicart-status></div>
       <cart-items-component
         class="cart-items-component"
         data-section-id="{{ section.id }}"
       >
         <div class="minicart-logobar">
-          <img
-            src="https://cdn.shopify.com/s/files/1/0558/0976/9626/files/Solace_Final_Primary_Logo_White_1.png?v=1768946961"
-            style="width:80px; padding:5px;"
-          >
+          {%- assign minicart_logo = minicart_settings.minicart_logo | default: settings.logo_inverse -%}
+          {%- if minicart_logo != blank -%}
+            {{ minicart_logo | image_url: width: 240 | image_tag: class: 'minicart-logobar__image', widths: '120, 180, 240', loading: 'eager' }}
+          {%- else -%}
+            <span class="minicart-logobar__shop-name">{{ shop.name }}</span>
+          {%- endif -%}
         </div>
 
-        {%- comment -%}
-          IMPORTANT:
-          This file is a THEME BLOCK (it has block.shopify_attributes).
-          So promo/upsell settings MUST come from block.settings (not section.settings).
-        {%- endcomment -%}
-        {% render 'minicart-promo', promo_settings: block.settings %}
+        {% render 'minicart-promo', promo_settings: minicart_settings %}
 
         {%- if cart.empty? -%}
           <div class="cart-drawer__header">
@@ -89,7 +88,7 @@
             </h2>
 
             <div class="cart-drawer__items">
-              {% render 'cart-products', upsell_settings: block.settings %}
+              {% render 'cart-products', upsell_settings: minicart_settings %}
             </div>
           </div>
         {%- else -%}
@@ -123,7 +122,7 @@
             style="--header-height: 60px;"
           >
             <scroll-hint class="cart-drawer__items">
-              {% render 'cart-products', upsell_settings: block.settings %}
+              {% render 'cart-products', upsell_settings: minicart_settings %}
             </scroll-hint>
 
             <div class="cart-drawer__summary">

@@ -5,6 +5,7 @@
 <div
   class="mini-cart-promo"
   data-minicart-promo
+  data-count-scope="{{ mp.promo_count_scope | default: 'collection' }}"
   data-tier1-qty="{{ mp.tier1_qty }}"
   data-tier2-qty="{{ mp.tier2_qty }}"
   data-msg-before-first="{{ mp.msg_before_first | escape }}"
@@ -14,12 +15,22 @@
   data-tier1-label="{{ mp.tier1_label | escape }}"
   data-tier2-label="{{ mp.tier2_label | escape }}"
   data-promo-product-ids="{% if promo_collection %}{% for product in promo_collection.products %}{{ product.id }}{% unless forloop.last %},{% endunless %}{% endfor %}{% endif %}"
-  style="--tier1-percent: {% if mp.tier2_qty != blank and mp.tier2_qty != 0 %}{{ mp.tier1_qty | times: 100.0 | divided_by: mp.tier2_qty }}%{% else %}0%{% endif %};"
+  role="group"
+  aria-label="{{ mp.promo_accessibility_label | default: 'Cart offer progress' | escape }}"
+  style="--tier1-percent: {% if mp.tier2_qty != blank and mp.tier2_qty != 0 %}{{ mp.tier1_qty | times: 100.0 | divided_by: mp.tier2_qty }}%{% else %}0%{% endif %}; --minicart-promo-accent: {{ mp.promo_accent_color | default: '#9ab2a5' }}; --minicart-promo-background: {{ mp.promo_background_color | default: '#fbf9f6' }}; --minicart-promo-radius: {{ mp.promo_corner_radius | default: 0 }}px;"
 >
-  <div class="mini-cart-promo__text" data-minicart-promo-message></div>
+  <div class="mini-cart-promo__text" data-minicart-promo-message aria-live="polite" aria-atomic="true"></div>
 
   <div class="mini-cart-promo__bar">
-    <div class="mini-cart-promo__bar-track">
+    <div
+      class="mini-cart-promo__bar-track"
+      role="progressbar"
+      aria-label="{{ mp.promo_accessibility_label | default: 'Cart offer progress' | escape }}"
+      aria-valuemin="0"
+      aria-valuemax="{{ mp.tier2_qty }}"
+      aria-valuenow="0"
+      data-minicart-promo-progress
+    >
       <div class="mini-cart-promo__bar-fill" data-minicart-promo-fill></div>
     </div>
 

@@ -1,447 +1,163 @@
-/**
- * minicart-promo.js
- * - Keeps promo bar in sync with cart count
- * - Adds/maintains VARIANT upsell behavior (no "control" upsells)
- * - Rebind-safe: works across Horizon morphs / section rerenders
- *
- * Key design principles:
- * - This script ONLY owns the promo bar and upsell visibility.
- *   It does NOT attempt to re-render Horizon's cart drawer or line items.
- *   Horizon owns its own DOM — we hook into its events, we don't replace its HTML.
- * - For upsell adds, we use Horizon's native cart add path (if available) so
- *   Horizon handles its own line item refresh, bubble count, etc.
- * - fetchInFlight deduplication prevents concurrent /cart.js races.
- * - Self-event guard prevents feedback loops from our own cart:update dispatches.
- * - A MutationObserver re-runs promo updates after any Horizon section morph so
- *   the bar is never wiped by a DOM swap (page load, drawer open, etc).
- */
+/** Minicart offer presentation. Horizon remains the cart state owner. */
 (function () {
-  if (window.__miniCartPromoInit) return;
-  window.__miniCartPromoInit = true;
+  if (window.__minicartOffersController) return;
+  window.__minicartOffersController = true;
 
-  var promoRefreshTimer = null;
-  var fetchInFlight = null;
-  var morphObserver = null;
+  let cartRequest = null;
+  let refreshTimer = null;
+  let drawerObserver = null;
+  let lastCart = null;
 
-  /* -----------------------------
-   * Promo helpers
-   * ----------------------------- */
-  function getCartCount(cart, el) {
+  function normalizeFit(value) {
+    const fit = String(value || '').trim().toLowerCase().replace(/\s+/g, '');
+    if (!fit) return '';
+    if (fit.includes('universal')) return 'universal';
+    if (fit.includes('38/40/41/42') || fit === 'small') return 'small';
+    if (fit.includes('44/45/46/49') || fit === 'large') return 'large';
+    return fit;
+  }
+
+  function cartFit(cart) {
+    if (!cart?.items?.length) return '';
+    let universal = '';
+    for (const item of cart.items) {
+      for (const option of item.options_with_values || []) {
+        if (String(option.name).toLowerCase() !== 'bandwidth') continue;
+        const fit = normalizeFit(option.value);
+        if (fit && fit !== 'universal') return fit;
+        if (fit === 'universal') universal = fit;
+      }
+    }
+    return universal;
+  }
+
+  function eligibleQuantity(cart, promo) {
     if (!cart) return 0;
+    if (promo.dataset.countScope === 'all') return Number(cart.item_count ?? cart.itemCount ?? 0);
+    const ids = new Set(String(promo.dataset.promoProductIds || '').split(',').map(Number).filter(Number.isFinite));
+    return (cart.items || []).reduce(
+      (quantity, item) => quantity + (ids.has(Number(item.product_id)) ? Number(item.quantity || 0) : 0), 0
+    );
+  }
 
-    var idsAttr = el && el.getAttribute('data-promo-product-ids');
-    if (!idsAttr) {
-      return typeof cart.item_count === 'number'
-        ? cart.item_count
-        : typeof cart.itemCount === 'number'
-          ? cart.itemCount
-          : 0;
+  const formatMessage = (template, remaining) => String(template || '').replaceAll('[remaining]', String(remaining));
+
+  function updatePromo(promo, cart) {
+    const first = Number(promo.dataset.tier1Qty || 0);
+    const final = Number(promo.dataset.tier2Qty || 0);
+    if (!first || !final || final < first) return;
+    const quantity = eligibleQuantity(cart, promo);
+    let copy;
+    if (quantity < first) copy = formatMessage(promo.dataset.msgBeforeFirst, first - quantity);
+    else if (quantity === first && promo.dataset.msgExactTier1) copy = promo.dataset.msgExactTier1;
+    else if (quantity < final) copy = formatMessage(promo.dataset.msgAfterFirst, final - quantity);
+    else copy = promo.dataset.msgAfterSecond || '';
+
+    const fill = promo.querySelector('[data-minicart-promo-fill]');
+    const progress = promo.querySelector('[data-minicart-promo-progress]');
+    const firstMarker = promo.querySelector('[data-minicart-promo-marker1]');
+    const finalMarker = promo.querySelector('[data-minicart-promo-marker2]');
+    promo.querySelector('[data-minicart-promo-message]')?.replaceChildren(document.createTextNode(copy));
+    if (fill) fill.style.width = `${Math.min(quantity / final, 1) * 100}%`;
+    if (progress) {
+      progress.setAttribute('aria-valuenow', String(Math.min(quantity, final)));
+      progress.setAttribute('aria-valuetext', copy);
     }
-
-    if (!cart.items || !cart.items.length) return 0;
-
-    var allowedIds = idsAttr
-      .split(',')
-      .map(function (id) { return parseInt(id, 10); })
-      .filter(function (id) { return !isNaN(id); });
-
-    if (!allowedIds.length) return 0;
-
-    var total = 0;
-    for (var i = 0; i < cart.items.length; i++) {
-      var item = cart.items[i];
-      if (allowedIds.indexOf(item.product_id) !== -1) {
-        total += item.quantity || 0;
-      }
+    if (firstMarker) {
+      firstMarker.style.left = `${(first / final) * 100}%`;
+      firstMarker.classList.toggle('is-active', quantity >= first);
     }
-    return total;
-  }
-
-  function formatMessage(template, remaining) {
-    return (template || '').replace('[remaining]', String(remaining));
-  }
-
-  function computeState(qty, tier1, tier2) {
-    if (qty < tier1) return 'before_first';
-    if (qty >= tier1 && qty < tier2) return 'after_first';
-    return 'after_second';
-  }
-
-  function updatePromoElement(el, cartLike) {
-    if (!el) return;
-
-    var tier1 = parseInt(el.getAttribute('data-tier1-qty'), 10) || 0;
-    var tier2 = parseInt(el.getAttribute('data-tier2-qty'), 10) || 0;
-    if (!tier1 || !tier2) return;
-
-    var msgBeforeFirst  = el.getAttribute('data-msg-before-first')  || '';
-    var msgAfterFirst   = el.getAttribute('data-msg-after-first')   || '';
-    var msgAfterSecond  = el.getAttribute('data-msg-after-second')  || '';
-    var msgExactTier1   = el.getAttribute('data-msg-exact-tier1')   || '';
-
-    var msgEl     = el.querySelector('[data-minicart-promo-message]');
-    var fillEl    = el.querySelector('[data-minicart-promo-fill]');
-    var marker1El = el.querySelector('[data-minicart-promo-marker1]');
-    var marker2El = el.querySelector('[data-minicart-promo-marker2]');
-
-    var qty = getCartCount(cartLike, el);
-    var state = computeState(qty, tier1, tier2);
-    var remainingToTier1 = Math.max(tier1 - qty, 0);
-    var remainingToTier2 = Math.max(tier2 - qty, 0);
-
-    var message = '';
-    if (state === 'before_first') {
-      message = formatMessage(msgBeforeFirst, remainingToTier1);
-    } else if (state === 'after_first') {
-      message = (qty === tier1 && msgExactTier1)
-        ? msgExactTier1
-        : formatMessage(msgAfterFirst, remainingToTier2);
-    } else {
-      message = msgAfterSecond || '';
+    if (finalMarker) {
+      finalMarker.style.left = '100%';
+      finalMarker.classList.toggle('is-active', quantity >= final);
     }
-
-    if (msgEl) msgEl.textContent = message;
-
-    var progress = Math.min(qty / tier2, 1) * 100;
-    if (fillEl) fillEl.style.width = progress + '%';
-
-    var tier1Percent = (tier1 / tier2) * 100;
-    if (marker1El) {
-      marker1El.style.left = tier1Percent + '%';
-      marker1El.classList.toggle('is-active', qty >= tier1);
-    }
-    if (marker2El) {
-      marker2El.style.left = '100%';
-      marker2El.classList.toggle('is-active', qty >= tier2);
-    }
+    promo.classList.toggle('is-complete', quantity >= final);
   }
 
-  function updateAllPromos(cartLike) {
-    var els = document.querySelectorAll('[data-minicart-promo]');
-    if (!els || !els.length) return;
-    els.forEach(function (el) { updatePromoElement(el, cartLike); });
-  }
-
-  function refreshPromosAfterPaint() {
-    if (promoRefreshTimer) clearTimeout(promoRefreshTimer);
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        promoRefreshTimer = setTimeout(fetchCartAndUpdate, 120);
-      });
-    });
-  }
-
-  /* -----------------------------
-   * MutationObserver — re-apply promo state after any Horizon DOM morph
-   *
-   * Horizon's section rendering (page load hydration, drawer open, cart updates)
-   * replaces innerHTML in the cart drawer, which wipes any inline styles we set
-   * on promo fill elements. The observer detects those DOM swaps and re-runs
-   * our promo update using the last known good cart data.
-   * ----------------------------- */
-  var lastKnownCart = null;
-
-  function startMorphObserver() {
-    if (morphObserver) return;
-
-    // Watch the whole document subtree for large DOM changes that indicate a
-    // section re-render (Horizon swaps entire subtrees, not individual nodes)
-    morphObserver = new MutationObserver(function (mutations) {
-      var significant = false;
-      for (var i = 0; i < mutations.length; i++) {
-        // Any added nodes that are elements (not text) = potential section swap
-        if (mutations[i].addedNodes && mutations[i].addedNodes.length) {
-          for (var j = 0; j < mutations[i].addedNodes.length; j++) {
-            if (mutations[i].addedNodes[j].nodeType === 1) {
-              significant = true;
-              break;
-            }
-          }
-        }
-        if (significant) break;
-      }
-
-      if (!significant) return;
-
-      // Re-apply last known cart state immediately (no fetch needed —
-      // we already have the correct data, Horizon just wiped our styles)
-      if (lastKnownCart) {
-        updateAllPromos(lastKnownCart);
-        updateVariantUpsells(lastKnownCart);
-      }
-
-      // Then schedule a fresh fetch in case the morph included new cart data
-      refreshPromosAfterPaint();
-    });
-
-    morphObserver.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
-  }
-
-  /* -----------------------------
-   * Variant upsell helpers (Horizon)
-   * ----------------------------- */
-  function getCartBandwidthFromCart(cart) {
-    var valid = ['38/40/41/42MM', '44/45/46/49MM'];
-    if (!cart || !cart.items || !cart.items.length) return null;
-
-    for (var i = 0; i < cart.items.length; i++) {
-      var item = cart.items[i];
-      var opts = item && item.options_with_values ? item.options_with_values : null;
-      if (!opts || !opts.length) continue;
-      for (var j = 0; j < opts.length; j++) {
-        var o = opts[j];
-        if (o && o.name === 'Bandwidth') {
-          var v = (o.value || '').trim();
-          if (valid.indexOf(v) !== -1) return v;
-        }
-      }
-    }
-    return null;
-  }
-
-  function getCartVariantIdsFromCart(cart) {
-    var out = [];
-    if (!cart || !cart.items) return out;
-    for (var i = 0; i < cart.items.length; i++) {
-      var id = cart.items[i] && cart.items[i].variant_id;
-      if (typeof id === 'number') out.push(id);
-    }
-    return out;
-  }
-
-  function toggleElActive(el, on) {
-    if (!el) return;
-    el.classList.toggle('active', !!on);
-  }
-
-  function updateVariantUpsells(cart) {
-    var wrapper = document.querySelector('#miniCartUpsellVariant');
+  function updateUpsells(cart) {
+    const wrapper = document.querySelector('#miniCartUpsellVariant');
     if (!wrapper) return;
+    const fit = cartFit(cart);
+    const variantIds = new Set((cart?.items || []).map((item) => Number(item.variant_id)));
+    const productIds = new Set((cart?.items || []).map((item) => Number(item.product_id)));
+    const hideProduct = wrapper.dataset.hideExistingProduct === 'true';
+    const limit = Math.max(1, Number(wrapper.dataset.maxVisible || 6));
+    let visible = 0;
 
-    var title = document.querySelector('#miniCartUpsellVariantTitle');
-    var cartBandwidth  = getCartBandwidthFromCart(cart);
-    var cartVariantIds = getCartVariantIdsFromCart(cart);
+    wrapper.querySelectorAll('.miniCartUpsellItem--variant').forEach((card) => {
+      const requiredFit = normalizeFit(card.dataset.fit || card.dataset.requiredBandwidth);
+      const fitMode = card.dataset.fitMode || 'match';
+      let show = !variantIds.has(Number(card.dataset.variant));
+      if (show && hideProduct) show = !productIds.has(Number(card.dataset.product));
+      if (show && fitMode === 'match' && requiredFit && requiredFit !== 'universal') {
+        show = Boolean(fit) && (fit === requiredFit || fit === 'universal');
+      } else if (show && fitMode === 'universal') show = requiredFit === 'universal';
+      if (show && visible >= limit) show = false;
+      card.classList.toggle('active', show);
+      card.hidden = !show;
+      if (show) visible += 1;
+    });
 
-    var upsells = document.querySelectorAll('.miniCartUpsellItem--variant');
-    if (!upsells || !upsells.length) {
-      toggleElActive(wrapper, false);
-      toggleElActive(title, false);
-      return;
-    }
+    wrapper.classList.toggle('active', visible > 0);
+    wrapper.hidden = visible === 0;
+    const title = wrapper.querySelector('#miniCartUpsellVariantTitle');
+    title?.classList.toggle('active', visible > 0);
+  }
 
-    var anyActive = false;
+  function apply(cart) {
+    if (!cart) return;
+    lastCart = cart;
+    document.querySelectorAll('[data-minicart-promo]').forEach((promo) => updatePromo(promo, cart));
+    updateUpsells(cart);
+  }
 
-    upsells.forEach(function (el) {
-      var variantId = parseInt(
-        el.getAttribute('data-variant') || el.getAttribute('data-variant-id') || '', 10
-      );
-      var ignoreBandwidth = (el.getAttribute('data-ignore-bandwidth') || '').toLowerCase() === 'true';
-      var requiredBw      = (el.getAttribute('data-required-bandwidth') || '').trim();
-      var requiredBwDown  = requiredBw.toLowerCase();
-      var isUniversal     = requiredBwDown.indexOf('universal') !== -1;
+  function fetchCart() {
+    if (cartRequest) return cartRequest;
+    cartRequest = fetch(`${window.Shopify?.routes?.root || '/'}cart.js`, { headers: { Accept: 'application/json' } })
+      .then((response) => {
+        if (!response.ok) throw new Error('Unable to load cart');
+        return response.json();
+      })
+      .then(apply)
+      .catch((error) => console.warn('[MinicartOffers]', error.message))
+      .finally(() => { cartRequest = null; });
+    return cartRequest;
+  }
 
-      var shouldShow = true;
+  function scheduleFetch(delay = 80) {
+    window.clearTimeout(refreshTimer);
+    refreshTimer = window.setTimeout(fetchCart, delay);
+  }
 
-      if (variantId && cartVariantIds.indexOf(variantId) !== -1) shouldShow = false;
-
-      if (shouldShow && !ignoreBandwidth && !isUniversal && requiredBw) {
-        if (!cartBandwidth) {
-          shouldShow = false;
-        } else if (String(cartBandwidth).toLowerCase().trim() !== requiredBwDown) {
-          shouldShow = false;
-        }
+  function observeDrawer() {
+    drawerObserver?.disconnect();
+    const drawer = document.querySelector('cart-drawer-component');
+    if (!drawer) return;
+    drawerObserver = new MutationObserver((mutations) => {
+      if (lastCart && mutations.some((mutation) => mutation.addedNodes.length)) {
+        requestAnimationFrame(() => apply(lastCart));
       }
-
-      toggleElActive(el, shouldShow);
-      if (shouldShow) anyActive = true;
     });
-
-    toggleElActive(wrapper, anyActive);
-    toggleElActive(title, anyActive);
+    drawerObserver.observe(drawer, { childList: true, subtree: true });
   }
 
-  /* -----------------------------
-   * Cart fetch
-   * ----------------------------- */
-  function fetchCartAndUpdate() {
-    if (fetchInFlight) return fetchInFlight;
-
-    fetchInFlight = fetch('/cart.js')
-      .then(function (res) { return res.json(); })
-      .then(function (cart) {
-        lastKnownCart = cart;
-        updateAllPromos(cart);
-        updateVariantUpsells(cart);
-        return cart;
-      })
-      .catch(function () {})
-      .finally(function () { fetchInFlight = null; });
-
-    return fetchInFlight;
-  }
-
-  /* -----------------------------
-   * Upsell add to cart
-   *
-   * Strategy: use Horizon's own add-to-cart machinery when available so that
-   * Horizon handles the line item render and cart bubble update itself.
-   * We only handle the promo bar update on top of that.
-   * ----------------------------- */
-  function dispatchCartUpdateWithCount(itemCount) {
-    try {
-      document.dispatchEvent(new CustomEvent('cart:update', {
-        bubbles: true,
-        detail: {
-          data: {
-            itemCount: typeof itemCount === 'number' ? itemCount : null,
-            source: 'minicart-upsell',
-          },
-        },
-      }));
-    } catch (e) {}
-  }
-
-  function addViaHorizonComponent(variantId) {
-    // Horizon exposes a global `window.theme.cart.add()` in some versions
-    if (window.theme && window.theme.cart && typeof window.theme.cart.add === 'function') {
-      return window.theme.cart.add({ id: variantId, quantity: 1 })
-        .then(function () { return true; })
-        .catch(function () { return false; });
-    }
-
-    // Some Horizon builds expose a CartAPI helper
-    if (window.CartAPI && typeof window.CartAPI.addItem === 'function') {
-      return window.CartAPI.addItem({ id: variantId, quantity: 1 })
-        .then(function () { return true; })
-        .catch(function () { return false; });
-    }
-
-    // Horizon cart-drawer custom element sometimes has an `addToCart` method
-    var drawerEl = document.querySelector('cart-drawer');
-    if (drawerEl && typeof drawerEl.addToCart === 'function') {
-      return drawerEl.addToCart({ id: variantId, quantity: 1 })
-        .then(function () { return true; })
-        .catch(function () { return false; });
-    }
-
-    return Promise.resolve(false);
-  }
-
-  function addUpsellVariantToCart(variantId, buttonEl) {
-    if (!variantId) return;
-
-    if (buttonEl) {
-      buttonEl.disabled = true;
-      buttonEl.classList.add('loading');
-    }
-
-    // Try Horizon's own add path first. If it succeeds, Horizon handles the
-    // line item list and bubble update — we just update the promo bar on top.
-    addViaHorizonComponent(variantId)
-      .then(function (handledByHorizon) {
-        if (handledByHorizon) {
-          // Horizon did the cart mutation — just fetch fresh cart for our promo bar
-          fetchInFlight = null;
-          return fetchCartAndUpdate().then(function (cart) {
-            dispatchCartUpdateWithCount(cart && typeof cart.item_count === 'number' ? cart.item_count : null);
-            refreshPromosAfterPaint();
-          });
-        }
-
-        // Horizon component not available — do a raw fetch add and then fire the
-        // standard Horizon cart:refresh event so it re-renders its own components.
-        return fetch('/cart/add.js', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ items: [{ id: variantId, quantity: 1 }] }),
-        })
-          .then(function () {
-            fetchInFlight = null;
-            return fetchCartAndUpdate();
-          })
-          .then(function (cart) {
-            dispatchCartUpdateWithCount(
-              cart && typeof cart.item_count === 'number' ? cart.item_count : null
-            );
-
-            // Fire cart:refresh so Horizon re-renders line items and bubble.
-            // We do NOT touch the DOM ourselves — Horizon owns that.
-            try { document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true })); } catch (e) {}
-            try { window.dispatchEvent(new CustomEvent('cart', { bubbles: true })); } catch (e) {}
-
-            refreshPromosAfterPaint();
-          });
-      })
-      .catch(function () {})
-      .finally(function () {
-        if (buttonEl) {
-          buttonEl.disabled = false;
-          buttonEl.classList.remove('loading');
-        }
-      });
-  }
-
-  function bindUpsellClicksOnce() {
-    if (document.querySelector('cart-drawer-component')) return;
-    if (document.documentElement.hasAttribute('data-upsell-delegate-bound')) return;
-    document.documentElement.setAttribute('data-upsell-delegate-bound', 'true');
-
-    document.addEventListener('click', function (e) {
-      var btn = e.target && e.target.closest
-        ? e.target.closest('.miniCartUpsellItemBtn')
-        : null;
-      if (!btn) return;
-
-      var variantId = parseInt(
-        btn.getAttribute('data-variant-id') || btn.getAttribute('data-variant') || '', 10
-      );
-      if (!variantId) return;
-
-      e.preventDefault();
-      addUpsellVariantToCart(variantId, btn);
-    });
-  }
-
-  /* -----------------------------
-   * Init
-   * ----------------------------- */
   function init() {
-    startMorphObserver();
-    fetchCartAndUpdate();
-    bindUpsellClicksOnce();
-
-    document.addEventListener('cart:update', function (event) {
-      var detail = event && event.detail ? event.detail : null;
-      var data   = detail && detail.data ? detail.data : null;
-
-      // Self-event guard: ignore events we dispatched to avoid a feedback loop
-      if (data && data.source === 'minicart-upsell') return;
-
-      if (data && data.items) {
-        updateAllPromos(data);
-        updateVariantUpsells(data);
-      }
-
-      refreshPromosAfterPaint();
+    observeDrawer();
+    fetchCart();
+    document.addEventListener('cart:update', (event) => {
+      const data = event?.detail?.data || event?.detail;
+      if (data?.items) apply(data);
+      scheduleFetch(data?.items ? 180 : 60);
     });
-
-    window.updateMiniCartPromo = function (cartLike) {
-      if (cartLike) {
-        updateAllPromos(cartLike);
-        if (cartLike.items) updateVariantUpsells(cartLike);
-        refreshPromosAfterPaint();
-      } else {
-        refreshPromosAfterPaint();
-      }
-    };
+    document.addEventListener('cart:refresh', () => scheduleFetch());
+    document.addEventListener('shopify:section:load', () => {
+      observeDrawer();
+      if (lastCart) apply(lastCart);
+      else fetchCart();
+    });
+    window.updateMiniCartPromo = (cart) => cart?.items ? apply(cart) : scheduleFetch(0);
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
+  else init();
 })();

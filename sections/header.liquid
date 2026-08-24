@@ -60,7 +60,7 @@
   endcapture
 
   capture actions
-    render 'header-actions'
+    render 'header-actions', minicart_settings: section.settings
   endcapture
 
   if shop.customer_accounts_enabled
@@ -652,15 +652,18 @@
   align-items: center;
   justify-content: flex-start;
   padding: 8px 12px;
-  background: #0a0a0a; /* matches your old header promo red */
+  min-height: 42px;
+  background: var(--minicart-logo-bar-color, #0a0a0a);
 }
+.cart-drawer__dialog .minicart-logobar__image { width: var(--minicart-logo-width, 80px); height: auto; display: block; }
+.cart-drawer__dialog .minicart-logobar__shop-name { color: #fff; font-weight: 700; }
 
 /* Upsell container (variant-only) */
 .cart-drawer__dialog #miniCartUpsellVariant {
   display: none; /* JS toggles .active */
-  padding: 18px 16px;
+  padding: 18px 16px 22px;
   border-top: 1px solid rgba(0,0,0,0.08);
-  background: rgba(0,0,0,0.02);
+  background: var(--minicart-upsell-background, #f8f5f0);
 }
 .cart-drawer__dialog #miniCartUpsellVariant.active {
   display: block;
@@ -668,10 +671,11 @@
 
 .cart-drawer__dialog #miniCartUpsellVariantTitle {
   display: none; /* JS toggles .active */
-  text-align: center;
+  text-align: left;
   font-weight: 700;
-  font-size: 14px;
-  margin-bottom: 10px;
+  font-size: 15px;
+  line-height: 1.3;
+  margin-bottom: 12px;
   color: rgba(0,0,0,0.85);
 }
 .cart-drawer__dialog #miniCartUpsellVariantTitle.active {
@@ -692,7 +696,9 @@
   gap: 12px;
   padding: 12px;
   background: #fff;
-  border: 1px solid #1d1c1c80;
+  border: 1px solid rgba(29,28,28,.14);
+  border-radius: var(--upsell-card-radius, 10px);
+  box-shadow: 0 1px 2px rgba(29,28,28,.04);
 }
 .cart-drawer__dialog .miniCartUpsellItem--variant.active {
   display: flex;
@@ -722,7 +728,13 @@
   font-size: 13px;
   line-height: 1.2;
   color: #1d1c1c;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
+.cart-drawer__dialog .miniCartUpsellItemMeta { font-size: 11px; line-height: 1.25; color: rgba(29,28,28,.65); }
+.cart-drawer__dialog .miniCartUpsellItemBadge { align-self: flex-start; padding: 2px 7px; border-radius: 999px; background: var(--minicart-upsell-badge-background, #e8dfd3); color: #1d1c1c; font-size: 10px; font-weight: 700; line-height: 1.4; }
 .cart-drawer__dialog .miniCartUpsellItemWrapPrice {
   font-size: 13px;
   font-weight: 600;
@@ -755,9 +767,22 @@
 }
 
 .cart-drawer__dialog .miniCartUpsellItemBtn.loading,
+.cart-drawer__dialog .miniCartUpsellItemBtn.is-loading,
 .cart-drawer__dialog .miniCartUpsellItemBtn:disabled {
   opacity: 0.65;
   cursor: not-allowed;
+}
+.cart-drawer__dialog .miniCartUpsellItemBtn:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+
+.cart-drawer__dialog .mini-cart-promo { background: var(--minicart-promo-background); border-radius: var(--minicart-promo-radius); padding: 12px 16px 14px; }
+.cart-drawer__dialog .mini-cart-promo__text { font-weight: 650; min-height: 1.3em; }
+.cart-drawer__dialog .mini-cart-promo__bar-fill,
+.cart-drawer__dialog .mini-cart-promo__dot.is-active { background: var(--minicart-promo-accent); }
+.cart-drawer__dialog .mini-cart-promo.is-complete .mini-cart-promo__text { color: #326148; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-drawer__dialog .mini-cart-promo__bar-fill,
+  .cart-drawer__dialog .miniCartUpsellItemBtn { transition: none; }
 }
 
 /* Optional: tighten drawer spacing on mobile */
@@ -1223,10 +1248,70 @@
       "content": "Mini-cart promo"
     },
     {
+      "type": "image_picker",
+      "id": "minicart_logo",
+      "label": "Drawer logo",
+      "info": "Uses the inverse theme logo when blank"
+    },
+    {
+      "type": "range",
+      "id": "minicart_logo_width",
+      "label": "Drawer logo width",
+      "min": 50,
+      "max": 160,
+      "step": 5,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "color",
+      "id": "minicart_logo_bar_color",
+      "label": "Logo bar color",
+      "default": "#0a0a0a"
+    },
+    {
   "type": "collection",
   "id": "promo_collection",
   "label": "Promo collection"
 },
+    {
+      "type": "select",
+      "id": "promo_count_scope",
+      "label": "Items counted toward offers",
+      "options": [
+        { "value": "collection", "label": "Products in promo collection" },
+        { "value": "all", "label": "All cart products" }
+      ],
+      "default": "collection"
+    },
+    {
+      "type": "text",
+      "id": "promo_accessibility_label",
+      "label": "Progress bar accessibility label",
+      "default": "Cart offer progress"
+    },
+    {
+      "type": "color",
+      "id": "promo_background_color",
+      "label": "Progress area background",
+      "default": "#fbf9f6"
+    },
+    {
+      "type": "color",
+      "id": "promo_accent_color",
+      "label": "Progress accent",
+      "default": "#9ab2a5"
+    },
+    {
+      "type": "range",
+      "id": "promo_corner_radius",
+      "label": "Progress area corner radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
     {
       "type": "number",
       "id": "tier1_qty",
@@ -1290,6 +1375,66 @@
   "id": "upsell_variant_title",
   "label": "Upsell title",
   "default": "Recommended for you"
+},
+{
+  "type": "text",
+  "id": "upsell_badge_text",
+  "label": "Upsell badge",
+  "default": "Popular"
+},
+{
+  "type": "text",
+  "id": "upsell_button_text",
+  "label": "Add button text",
+  "default": "Add"
+},
+{
+  "type": "select",
+  "id": "upsell_fit_mode",
+  "label": "Fit matching",
+  "options": [
+    { "value": "match", "label": "Match cart size" },
+    { "value": "universal", "label": "Universal fit only" },
+    { "value": "ignore", "label": "Ignore size" }
+  ],
+  "default": "match"
+},
+{
+  "type": "range",
+  "id": "upsell_max_visible",
+  "label": "Maximum visible recommendations",
+  "min": 1,
+  "max": 6,
+  "step": 1,
+  "default": 3
+},
+{
+  "type": "checkbox",
+  "id": "upsell_hide_existing_product",
+  "label": "Hide product when another variant is in cart",
+  "default": false
+},
+{
+  "type": "color",
+  "id": "upsell_section_background",
+  "label": "Upsell section background",
+  "default": "#f8f5f0"
+},
+{
+  "type": "color",
+  "id": "upsell_badge_background",
+  "label": "Upsell badge background",
+  "default": "#e8dfd3"
+},
+{
+  "type": "range",
+  "id": "upsell_card_radius",
+  "label": "Upsell card corner radius",
+  "min": 0,
+  "max": 24,
+  "step": 2,
+  "unit": "px",
+  "default": 10
 },
 
 {
