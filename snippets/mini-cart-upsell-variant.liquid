@@ -1,0 +1,48 @@
+<dialog id="variantUpsell-{{ product.id }}" class="variantUpsell"
+        data-product="{{ product | json | escape }}"
+        data-variant="{{ product.selected_or_first_available_variant | json | escape }}"
+        data-variant-id="{{ product.selected_or_first_available_variant.id }}">
+    <div class="variantUpsellBody">
+        <button class="variantUpsellBodyClose variantUpsellClose" data-target="variantUpsell-{{ product.id }}">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M14 12.6201L1.37988 0L0 1.37988L12.6201 14L14 12.6201Z"
+                      fill="#4F4F4F"></path>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M1.37988 14L14 1.37988L12.6201 0L0 12.6201L1.37988 14Z"
+                      fill="#4F4F4F"></path>
+            </svg>
+        </button>
+        <div class="variantUpsellHeader">
+            <img class="variantUpsellHeaderImg" src="{{ product.images[0] | image_url: width: 800 }}"
+                 alt="{{ product.title }}">
+            <div class="variantUpsellHeaderInfo">
+                <div class="variantUpsellHeaderInfoTitle">{{ product.title }}</div>
+                <span class="variantUpsellHeaderInfoVariant">{{ product.variants[0].title }}</span>
+            </div>
+            <div class="variantUpsellPrice">
+                <span class="variantUpsellPriceCompare">
+                    {% if product.variants[0].compare_at_price > product.variants[0].price %}
+                        {{ product.variants[0].compare_at_price | money_without_trailing_zeros }}
+                    {% endif %}
+                </span>
+                <span class="variantUpsellPriceReal">{{ product.variants[0].price | money_without_trailing_zeros }}</span>
+            </div>
+        </div>
+        <div class="variantUpsellOptions">
+            {% for option in product.options_with_values %}
+                <div class="variantUpsellOptionsTitle">{{ option.name }}</div>
+                <select class="variantUpsellOptionsSelect" name="options" aria-label="Options">
+                    {% for value in option.values %}
+                        <option value="{{ value }}">{{ value }}</option>
+                    {% endfor %}
+                </select>
+            {% endfor %}
+        </div>
+        <button class="variantUpsellATC button" {% unless product.selected_or_first_available_variant.available %} disabled{% endunless %}>
+            {% if product.selected_or_first_available_variant.available %}
+                ADD TO CART
+            {% else %}
+                SOLD OUT
+            {% endif %}
+        </button>
+    </div>
+</dialog>

@@ -1,0 +1,60 @@
+{% comment %}
+  Renders variant swatches for product cards using:
+  - product.metafields.maltertech.variant_swatch_override (list of images)
+  - else: per-variant metafield custom.swatch_image (image)
+  - respects: variant metafield maltertech.hidden
+{% endcomment %}
+
+{% unless product.has_only_default_variant %}
+  <div class="collectionItemVariants">
+    {% if product.metafields.maltertech.variant_swatch_override.value
+      and product.metafields.maltertech.variant_swatch_override.value.count > 0 %}
+
+      {% for image in product.metafields.maltertech.variant_swatch_override.value %}
+        <img
+          class="collectionItemVariantsImg"
+          src="{{ image | image_url: width: 200 }}"
+          alt="{{ image.alt | escape }}"
+          loading="lazy"
+        >
+      {% endfor %}
+
+      {% if product.metafields.maltertech.more > 0 %}
+        <div class="collectionItemVariantsMore">
+          +{{ product.metafields.maltertech.more }}
+        </div>
+      {% endif %}
+
+    {% else %}
+
+      {% assign count = 0 %}
+      {% assign swatches = 0 %}
+
+      {% for swatch_variant in product.variants %}
+        {% if swatch_variant.metafields.maltertech.hidden %}
+          {% continue %}
+        {% endif %}
+
+        {% if swatch_variant.metafields.custom.swatch_image %}
+          {% if count < 3 %}
+            <img
+              class="collectionItemVariantsImg"
+              src="{{ swatch_variant.metafields.custom.swatch_image | image_url: width: 200 }}"
+              alt="{{ swatch_variant.metafields.custom.swatch_image.alt | escape }}"
+              loading="lazy"
+            >
+            {% assign count = count | plus: 1 %}
+          {% endif %}
+          {% assign swatches = swatches | plus: 1 %}
+        {% endif %}
+      {% endfor %}
+
+      {% if swatches > 3 %}
+        <div class="collectionItemVariantsMore">
+          +{{ swatches | minus: 3 }}
+        </div>
+      {% endif %}
+
+    {% endif %}
+  </div>
+{% endunless %}

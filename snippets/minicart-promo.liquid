@@ -1,0 +1,40 @@
+{%- assign mp = promo_settings | default: section.settings -%}
+{%- assign promo_collection_handle = mp.promo_collection -%}
+{%- assign promo_collection = collections[promo_collection_handle] -%}
+
+<div
+  class="mini-cart-promo"
+  data-minicart-promo
+  data-tier1-qty="{{ mp.tier1_qty }}"
+  data-tier2-qty="{{ mp.tier2_qty }}"
+  data-msg-before-first="{{ mp.msg_before_first | escape }}"
+  data-msg-after-first="{{ mp.msg_after_first | escape }}"
+  data-msg-exact-tier1="{{ mp.msg_exact_tier1 | escape }}"
+  data-msg-after-second="{{ mp.msg_after_second | escape }}"
+  data-tier1-label="{{ mp.tier1_label | escape }}"
+  data-tier2-label="{{ mp.tier2_label | escape }}"
+  data-promo-product-ids="{% if promo_collection %}{% for product in promo_collection.products %}{{ product.id }}{% unless forloop.last %},{% endunless %}{% endfor %}{% endif %}"
+  style="--tier1-percent: {% if mp.tier2_qty != blank and mp.tier2_qty != 0 %}{{ mp.tier1_qty | times: 100.0 | divided_by: mp.tier2_qty }}%{% else %}0%{% endif %};"
+>
+  <div class="mini-cart-promo__text" data-minicart-promo-message></div>
+
+  <div class="mini-cart-promo__bar">
+    <div class="mini-cart-promo__bar-track">
+      <div class="mini-cart-promo__bar-fill" data-minicart-promo-fill></div>
+    </div>
+
+    <div class="mini-cart-promo__dots">
+      <span class="mini-cart-promo__dot mini-cart-promo__dot--tier1" data-minicart-promo-marker1></span>
+      <span class="mini-cart-promo__dot mini-cart-promo__dot--tier2" data-minicart-promo-marker2></span>
+    </div>
+
+    <div class="mini-cart-promo__labels">
+      <div class="mini-cart-promo__label mini-cart-promo__label--tier1">
+        {{ mp.tier1_label }}
+      </div>
+      <div class="mini-cart-promo__label mini-cart-promo__label--tier2">
+        {{ mp.tier2_label }}
+      </div>
+    </div>
+  </div>
+</div>

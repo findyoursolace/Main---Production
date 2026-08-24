@@ -1,0 +1,260 @@
+{%- comment -%} ============================================================
+  STRAPPED — Section 7: Signature Color Palette
+  sections/strapped-colors.liquid
+============================================================ {%- endcomment -%}
+
+{%- style -%}
+  #shopify-section-{{ section.id }} {
+    --sb-soft-pink:  {{ section.settings.bg_color }};
+    --sb-espresso:   {{ section.settings.text_color }};
+    --sb-dusty-rose: {{ section.settings.accent_color }};
+    --sb-mocha:      {{ section.settings.muted_color }};
+    padding-top:    {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+{%- render 'strapped-fonts' -%}
+
+<style>
+  .strapped-colors {
+    padding: {{ section.settings.section_pad_v }}px {{ section.settings.section_pad_h }}px;
+    background: var(--sb-soft-pink);
+    color: var(--sb-espresso);
+  }
+  .strapped-colors__header { text-align: {{ section.settings.header_align }}; margin-bottom: {{ section.settings.header_margin }}px; }
+  .strapped-colors__tag {
+    font-family: {{ section.settings.eyebrow_font }};
+    font-size: {{ section.settings.eyebrow_size }}px;
+    font-weight: {{ section.settings.eyebrow_weight }};
+    font-style: {{ section.settings.eyebrow_style }};
+    letter-spacing: {{ section.settings.eyebrow_tracking }};
+    text-transform: {{ section.settings.eyebrow_transform }};
+    color: {{ section.settings.eyebrow_color }};
+    margin-bottom: 1rem;
+  }
+  .strapped-colors__title {
+    font-family: {{ section.settings.heading_font }};
+    font-size: {{ section.settings.heading_size }}px;
+    font-weight: {{ section.settings.heading_weight }};
+    font-style: {{ section.settings.heading_style }};
+    letter-spacing: {{ section.settings.heading_tracking }};
+    text-transform: {{ section.settings.heading_transform }};
+    color: {{ section.settings.heading_color }};
+    line-height: {{ section.settings.heading_line_height }};
+  }
+  .strapped-colors__title em {
+    font-family: {{ section.settings.heading_em_font }};
+    font-style: {{ section.settings.heading_em_style }};
+    color: var(--sb-dusty-rose);
+  }
+  .strapped-colors__subtitle {
+    font-family: {{ section.settings.subtitle_font }};
+    font-size: {{ section.settings.subtitle_size }}px;
+    font-weight: {{ section.settings.subtitle_weight }};
+    font-style: {{ section.settings.subtitle_style }};
+    letter-spacing: {{ section.settings.subtitle_tracking }};
+    text-transform: {{ section.settings.subtitle_transform }};
+    color: {{ section.settings.subtitle_color }};
+    margin-top: 0.5rem;
+  }
+  .strapped-colors__palette {
+    display: flex; justify-content: center; flex-wrap: wrap;
+    gap: {{ section.settings.swatch_gap }}px;
+    max-width: {{ section.settings.palette_max_width }}px;
+    margin: 0 auto;
+  }
+  .strapped-colors__swatch { display: flex; flex-direction: column; align-items: center; gap: 0.7rem; cursor: pointer; text-decoration: none; }
+  .strapped-colors__circle {
+    width: {{ section.settings.swatch_size }}px;
+    height: {{ section.settings.swatch_size }}px;
+    border-radius: {{ section.settings.swatch_radius }}px;
+    border: 2px solid transparent;
+    transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s; display: block;
+  }
+  .strapped-colors__swatch:hover .strapped-colors__circle {
+    transform: scale(1.15) translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.14);
+    border-color: var(--sb-espresso);
+  }
+  .strapped-colors__name {
+    font-family: {{ section.settings.swatch_name_font }};
+    font-size: {{ section.settings.swatch_name_size }}px;
+    font-weight: {{ section.settings.swatch_name_weight }};
+    font-style: {{ section.settings.swatch_name_style }};
+    letter-spacing: {{ section.settings.swatch_name_tracking }};
+    text-transform: {{ section.settings.swatch_name_transform }};
+    color: {{ section.settings.swatch_name_color }};
+  }
+  @media (max-width: 900px) { .strapped-colors { padding: 5rem 1.5rem; } }
+</style>
+
+<div class="strapped-colors" id="strapped-colors">
+  <div class="strapped-colors__header">
+    {%- if section.settings.eyebrow != blank -%}<div class="strapped-colors__tag">{{ section.settings.eyebrow }}</div>{%- endif -%}
+    <h2 class="strapped-colors__title">{{ section.settings.heading | newline_to_br }}</h2>
+    {%- if section.settings.subtitle != blank -%}<p class="strapped-colors__subtitle">{{ section.settings.subtitle }}</p>{%- endif -%}
+  </div>
+  <div class="strapped-colors__palette">
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'swatch' -%}
+        {%- if block.settings.link != blank -%}<a href="{{ block.settings.link }}" class="strapped-colors__swatch" {{ block.shopify_attributes }}>{%- else -%}<div class="strapped-colors__swatch" {{ block.shopify_attributes }}>{%- endif -%}
+          <span class="strapped-colors__circle" style="background-color: {{ block.settings.color }}; box-shadow: 0 4px 16px {{ block.settings.color }}66;"></span>
+          {%- if block.settings.name != blank -%}<span class="strapped-colors__name">{{ block.settings.name }}</span>{%- endif -%}
+        {%- if block.settings.link != blank -%}</a>{%- else -%}</div>{%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Strapped — Colors",
+  "tag": "section",
+  "class": "strapped-section",
+  "settings": [
+    { "type": "header",   "content": "Content" },
+    { "type": "text",     "id": "eyebrow",  "label": "Eyebrow",  "default": "— 40+ Shades" },
+    { "type": "richtext", "id": "heading",  "label": "Heading",  "default": "<p>Find your <em>signature color</em></p>" },
+    { "type": "text",     "id": "subtitle", "label": "Subtitle", "default": "From your quiet luxury era to your pink everything phase — we have it." },
+
+    { "type": "header", "content": "Eyebrow Typography" },
+    { "type": "color",  "id": "eyebrow_color",     "label": "Eyebrow color",         "default": "#D4A5A5" },
+    { "type": "select", "id": "eyebrow_font",      "label": "Eyebrow font family",
+      "options": [
+        { "value": "var(--sb-font-heading)", "label": "Heading" },
+        { "value": "var(--sb-font-display)", "label": "Display / Italic" },
+        { "value": "var(--sb-font-body)",    "label": "Body" },
+        { "value": "var(--sb-font-mono)",    "label": "Mono" }
+      ], "default": "var(--sb-font-mono)" },
+    { "type": "range",  "id": "eyebrow_size",     "label": "Eyebrow size",  "min": 8, "max": 56, "step": 1, "unit": "px", "default": 10 },
+    { "type": "select", "id": "eyebrow_weight",   "label": "Eyebrow weight",
+      "options": [{ "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" }, { "value": "600", "label": "Semibold" }, { "value": "700", "label": "Bold" }],
+      "default": "400" },
+    { "type": "select", "id": "eyebrow_style",    "label": "Eyebrow style",
+      "options": [{ "value": "normal", "label": "Normal" }, { "value": "italic", "label": "Italic" }],
+      "default": "normal" },
+    { "type": "text",   "id": "eyebrow_tracking", "label": "Eyebrow letter spacing", "default": "0.2em" },
+    { "type": "select", "id": "eyebrow_transform","label": "Eyebrow transform",
+      "options": [{ "value": "none", "label": "None" }, { "value": "uppercase", "label": "Uppercase" }],
+      "default": "uppercase" },
+
+    { "type": "header", "content": "Heading Typography" },
+    { "type": "color",  "id": "heading_color",     "label": "Heading color",         "default": "#3D2B1F" },
+    { "type": "select", "id": "heading_font",      "label": "Heading font family",
+      "options": [
+        { "value": "var(--sb-font-heading)", "label": "Heading" },
+        { "value": "var(--sb-font-display)", "label": "Display / Italic" },
+        { "value": "var(--sb-font-body)",    "label": "Body" },
+        { "value": "var(--sb-font-mono)",    "label": "Mono" }
+      ], "default": "var(--sb-font-heading)" },
+    { "type": "range",  "id": "heading_size",     "label": "Heading size",  "min": 8, "max": 56, "step": 1, "unit": "px", "default": 30 },
+    { "type": "select", "id": "heading_weight",   "label": "Heading weight",
+      "options": [{ "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" }, { "value": "600", "label": "Semibold" }, { "value": "700", "label": "Bold" }],
+      "default": "600" },
+    { "type": "select", "id": "heading_style",    "label": "Heading style",
+      "options": [{ "value": "normal", "label": "Normal" }, { "value": "italic", "label": "Italic" }],
+      "default": "normal" },
+    { "type": "text",   "id": "heading_tracking", "label": "Heading letter spacing", "default": "-0.01em" },
+    { "type": "select", "id": "heading_transform","label": "Heading transform",
+      "options": [{ "value": "none", "label": "None" }, { "value": "uppercase", "label": "Uppercase" }],
+      "default": "none" },
+    { "type": "text", "id": "heading_line_height", "label": "Heading line height", "default": "1.1" },
+    { "type": "select", "id": "heading_em_font", "label": "Heading italic font",
+      "options": [
+        { "value": "var(--sb-font-display)", "label": "Display / Italic (default)" },
+        { "value": "var(--sb-font-heading)", "label": "Heading" }
+      ], "default": "var(--sb-font-display)" },
+    { "type": "select", "id": "heading_em_style", "label": "Heading italic style",
+      "options": [{ "value": "italic", "label": "Italic" }, { "value": "normal", "label": "Normal" }],
+      "default": "italic" },
+
+    { "type": "header", "content": "Subtitle Typography" },
+    { "type": "color",  "id": "subtitle_color",     "label": "Subtitle color",         "default": "#8B6B5D" },
+    { "type": "select", "id": "subtitle_font",      "label": "Subtitle font family",
+      "options": [
+        { "value": "var(--sb-font-heading)", "label": "Heading" },
+        { "value": "var(--sb-font-display)", "label": "Display / Italic" },
+        { "value": "var(--sb-font-body)",    "label": "Body" },
+        { "value": "var(--sb-font-mono)",    "label": "Mono" }
+      ], "default": "var(--sb-font-body)" },
+    { "type": "range",  "id": "subtitle_size",     "label": "Subtitle size",  "min": 8, "max": 56, "step": 1, "unit": "px", "default": 15 },
+    { "type": "select", "id": "subtitle_weight",   "label": "Subtitle weight",
+      "options": [{ "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" }, { "value": "600", "label": "Semibold" }, { "value": "700", "label": "Bold" }],
+      "default": "400" },
+    { "type": "select", "id": "subtitle_style",    "label": "Subtitle style",
+      "options": [{ "value": "normal", "label": "Normal" }, { "value": "italic", "label": "Italic" }],
+      "default": "normal" },
+    { "type": "text",   "id": "subtitle_tracking", "label": "Subtitle letter spacing", "default": "0em" },
+    { "type": "select", "id": "subtitle_transform","label": "Subtitle transform",
+      "options": [{ "value": "none", "label": "None" }, { "value": "uppercase", "label": "Uppercase" }],
+      "default": "none" },
+
+    { "type": "header", "content": "Swatch label Typography" },
+    { "type": "color",  "id": "swatch_name_color",     "label": "Swatch label color",         "default": "#8B6B5D" },
+    { "type": "select", "id": "swatch_name_font",      "label": "Swatch label font family",
+      "options": [
+        { "value": "var(--sb-font-heading)", "label": "Heading" },
+        { "value": "var(--sb-font-display)", "label": "Display / Italic" },
+        { "value": "var(--sb-font-body)",    "label": "Body" },
+        { "value": "var(--sb-font-mono)",    "label": "Mono" }
+      ], "default": "var(--sb-font-mono)" },
+    { "type": "range",  "id": "swatch_name_size",     "label": "Swatch label size",  "min": 8, "max": 56, "step": 1, "unit": "px", "default": 9 },
+    { "type": "select", "id": "swatch_name_weight",   "label": "Swatch label weight",
+      "options": [{ "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" }, { "value": "600", "label": "Semibold" }, { "value": "700", "label": "Bold" }],
+      "default": "400" },
+    { "type": "select", "id": "swatch_name_style",    "label": "Swatch label style",
+      "options": [{ "value": "normal", "label": "Normal" }, { "value": "italic", "label": "Italic" }],
+      "default": "normal" },
+    { "type": "text",   "id": "swatch_name_tracking", "label": "Swatch label letter spacing", "default": "0.1em" },
+    { "type": "select", "id": "swatch_name_transform","label": "Swatch label transform",
+      "options": [{ "value": "none", "label": "None" }, { "value": "uppercase", "label": "Uppercase" }],
+      "default": "uppercase" },
+    { "type": "header", "content": "Swatch Layout" },
+    { "type": "range", "id": "swatch_size",       "min": 32, "max": 100, "step": 4,  "unit": "px", "label": "Swatch diameter",  "default": 64 },
+    { "type": "range", "id": "swatch_radius",     "min": 0,  "max": 50,  "step": 2,  "unit": "px", "label": "Border radius (50 = circle, 0 = square)", "default": 50 },
+    { "type": "range", "id": "swatch_gap",        "min": 8,  "max": 48,  "step": 4,  "unit": "px", "label": "Gap between swatches", "default": 24 },
+    { "type": "range", "id": "palette_max_width", "min": 400,"max": 1200,"step": 40, "unit": "px", "label": "Palette max width",   "default": 720 },
+    { "type": "header", "content": "Section Layout" },
+    { "type": "select", "id": "header_align",  "label": "Header alignment",
+      "options": [{ "value": "center", "label": "Center" }, { "value": "left", "label": "Left" }, { "value": "right", "label": "Right" }],
+      "default": "center" },
+    { "type": "range",  "id": "header_margin", "min": 16, "max": 80,  "step": 4, "unit": "px", "label": "Header bottom margin",       "default": 64 },
+    { "type": "range",  "id": "section_pad_v", "min": 32, "max": 160, "step": 8, "unit": "px", "label": "Section vertical padding",   "default": 112 },
+    { "type": "range",  "id": "section_pad_h", "min": 16, "max": 120, "step": 8, "unit": "px", "label": "Section horizontal padding", "default": 80 },
+    { "type": "header", "content": "Colors" },
+    { "type": "color",  "id": "bg_color",     "label": "Background",   "default": "#F9ECE8" },
+    { "type": "color",  "id": "text_color",   "label": "Heading color","default": "#3D2B1F" },
+    { "type": "color",  "id": "accent_color", "label": "Accent color", "default": "#D4A5A5" },
+    { "type": "color",  "id": "muted_color",  "label": "Muted color",  "default": "#8B6B5D" },
+    { "type": "header", "content": "Spacing" },
+    { "type": "range",  "id": "padding_top",    "min": 0, "max": 120, "step": 4, "unit": "px", "label": "Padding top",    "default": 0 },
+    { "type": "range",  "id": "padding_bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "label": "Padding bottom", "default": 0 }
+  ],
+  "blocks": [
+    { "type": "swatch", "name": "Color swatch",
+      "settings": [
+        { "type": "color", "id": "color", "label": "Swatch color", "default": "#D4A5A5" },
+        { "type": "text",  "id": "name",  "label": "Color name",   "default": "Rosette" },
+        { "type": "url",   "id": "link",  "label": "Link (optional — e.g. filtered collection)" }
+      ]
+    }
+  ],
+  "presets": [
+    { "name": "Strapped — Colors",
+      "blocks": [
+        { "type": "swatch", "settings": { "color": "#D4A5A5", "name": "Rosette" } },
+        { "type": "swatch", "settings": { "color": "#F2D9CC", "name": "Blush" } },
+        { "type": "swatch", "settings": { "color": "#E8C4D0", "name": "Cotton Candy" } },
+        { "type": "swatch", "settings": { "color": "#C5CDD8", "name": "Cloud Blue" } },
+        { "type": "swatch", "settings": { "color": "#B8CDBA", "name": "Sage" } },
+        { "type": "swatch", "settings": { "color": "#D4C5B2", "name": "Latte" } },
+        { "type": "swatch", "settings": { "color": "#C9A96E", "name": "Gold" } },
+        { "type": "swatch", "settings": { "color": "#8B6B5D", "name": "Mocha" } },
+        { "type": "swatch", "settings": { "color": "#3D2B1F", "name": "Espresso" } },
+        { "type": "swatch", "settings": { "color": "#2D2D2D", "name": "Midnight" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

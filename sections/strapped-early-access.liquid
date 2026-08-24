@@ -1,0 +1,297 @@
+{%- comment -%} ============================================================
+  STRAPPED — Section 8: Early Access / Email CTA
+  sections/strapped-early-access.liquid
+============================================================ {%- endcomment -%}
+{%- style -%}
+  #shopify-section-{{ section.id }} {
+    --sb-cream: {{ section.settings.bg_color }};
+    --sb-espresso: {{ section.settings.text_color }};
+    --sb-dusty-rose: {{ section.settings.accent_color }};
+    --sb-mocha: {{ section.settings.muted_color }};
+    --sb-champagne: {{ section.settings.border_color }};
+    --sb-soft-pink: {{ section.settings.pill_bg }};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+<style>
+  .strapped-early-access {
+    padding: 7rem 5rem;
+    background: var(--sb-cream);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: center;
+    border-top: 1px solid var(--sb-champagne);
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--sb-espresso);
+  }
+  .strapped-early-access__title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 3vw, 3.2rem);
+    font-weight: 900;
+    line-height: 1.05;
+    color: var(--sb-espresso);
+  }
+  .strapped-early-access__title em { font-style: italic; color: var(--sb-dusty-rose); }
+  .strapped-early-access__body {
+    font-size: 1.05rem;
+
+    font-weight: 300;
+    color: var(--sb-mocha);
+    line-height: 1.7;
+    margin-top: 1rem;
+  }
+  .strapped-early-access__label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--sb-dusty-rose);
+    margin-bottom: 1rem;
+    display: block;
+  }
+  .strapped-early-access__input-wrap {
+    display: flex;
+    border-bottom: 1.5px solid var(--sb-espresso);
+    padding-bottom: 0.75rem;
+    gap: 1rem;
+  }
+  .strapped-early-access__input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--sb-espresso);
+  }
+  .strapped-early-access__input::placeholder { color: var(--sb-champagne); }
+  .strapped-early-access__submit {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sb-mocha);
+    transition: color 0.2s;
+    white-space: nowrap;
+    padding: 0;
+  }
+  .strapped-early-access__submit:hover { color: var(--sb-espresso); }
+  .strapped-early-access__perks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+  .strapped-early-access__perk {
+    background: var(--sb-soft-pink);
+    border: 1px solid var(--sb-champagne);
+    padding: 0.4rem 0.85rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sb-mocha);
+  }
+  .strapped-early-access__success {
+    display: none;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--sb-mocha);
+    margin-top: 1rem;
+  }
+  @media (max-width: 900px) {
+    .strapped-early-access { grid-template-columns: 1fr; gap: 3rem; padding: 5rem 1.5rem; }
+  }
+</style>
+<div class="strapped-early-access" id="strapped-cta">
+  <!-- Left: headline -->
+  <div>
+    <h2 class="strapped-early-access__title">{{ section.settings.heading | newline_to_br }}</h2>
+    {%- if section.settings.body != blank -%}
+      <p class="strapped-early-access__body">{{ section.settings.body }}</p>
+    {%- endif -%}
+  </div>
+  <!-- Right: Shopify email signup form -->
+  <div>
+    {%- if section.settings.form_label != blank -%}
+      <span class="strapped-early-access__label">{{ section.settings.form_label }}</span>
+    {%- endif -%}
+    {%- form 'customer', id: 'strapped-email-form-{{ section.id }}' -%}
+      <input type="hidden" name="contact[tags]" value="newsletter,strapped-early-access">
+      <div class="strapped-early-access__input-wrap">
+        <input
+          class="strapped-early-access__input"
+          type="email"
+          name="contact[email]"
+          placeholder="{{ section.settings.placeholder }}"
+          autocomplete="email"
+          required
+        />
+        <button type="submit" class="strapped-early-access__submit">
+          {{ section.settings.submit_label }} →
+        </button>
+      </div>
+      {%- if form.posted_successfully? -%}
+        <p class="strapped-early-access__success" style="display:block;">{{ section.settings.success_message }}</p>
+      {%- endif -%}
+    {%- endform -%}
+    {%- if section.blocks.size > 0 -%}
+      <div class="strapped-early-access__perks">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'perk' -%}
+            <span class="strapped-early-access__perk" {{ block.shopify_attributes }}>{{ block.settings.text }}</span>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+{% schema %}
+{
+  "name": "Strapped — Early Access",
+  "tag": "section",
+  "class": "strapped-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "<p>Get early access to <em>new drops.</em></p>"
+    },
+    {
+      "type": "textarea",
+      "id": "body",
+      "label": "Body text",
+      "default": "Join the list. Be the first to shop new colorways, limited editions, and member-only discounts."
+    },
+    {
+      "type": "header",
+      "content": "Form"
+    },
+    {
+      "type": "text",
+      "id": "form_label",
+      "label": "Form label",
+      "default": "— Join the Edit"
+    },
+    {
+      "type": "text",
+      "id": "placeholder",
+      "label": "Input placeholder",
+      "default": "your@email.com"
+    },
+    {
+      "type": "text",
+      "id": "submit_label",
+      "label": "Submit button label",
+      "default": "Subscribe"
+    },
+    {
+      "type": "text",
+      "id": "success_message",
+      "label": "Success message",
+      "default": "You're on the list. ✓"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background",
+      "default": "#FAF6F1"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Heading color",
+      "default": "#3D2B1F"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent / label color",
+      "default": "#D4A5A5"
+    },
+    {
+      "type": "color",
+      "id": "muted_color",
+      "label": "Muted / submit color",
+      "default": "#8B6B5D"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border / line color",
+      "default": "#E8D5C0"
+    },
+    {
+      "type": "color",
+      "id": "pill_bg",
+      "label": "Perk pill background",
+      "default": "#F9ECE8"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "perk",
+      "name": "Perk tag",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Perk text",
+          "default": "Early Access"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Strapped — Early Access",
+      "blocks": [
+        { "type": "perk", "settings": { "text": "Early Access" } },
+        { "type": "perk", "settings": { "text": "10% Off First Order" } },
+        { "type": "perk", "settings": { "text": "Style Drops" } },
+        { "type": "perk", "settings": { "text": "No Spam, Ever" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

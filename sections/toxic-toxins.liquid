@@ -1,0 +1,350 @@
+<div id="solace-toxins-{{ section.id }}" class="solace-toxins-outer">
+  <style>
+    /* 1. THEME OVERRIDE & SCOPED RESET */
+    #solace-toxins-{{ section.id }} {
+      all: unset;
+      display: block;
+      background-color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    #solace-toxins-{{ section.id }} * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      line-height: 1.3; /* Corrects default theme spacing */
+    }
+
+    /* 2. LAYOUT GRID */
+    .toxin-row {
+      padding: 80px 24px !important;
+      border-bottom: 1px solid #f8fafc;
+      position: relative;
+    }
+
+    @media (min-width: 768px) {
+      .toxin-row { padding: 120px 48px; }
+    }
+
+    .toxin-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+      position: relative;
+    }
+
+    @media (min-width: 1024px) {
+      .toxin-container { 
+        flex-direction: row; 
+        align-items: center; 
+        gap: 80px;
+      }
+      .layout-reverse { flex-direction: row-reverse; }
+    }
+
+    /* 3. TYPOGRAPHY & DECORATION */
+    .bg-number {
+      position: absolute;
+      top: -20px;
+      left: -10px;
+      font-size: clamp(8rem, 20vw, 18rem);
+      font-weight: 900;
+      color: #f1f5f9;
+      line-height: 1;
+      z-index: 1;
+      user-select: none;
+    }
+
+    .toxin-content {
+      flex: 1.1;
+      position: relative;
+      z-index: 5;
+    }
+
+    .toxin-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #2563eb;
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      margin-bottom: 16px;
+    }
+    .badge-line { width: 32px; height: 4px; background: #2563eb; border-radius: 99px; }
+
+    .toxin-title {
+      font-size: clamp(2.2rem, 6vw, 4.2rem);
+      font-weight: 900;
+      color: #0f172a;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      line-height: 0.95;
+    }
+
+    .toxin-description {
+      font-size: 1.125rem;
+      color: #64748b;
+      font-weight: 500;
+      margin-bottom: 40px;
+      max-width: 550px;
+      line-height: 1.6;
+    }
+
+    /* 4. DANGER LEVEL & HEALTH RISKS FIXES */
+    .metrics-container {
+      position: relative;
+      width: 100%;
+      /* Corrected natural flow grid */
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      z-index: 10;
+      margin-top: 32px;
+    }
+
+    @media (min-width: 640px) {
+      .metrics-container { 
+        grid-template-columns: 1fr 1fr;
+        align-items: start;
+      }
+    }
+
+    /* Shared properties */
+    .metric-box-card {
+      padding: 24px !important;
+      border-radius: 24px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .metric-label-small {
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 12px;
+    }
+
+    /* Danger Level - Light Card */
+    .metric-danger-box {
+      background: #ffffff;
+      border: 1px solid #f1f5f9;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.03);
+    }
+
+    .metric-danger-box .metric-label-small { color: #94a3b8; }
+
+    .danger-status-badge {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      color: #c0392b;
+      background: #fef2f2;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .progress-bar-outer {
+      width: 100%;
+      height: 8px;
+      background: #f1f5f9;
+      border-radius: 99px;
+      overflow: hidden;
+      margin-top: auto;
+    }
+
+    .progress-fill-bar {
+      height: 100%;
+      background: #c0392b;
+      border-radius: 99px;
+    }
+
+    /* Health Risks - Dark Card */
+    .metric-risks-box {
+      background: #0f172a;
+      color: #ffffff;
+    }
+
+    .metric-risks-box .metric-label-small { color: #60a5fa; }
+
+    .risks-list-wrapper { list-style: none; margin-top: 10px; }
+    .risk-list-item {
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+    .risk-list-item:last-of-type { margin-bottom: 0; }
+    .risk-bullet-point { width: 6px; height: 6px; background: #3b82f6; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+
+    /* 5. IMAGE VISUAL FIXES */
+    .toxin-image-column { flex: 0.9; position: relative; }
+    .image-main-frame {
+      aspect-ratio: 4/5;
+      border-radius: 3rem;
+      overflow: hidden;
+      background: #f8fafc;
+      box-shadow: 0 40px 80px -20px rgba(0,0,0,0.15);
+      z-index: 5;
+      position: relative;
+    }
+
+    @media (min-width: 1024px) {
+      .image-main-frame { border-radius: 4rem; }
+    }
+
+    .image-main-frame img { 
+      width: 100%; 
+      height: 100%; 
+      object-fit: cover; 
+      transition: transform 0.7s ease; 
+    }
+    .toxin-row:hover .image-main-frame img { transform: scale(1.03); }
+
+    .image-icon-floating {
+      position: absolute;
+      bottom: -20px;
+      right: -20px;
+      background: #ffffff;
+      padding: 18px;
+      border-radius: 28px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+      border: 1px solid #f1f5f9;
+      z-index: 20;
+    }
+    .image-icon-floating img { width: 44px; height: 44px; object-fit: contain; }
+
+    /* Layout order toggles */
+    .is-reverse-mobile { display: none; }
+    .is-desktop-only { display: block; }
+    
+    @media (max-width: 1023px) {
+      .is-reverse-mobile { display: block; margin: 40px 0 !important; }
+      .is-desktop-only { display: none; }
+      #solace-toxins-{{ section.id }} h1, 
+      #solace-toxins-{{ section.id }} h2 { text-transform: none; letter-spacing: normal; }
+    }
+  </style>
+
+  {% for block in section.blocks %}
+    <div class="toxin-row" {{ block.shopify_attributes }}>
+      <div class="bg-number">0{{ forloop.index }}</div>
+      
+      <div class="toxin-container {% if block.settings.layout == 'left' %}layout-reverse{% endif %}">
+        
+        <div class="toxin-content">
+          <div class="toxin-badge">
+            <span class="badge-line"></span>
+            {{ block.settings.badge_label | default: 'Risk Item' }} 0{{ forloop.index }}
+          </div>
+
+          <h2 class="toxin-title">{{ block.settings.title }}</h2>
+
+          <p class="toxin-description">{{ block.settings.description }}</p>
+
+          <div class="is-reverse-mobile">
+            <div style="position: relative; max-width: 480px; margin: 0 auto;">
+              <div class="image-main-frame">
+                {% if block.settings.image %}
+                  <img src="{{ block.settings.image | img_url: '1000x' }}" alt="{{ block.settings.title }}">
+                {% else %}
+                  <div style="height:100%; display:flex; align-items:center; justify-content:center; color:#cbd5e1; font-weight:bold;">Visual Needed</div>
+                {% endif %}
+              </div>
+              {% if block.settings.icon_image != blank %}
+                <div class="image-icon-floating">
+                   <img src="{{ block.settings.icon_image | img_url: '100x' }}" alt="Icon">
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="metrics-container">
+            <div class="metric-box-card metric-danger-box">
+              <span class="metric-label-small">{{ block.settings.danger_level_label | default: 'Danger Level' }}</span>
+              <span class="danger-status-badge">{{ block.settings.danger_label }}</span>
+              <div class="progress-bar-outer">
+                <div class="progress-fill-bar" style="width: {{ block.settings.danger_percent }}%"></div>
+              </div>
+            </div>
+
+            <div class="metric-box-card metric-risks-box">
+              <span class="metric-label-small">{{ block.settings.health_risks_label | default: 'Health Risks' }}</span>
+              <ul class="risks-list-wrapper">
+                {% assign symptoms = block.settings.symptoms | newline_to_br | split: '<br />' %}
+                {% for symptom in symptoms %}
+                  {% if symptom != blank %}
+                    <li class="risk-list-item">
+                      <span class="risk-bullet-point"></span>
+                      {{ symptom | strip }}
+                    </li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="toxin-image-column is-desktop-only">
+          <div class="image-main-frame">
+            {% if block.settings.image %}
+              <img src="{{ block.settings.image | img_url: '1200x' }}" alt="{{ block.settings.title }}">
+            {% else %}
+              <div style="height:100%; display:flex; align-items:center; justify-content:center; color:#cbd5e1; font-weight:bold;">Visual Needed</div>
+            {% endif %}
+          </div>
+          {% if block.settings.icon_image != blank %}
+            <div class="image-icon-floating">
+               <img src="{{ block.settings.icon_image | img_url: '200x' }}" alt="Icon">
+            </div>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+{% schema %}
+{
+  "name": "Solace Toxins (Fixed)",
+  "blocks": [
+    {
+      "type": "toxin",
+      "name": "Toxin",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Toxin Name", "default": "Lead Contamination" },
+        { "type": "textarea", "id": "description", "label": "Description", "default": "Lead is frequently found in low-quality pigments used to color vibrant silicone and plastic bands." },
+        { "type": "textarea", "id": "symptoms", "label": "Symptoms (One per line)", "default": "Neurotoxicity\nChronic Skin Inflammation\nKidney Damage\nDevelopmental Delays" },
+        { "type": "image_picker", "id": "image", "label": "Main Image" },
+        { "type": "image_picker", "id": "icon_image", "label": "Floating Icon Image" },
+        { "type": "select", "id": "layout", "label": "Desktop Image Position", "options": [
+          { "value": "left", "label": "Left" },
+          { "value": "right", "label": "Right" }
+        ], "default": "right" },
+        { "type": "header", "content": "Labels & Metrics" },
+        { "type": "text", "id": "badge_label", "label": "Badge Label", "default": "Risk Item" },
+        { "type": "text", "id": "danger_level_label", "label": "Danger Metric Label", "default": "Danger Level" },
+        { "type": "text", "id": "health_risks_label", "label": "Health Risks Label", "default": "Health Risks" },
+        { "type": "range", "id": "danger_percent", "label": "Danger Progress %", "min": 0, "max": 100, "step": 5, "default": 80 },
+        { "type": "text", "id": "danger_label", "label": "Danger Status", "default": "CRITICAL" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Solace Toxins (Fixed)" }]
+}
+{% endschema %}

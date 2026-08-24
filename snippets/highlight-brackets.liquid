@@ -1,0 +1,9 @@
+{%- assign text_parts = text | split: '[' -%}
+{%- for part in text_parts -%}
+    {%- if part contains ']' -%}
+        {%- assign inner_parts = part | split: ']' -%}
+        <span class="{{ class }}">{{ inner_parts[0] }}</span>{{ inner_parts[1] }}
+    {%- else -%}
+        {{ part }}
+    {%- endif -%}
+{%- endfor -%}

@@ -1,0 +1,46 @@
+<!--LOOMI SDK-->
+<!--DO NOT EDIT-->
+<link rel="preconnect"  href="https://live.visually-io.com/" crossorigin data-em-disable>
+<link rel="dns-prefetch" href="https://live.visually-io.com/" data-em-disable>
+<script>
+    (()=> {
+        const env = 2;
+        var store = "{{ shop.permanent_domain }}";
+        var alias = store.replace(".myshopify.com", "").replaceAll("-", "_").toUpperCase();
+        var jitsuKey =  "js.{{ shop.id }}";
+        var themeId = {{ theme.id }};
+        var role = "{{ theme.role }}";
+        window.loomi_ctx = {...(window.loomi_ctx || {}),storeAlias:alias,jitsuKey,env,themeId,role};
+        
+        
+    {% if customer %}
+      window.loomi_ctx.ctags = []
+      {% for t in customer.tags %}
+        window.loomi_ctx.ctags.push("{{ t }}")
+      {% endfor %}
+    {% endif %}
+	{% if product %}
+	var product = {};
+	var variants = [];
+	{% for v in product.variants %}
+	variants.push({id:{{ v.id }},policy:"{{v.inventory_policy }}",price:{{v.price}},iq:{{ v.inventory_quantity }}});
+	{% endfor %}
+	product.variants = variants;
+	product.oos = !{{product.available}};
+	product.price = {{ product.price }} ;
+	window.loomi_ctx.current_product=product;
+	window.loomi_ctx.productId={{product.id}};
+	{%- if product.selected_or_first_available_variant %}
+	window.loomi_ctx.variantId = {{ product.selected_or_first_available_variant.id  }};
+	{%- endif %}
+	{% endif %}
+    })()
+</script>
+<link href="https://live.visually-io.com/cf/SOLACEBANDS.js?k=js.55809769626&e=2&s=SOLACEBANDS" rel="preload" as="script" data-em-disable>
+<link href="https://live.visually-io.com/cf/SOLACEBANDS.js?k=js.55809769626&e=2&s=SOLACEBANDS" rel="preload" as="script" data-em-disable>
+<link href="https://assets.visually.io/widgets/vsly-preact.min.js" rel="preload" as="script" data-em-disable>
+<script data-vsly="preact2" type="text/javascript" src="https://assets.visually.io/widgets/vsly-preact.min.js" data-em-disable></script>
+<script type="text/javascript" src="https://live.visually-io.com/cf/SOLACEBANDS.js" data-em-disable></script>
+<script type="text/javascript" src="https://live.visually-io.com/v/visually.js" data-em-disable></script>
+<script defer type="text/javascript" src="https://live.visually-io.com/v/visually-a.js" data-em-disable></script>
+<!--LOOMI SDK-->

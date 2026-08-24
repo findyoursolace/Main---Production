@@ -1,0 +1,765 @@
+<style>
+  .variant-title {
+    display: inline;
+    text-align: center;
+  }
+</style>
+
+<script
+  src="{{ 'results-list.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+{% javascript %}
+  const url = new URL(window.location.href);
+  if (url.hash) {
+    document.addEventListener(
+      'DOMContentLoaded',
+      () => {
+        const card = document.getElementById(url.hash.slice(1));
+        if (card) {
+          card.scrollIntoView({ behavior: 'instant' });
+        }
+      },
+      { once: true }
+    );
+  }
+{% endjavascript %}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<results-list
+  class="section product-grid-container color-{{ section.settings.color_scheme }}"
+  style="--padding-block-start: {{ section.settings.padding-block-start }}px; --padding-block-end: {{ section.settings.padding-block-end }}px;"
+  section-id="{{ section.id }}"
+  infinite-scroll="{{ section.settings.enable_infinite_scroll }}"
+>
+  {% render 'skip-to-content-link', href: '#ResultsList', text: 'accessibility.skip_to_results_list' %}
+
+  <div class="collection-wrapper grid gap-style">
+    {% content_for 'block',
+      type: 'filters',
+      id: 'filters',
+      results: collection,
+      results_size: collection.products_count
+    %}
+
+    {% if template_suffix == 'all-styles' %}
+      {% assign products_per_page = 8 %}
+    {% else %}
+      {% assign products_per_page = 24 %}
+    {% endif %}
+
+    {% if section.settings.enable_infinite_scroll == false %}
+      {% assign products_per_page = section.settings.products_per_page %}
+    {% endif %}
+
+    {% paginate collection.products by products_per_page %}
+      {% capture children %}
+        {% assign item_index0 = 0 %}
+
+        {% for product in collection.products %}
+          {%- if product.metafields.maltertech.hidden -%}
+            {% continue %}
+          {%- endif -%}
+
+          {% assign rule = '' %}
+          {% assign rule_namespace = '' %}
+          {% assign rule_key = '' %}
+
+          {% assign template_suffix = template.suffix | default: '' %}
+
+          {% assign is_non_restocking_page = false %}
+          {% if template_suffix == 'non-restocking' or template_suffix == 'not-restocking' or template_suffix == 'non-restocking-bands' or template == 'collection.non-restocking-bands' or collection.handle == 'non-restocking' or collection.handle == 'non-restocking-bands' %}
+            {% assign is_non_restocking_page = true %}
+          {% endif %}
+
+          {% if template == 'collection.not-restocking' or template_suffix == 'not-restocking' %}
+            {% assign rule_namespace = 'maltertech' %}
+            {% assign rule_key = 'not_restocking' %}
+            {% assign rule = 'variant_rule' %}
+
+          {% elsif template == 'collection.promo' or template_suffix == 'promo' %}
+            {% assign rule_namespace = 'maltertech' %}
+            {% assign rule_key = 'show_variant' %}
+            {% assign rule = 'variant_rule' %}
+
+          {% elsif template == 'collection.featured' or template_suffix == 'featured' %}
+            {% assign rule_namespace = 'custom' %}
+            {% assign rule_key = 'featured_collection' %}
+            {% assign rule = 'variant_rule' %}
+
+          {% elsif template_suffix == 'color' or template == 'collection.color' %}
+            {% assign rule = 'color_variants' %}
+
+          {% elsif template_suffix == 'prints' or template == 'collection.prints' %}
+            {% assign rule = 'explode_all_variants' %}
+
+          {% elsif template_suffix == 'all-styles' or template == 'collection.all-styles' %}
+            {% assign rule = 'explode_all_variants' %}
+
+          {% elsif is_non_restocking_page %}
+            {% assign rule = 'explode_in_stock_variants' %}
+
+          {% elsif collection.metafields.maltertech.show_variants %}
+            {% assign rule_namespace = 'maltertech' %}
+            {% assign rule_key = 'show_variant_2' %}
+            {% assign rule = 'variant_rule' %}
+
+          {% elsif collection.metafields.custom.show_variants_wwp %}
+            {% assign rule_namespace = 'custom' %}
+            {% assign rule_key = 'show_variants_wwp_2' %}
+            {% assign rule = 'variant_rule' %}
+
+            {% elsif collection.metafields.custom.show_variants_mbc %}
+            {% assign rule_namespace = 'custom' %}
+            {% assign rule_key = 'show_variants_mbc' %}
+            {% assign rule = 'variant_rule' %}
+
+          {% elsif collection.metafields.custom.show_preorder_variants %}
+            {% assign rule_namespace = 'custom' %}
+            {% assign rule_key = 'show_preorder_variants' %}
+            {% assign rule = 'variant_rule' %}
+
+          {% elsif collection.metafields.custom.show_variants_non_restocking %}
+            {% assign rule_namespace = 'custom' %}
+            {% assign rule_key = 'show_variants_nr' %}
+            {% assign rule = 'variant_rule' %}
+          {% endif %}
+
+          {% if rule == 'variant_rule' %}
+            {% assign colors = '' %}
+
+            {% for variant in product.variants %}
+              {%- if variant.metafields.maltertech.hidden and section.settings.show_hidden_variants == false -%}
+                {% continue %}
+              {%- endif -%}
+
+              {% if is_non_restocking_page %}
+                {% if variant.available == false or variant.inventory_quantity <= 0 %}
+                  {% continue %}
+                {% endif %}
+              {% endif %}
+
+              {% assign v_mf = variant.metafields[rule_namespace][rule_key] %}
+              {% if v_mf and v_mf.value == false %}
+                {% continue %}
+              {% endif %}
+              {% unless v_mf %}
+                {% continue %}
+              {% endunless %}
+
+              {% assign color = variant.options[0] | default: '' %}
+              {% if color == blank %}
+                {% if colors contains '___no_color___' %}
+                  {% continue %}
+                {% endif %}
+                {% assign colors = colors | append: '___no_color___,' %}
+              {% else %}
+                {% unless colors contains color %}
+                  {% assign colors = colors | append: color | append: ',' %}
+                {% else %}
+                  {% continue %}
+                {% endunless %}
+              {% endif %}
+
+              {% assign variant_media = variant.featured_media | default: variant.featured_image %}
+              {% assign variant_image_url = '' %}
+              {% if variant_media != blank %}
+                {% if variant_media.preview_image %}
+                  {% assign variant_image_url = variant_media.preview_image | image_url: width: 900 %}
+                {% else %}
+                  {% assign variant_image_url = variant_media | image_url: width: 900 %}
+                {% endif %}
+              {% endif %}
+
+              {% if item_index0 < 4 and variant_image_url != blank %}
+                <link rel="preload" as="image" href="{{ variant_image_url }}">
+              {% endif %}
+
+              <li
+                id="{{ section.id }}-{{ product.id }}-{{ variant.id }}"
+                class="product-grid__item product-grid__item--{{ item_index0 }}"
+                data-page="{{ paginate.current_page }}"
+                data-product-id="{{ product.id }}"
+                data-variant-id="{{ variant.id }}"
+                data-variant-url="/products/{{ product.handle }}?variant={{ variant.id }}"
+                data-variant-image="{{ variant_image_url }}"
+                data-variant-title="{{ variant.option1 | escape }}"
+                ref="cards[]"
+              >
+                {% # theme-check-disable %}
+                {% content_for 'block',
+                  type: '_product-card',
+                  id: 'product-card',
+                  closest.product: product
+                %}
+                {% # theme-check-enable %}
+              </li>
+
+              {% assign item_index0 = item_index0 | plus: 1 %}
+            {% endfor %}
+
+          {% elsif rule == 'color_variants' %}
+            {% assign collection_color = collection.handle | default: '' %}
+            {% if collection_color == blank %}
+              {% assign collection_color = collection.title | handleize %}
+            {% endif %}
+
+            {%- assign candidate_variant = nil -%}
+
+            {% for variant in product.variants %}
+              {%- if variant.metafields.maltertech.hidden and section.settings.show_hidden_variants == false -%}
+                {% continue %}
+              {%- endif -%}
+
+              {% assign v_color_raw = variant.metafields.custom.color_name.value | default: '' %}
+              {% assign v_color = v_color_raw | handleize %}
+
+              {% if v_color != collection_color %}
+                {% continue %}
+              {% endif %}
+
+              {% if variant.available %}
+                {% assign candidate_variant = variant %}
+                {% break %}
+              {% endif %}
+
+              {% if candidate_variant == nil %}
+                {% assign candidate_variant = variant %}
+              {% endif %}
+            {% endfor %}
+
+            {%- if candidate_variant != nil -%}
+              {% assign variant_media = candidate_variant.featured_media | default: candidate_variant.featured_image %}
+              {% assign variant_image_url = '' %}
+              {% if variant_media != blank %}
+                {% if variant_media.preview_image %}
+                  {% assign variant_image_url = variant_media.preview_image | image_url: width: 900 %}
+                {% else %}
+                  {% assign variant_image_url = variant_media | image_url: width: 900 %}
+                {% endif %}
+              {% endif %}
+
+              <li
+                id="{{ section.id }}-{{ product.id }}-{{ candidate_variant.id }}"
+                class="product-grid__item product-grid__item--{{ item_index0 }}"
+                data-page="{{ paginate.current_page }}"
+                data-product-id="{{ product.id }}"
+                data-variant-id="{{ candidate_variant.id }}"
+                data-variant-url="/products/{{ product.handle }}?variant={{ candidate_variant.id }}"
+                data-variant-image="{{ variant_image_url }}"
+                data-variant-title="{{ candidate_variant.option1 | escape }}"
+                ref="cards[]"
+              >
+                {% # theme-check-disable %}
+                {% content_for 'block',
+                  type: '_product-card',
+                  id: 'product-card',
+                  closest.product: product
+                %}
+                {% # theme-check-enable %}
+              </li>
+
+              {% assign item_index0 = item_index0 | plus: 1 %}
+            {%- endif -%}
+
+          {% elsif rule == 'explode_in_stock_variants' %}
+            {% assign colors = '' %}
+
+            {% for variant in product.variants %}
+              {%- if variant.metafields.maltertech.hidden and section.settings.show_hidden_variants == false -%}
+                {% continue %}
+              {%- endif -%}
+
+              {% assign inventory_qty = variant.inventory_quantity | default: 0 | plus: 0 %}
+
+              {% if inventory_qty <= 0 %}
+                {% continue %}
+              {% endif %}
+
+              {% assign color = variant.option1 | default: '' %}
+
+              {% if color == blank %}
+                {% if colors contains '___no_color___' %}
+                  {% continue %}
+                {% endif %}
+                {% assign colors = colors | append: '___no_color___,' %}
+              {% else %}
+                {% assign color_token = color | append: '___' %}
+                {% if colors contains color_token %}
+                  {% continue %}
+                {% endif %}
+                {% assign colors = colors | append: color_token | append: ',' %}
+              {% endif %}
+
+              {% assign variant_media = variant.featured_media | default: variant.featured_image %}
+              {% assign variant_image_url = '' %}
+
+              {% if variant_media != blank %}
+                {% if variant_media.preview_image %}
+                  {% assign variant_image_url = variant_media.preview_image | image_url: width: 900 %}
+                {% else %}
+                  {% assign variant_image_url = variant_media | image_url: width: 900 %}
+                {% endif %}
+              {% endif %}
+
+              <li
+                id="{{ section.id }}-{{ product.id }}-{{ variant.id }}"
+                class="product-grid__item product-grid__item--{{ item_index0 }}"
+                data-page="{{ paginate.current_page }}"
+                data-product-id="{{ product.id }}"
+                data-variant-id="{{ variant.id }}"
+                data-variant-url="/products/{{ product.handle }}?variant={{ variant.id }}"
+                data-variant-image="{{ variant_image_url }}"
+                data-variant-title="{{ variant.option1 | escape }}"
+                ref="cards[]"
+              >
+                {% # theme-check-disable %}
+                {% content_for 'block',
+                  type: '_product-card',
+                  id: 'product-card',
+                  closest.product: product
+                %}
+                {% # theme-check-enable %}
+              </li>
+
+              {% assign item_index0 = item_index0 | plus: 1 %}
+            {% endfor %}
+
+          {% elsif rule == 'explode_all_variants' %}
+            {% assign colors = '' %}
+
+            {% for variant in product.variants %}
+              {%- if variant.metafields.maltertech.hidden and section.settings.show_hidden_variants == false -%}
+                {% continue %}
+              {%- endif -%}
+
+              {% if is_non_restocking_page %}
+                {% if variant.available == false or variant.inventory_quantity <= 0 %}
+                  {% continue %}
+                {% endif %}
+              {% endif %}
+
+              {% assign color = variant.options[0] | default: '' %}
+              {% if color == blank %}
+                {% if colors contains '___no_color___' %}
+                  {% continue %}
+                {% endif %}
+                {% assign colors = colors | append: '___no_color___,' %}
+              {% else %}
+                {% unless colors contains color %}
+                  {% assign colors = colors | append: color | append: ',' %}
+                {% else %}
+                  {% continue %}
+                {% endunless %}
+              {% endif %}
+
+              {% assign variant_media = variant.featured_media | default: variant.featured_image %}
+              {% assign variant_image_url = '' %}
+              {% if variant_media != blank %}
+                {% if variant_media.preview_image %}
+                  {% assign variant_image_url = variant_media.preview_image | image_url: width: 900 %}
+                {% else %}
+                  {% assign variant_image_url = variant_media | image_url: width: 900 %}
+                {% endif %}
+              {% endif %}
+
+              <li
+                id="{{ section.id }}-{{ product.id }}-{{ variant.id }}"
+                class="product-grid__item product-grid__item--{{ item_index0 }}"
+                data-page="{{ paginate.current_page }}"
+                data-product-id="{{ product.id }}"
+                data-variant-id="{{ variant.id }}"
+                data-variant-url="/products/{{ product.handle }}?variant={{ variant.id }}"
+                data-variant-image="{{ variant_image_url }}"
+                data-variant-title="{{ variant.option1 | escape }}"
+                ref="cards[]"
+              >
+                {% # theme-check-disable %}
+                {% content_for 'block',
+                  type: '_product-card',
+                  id: 'product-card',
+                  closest.product: product
+                %}
+                {% # theme-check-enable %}
+              </li>
+
+              {% assign item_index0 = item_index0 | plus: 1 %}
+            {% endfor %}
+
+          {% else %}
+            <li
+              id="{{ section.id }}-{{ product.id }}"
+              class="product-grid__item product-grid__item--{{ item_index0 }}"
+              data-page="{{ paginate.current_page }}"
+              data-product-id="{{ product.id }}"
+              ref="cards[]"
+            >
+              {% # theme-check-disable %}
+              {% content_for 'block', type: '_product-card', id: 'product-card', closest.product: product %}
+              {% # theme-check-enable %}
+            </li>
+
+            {% assign item_index0 = item_index0 | plus: 1 %}
+          {% endif %}
+        {% endfor %}
+      {% endcapture %}
+
+      {% render 'product-grid',
+        section: section,
+        children: children,
+        products: collection.products,
+        paginate: paginate,
+        enable_infinite_scroll: section.settings.enable_infinite_scroll
+      %}
+    {% endpaginate %}
+  </div>
+</results-list>
+
+{% unless request.design_mode %}
+  <script>
+    (() => {
+      const isSameProductLink = (href, productUrl) => {
+        if (!href) return false;
+
+        try {
+          const u = new URL(href, window.location.origin);
+          const p = new URL(productUrl, window.location.origin);
+          return u.pathname === p.pathname;
+        } catch (e) {
+          return href.indexOf(productUrl) !== -1;
+        }
+      };
+
+      const applyVariantCard = (li) => {
+        if (!li?.dataset?.variantUrl || li.dataset.variantPatched === '1') return;
+        li.dataset.variantPatched = '1';
+
+        const variantUrl = li.dataset.variantUrl;
+        const productUrl = (variantUrl || '').split('?')[0];
+        const imgUrl = li.dataset.variantImage;
+        const variantTitle = li.dataset.variantTitle;
+
+        if (variantTitle && variantTitle !== 'Default Title') {
+          const productLinks = li.querySelectorAll('a[href]');
+
+          productLinks.forEach((a) => {
+            const href = a.getAttribute('href');
+
+            if (
+              href &&
+              isSameProductLink(href, productUrl) &&
+              !a.classList.contains('variant-card-cta') &&
+              !a.closest('.variant-card-cta') &&
+              !a.querySelector('img') &&
+              !a.querySelector('.variant-title')
+            ) {
+              const walker = document.createTreeWalker(
+                a,
+                NodeFilter.SHOW_TEXT,
+                {
+                  acceptNode: (node) => {
+                    return node.textContent.trim()
+                      ? NodeFilter.FILTER_ACCEPT
+                      : NodeFilter.FILTER_REJECT;
+                  }
+                }
+              );
+
+              let lastTextNode = null;
+              while (walker.nextNode()) {
+                lastTextNode = walker.currentNode;
+              }
+
+              if (lastTextNode) {
+                const span = document.createElement('span');
+                span.className = 'variant-title';
+                span.textContent = ` - ${variantTitle}`;
+
+                lastTextNode.parentNode.insertBefore(span, lastTextNode.nextSibling);
+              }
+            }
+          });
+        }
+
+        const links = li.querySelectorAll('a[href]');
+        links.forEach((a) => {
+          const href = a.getAttribute('href');
+          if (!href) return;
+
+          if (isSameProductLink(href, productUrl)) {
+            a.setAttribute('href', variantUrl);
+          }
+        });
+
+        if (imgUrl) {
+          const sources = li.querySelectorAll('picture source[srcset], picture source[data-srcset]');
+          sources.forEach((s) => {
+            if (s.hasAttribute('srcset')) s.setAttribute('srcset', imgUrl);
+            if (s.hasAttribute('data-srcset')) s.setAttribute('data-srcset', imgUrl);
+          });
+
+          const img =
+            li.querySelector('img[src], img[data-src], img[data-srcset], img[srcset]') ||
+            li.querySelector('img');
+
+          if (img) {
+            if (img.hasAttribute('src')) img.setAttribute('src', imgUrl);
+            if (img.hasAttribute('data-src')) img.setAttribute('data-src', imgUrl);
+            if (img.hasAttribute('srcset')) img.setAttribute('srcset', imgUrl);
+            if (img.hasAttribute('data-srcset')) img.setAttribute('data-srcset', imgUrl);
+            if (img.hasAttribute('data-master')) img.setAttribute('data-master', imgUrl);
+          }
+        }
+      };
+
+      const applyAllIn = (root) => {
+        const nodes = root.querySelectorAll?.('li.product-grid__item[data-variant-url]') || [];
+        for (const li of nodes) applyVariantCard(li);
+        if (root.matches?.('li.product-grid__item[data-variant-url]')) applyVariantCard(root);
+      };
+
+      applyAllIn(document);
+
+      const grid = document.querySelector('ul.product-grid') || document.querySelector('[ref="grid"]');
+      const container = grid || document.querySelector('results-list') || document.body;
+
+      const obs = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+          for (const node of m.addedNodes) {
+            if (node?.nodeType !== 1) continue;
+            applyAllIn(node);
+          }
+        }
+      });
+
+      obs.observe(container, { childList: true, subtree: true });
+    })();
+  </script>
+{% endunless %}
+
+{% stylesheet %}
+  .main-collection-grid {
+    grid-column: var(--grid-column--mobile);
+
+    @media screen and (min-width: 750px) {
+      grid-column: var(--grid-column--desktop);
+    }
+  }
+
+  .collection-wrapper {
+    @media screen and (min-width: 750px) {
+      grid-template-columns:
+        1fr repeat(
+          var(--centered-column-number),
+          minmax(0, calc((var(--page-width) - var(--page-margin) * 2) / var(--centered-column-number)))
+        )
+        1fr;
+    }
+  }
+
+  .collection-wrapper:has(.facets-block-wrapper--full-width),
+  .collection-wrapper:has(.collection-wrapper--full-width) {
+    @media screen and (min-width: 750px) {
+      grid-column: 1 / -1;
+      grid-template-columns:
+        minmax(var(--page-margin), 1fr) repeat(
+          var(--centered-column-number),
+          minmax(0, calc((var(--page-width) - var(--page-margin) * 2) / var(--centered-column-number)))
+        )
+        minmax(var(--page-margin), 1fr);
+    }
+  }
+
+  .collection-wrapper:has(.facets--vertical) .facets-block-wrapper--vertical:not(.hidden) ~ .main-collection-grid {
+    @media screen and (min-width: 750px) {
+      grid-column: var(--facets-vertical-col-width) / var(--full-width-column-number);
+    }
+  }
+
+  .collection-wrapper:has(.facets-block-wrapper--vertical:not(#filters-drawer)):has(.collection-wrapper--full-width) {
+    @media screen and (min-width: 750px) {
+      grid-column: 1 / -1;
+      grid-template-columns: 0fr repeat(var(--centered-column-number), minmax(0, 1fr)) 0fr;
+    }
+  }
+
+  :is(.collection-wrapper--full-width, .collection-wrapper--full-width-on-mobile)
+    [product-grid-view='default']
+    .product-grid__card {
+    @media screen and (max-width: 749px) {
+      padding-inline-start: max(var(--padding-xs), var(--padding-inline-start));
+      padding-inline-end: max(var(--padding-xs), var(--padding-inline-end));
+    }
+  }
+
+  :is(.collection-wrapper--full-width, .collection-wrapper--full-width-on-mobile)
+    [product-grid-view='mobile-single']
+    .product-grid__card {
+    @media screen and (max-width: 749px) {
+      padding-inline-start: max(var(--padding-xs), var(--padding-inline-start));
+      padding-inline-end: max(var(--padding-xs), var(--padding-inline-end));
+    }
+  }
+
+  :is(.collection-wrapper--full-width) .card-gallery,
+  :is(.collection-wrapper--full-width-on-mobile) .card-gallery {
+    @media screen and (max-width: 749px) {
+      margin-inline-start: calc(-1 * max(var(--padding-xs), var(--padding-inline-start)));
+      margin-inline-end: calc(-1 * max(var(--padding-xs), var(--padding-inline-end)));
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:names.collection_container",
+  "enabled_on": {
+    "templates": ["collection"]
+  },
+  "settings": [
+    {
+      "type": "select",
+      "id": "layout_type",
+      "label": "t:settings.type",
+      "options": [
+        { "value": "grid", "label": "t:options.grid" },
+        { "value": "organic", "label": "t:options.editorial" }
+      ],
+      "default": "grid"
+    },
+    {
+      "type": "select",
+      "id": "product_card_size",
+      "label": "t:settings.card_size",
+      "options": [
+        { "value": "small", "label": "t:options.small" },
+        { "value": "medium", "label": "t:options.medium" },
+        { "value": "large", "label": "t:options.large" },
+        { "value": "extra-large", "label": "t:options.extra_large" }
+      ],
+      "default": "medium",
+      "visible_if": "{{ section.settings.layout_type == 'grid' }}"
+    },
+    {
+      "type": "select",
+      "id": "mobile_product_card_size",
+      "label": "t:settings.mobile_card_size",
+      "options": [
+        { "value": "small", "label": "t:options.small" },
+        { "value": "large", "label": "t:options.large" }
+      ],
+      "default": "small"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_infinite_scroll",
+      "label": "t:settings.auto_load_products",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_hidden_variants",
+      "label": "Show hidden variants",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "t:settings.products_per_page",
+      "min": 8,
+      "max": 36,
+      "step": 4,
+      "default": 24,
+      "visible_if": "{{ section.settings.enable_infinite_scroll == false }}"
+    },
+    { "type": "header", "content": "t:content.layout" },
+    {
+      "type": "select",
+      "id": "product_grid_width",
+      "label": "t:settings.width",
+      "options": [
+        { "value": "centered", "label": "t:options.page" },
+        { "value": "full-width", "label": "t:options.full" }
+      ],
+      "default": "centered"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width_on_mobile",
+      "label": "t:settings.full_width_on_mobile",
+      "default": true,
+      "visible_if": "{{ section.settings.product_grid_width != 'full-width' }}"
+    },
+    {
+      "type": "range",
+      "id": "columns_gap_horizontal",
+      "label": "t:settings.horizontal_gap",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "columns_gap_vertical",
+      "label": "t:settings.vertical_gap",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left_padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right_padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    { "type": "header", "content": "t:content.section_layout" },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top_padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom_padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    }
+  ],
+  "presets": []
+}
+{% endschema %}

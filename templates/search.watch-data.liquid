@@ -1,0 +1,31 @@
+{% layout none %}
+{%- paginate search.results by 50 -%}
+{
+  "results": [
+    {%- for item in search.results -%}
+      {%- if item.object_type == 'product' -%}
+        {%- for variant in item.variants -%}
+          {%- assign bandwidth_value = nil -%}
+          {%- for option in item.options_with_values -%}
+            {%- if option.name == 'Bandwidth' -%}
+              {%- assign bandwidth_value = variant.options[forloop.index0] -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {
+            "id": {{ variant.id | json }},
+            "title": {{ variant.title | json }},
+            "price": {{ variant.price | money_without_currency | json }},
+            "bandwidth": {{ bandwidth_value | json }},
+            "product": {
+              "id": {{ item.id | json }},
+              "title": {{ item.title | json }},
+              "handle": {{ item.handle | json }}
+            }
+          }{% unless forloop.last and item == search.results.last %},{% endunless %}
+        {%- endfor -%}
+      {%- endif -%}
+    {%- endfor -%}
+  ]
+}
+{%- endpaginate -%}

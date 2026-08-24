@@ -1,0 +1,453 @@
+{%- comment -%} ============================================================
+  STRAPPED — Section 5: Feature Strip
+  sections/strapped-features.liquid
+============================================================ {%- endcomment -%}
+
+{%- style -%}
+  #shopify-section-{{ section.id }} {
+    --sb-cream:     {{ section.settings.bg_color }};
+    --sb-champagne: {{ section.settings.border_color }};
+    padding-top:    {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+{%- render 'strapped-fonts' -%}
+
+<style>
+  .strapped-features {
+    background: var(--sb-cream);
+    border-top: 1px solid var(--sb-champagne);
+    border-bottom: 1px solid var(--sb-champagne);
+  }
+  .strapped-features__grid {
+    display: grid;
+    grid-template-columns: repeat({{ section.blocks.size | default: 3 }}, 1fr);
+  }
+  .strapped-features__item {
+    padding: {{ section.settings.item_pad_v }}px {{ section.settings.item_pad_h }}px;
+    border-right: 1px solid var(--sb-champagne);
+  }
+  .strapped-features__item:last-child { border-right: none; }
+  .strapped-features__icon { font-size: {{ section.settings.icon_size }}px; margin-bottom: {{ section.settings.icon_margin }}px; display: block; }
+  .strapped-features__title {
+        font-family: {{ section.settings.title_font }};
+    font-size:   {{ section.settings.title_size }}px;
+    font-weight: {{ section.settings.title_weight }};
+    font-style:  {{ section.settings.title_style }};
+    letter-spacing: {{ section.settings.title_tracking }};
+    text-transform: {{ section.settings.title_transform }};
+    color: {{ section.settings.title_color }};
+    margin-bottom: 0.5rem;
+  }
+  .strapped-features__desc {
+        font-family: {{ section.settings.desc_font }};
+    font-size:   {{ section.settings.desc_size }}px;
+    font-weight: {{ section.settings.desc_weight }};
+    font-style:  {{ section.settings.desc_style }};
+    letter-spacing: {{ section.settings.desc_tracking }};
+    text-transform: {{ section.settings.desc_transform }};
+    color: {{ section.settings.desc_color }};
+    line-height: {{ section.settings.desc_line_height }};
+  }
+  @media (max-width: 900px) {
+    .strapped-features__grid { grid-template-columns: 1fr; }
+    .strapped-features__item { border-right: none; border-bottom: 1px solid var(--sb-champagne); }
+    .strapped-features__item:last-child { border-bottom: none; }
+  }
+</style>
+
+<div class="strapped-features">
+  <div class="strapped-features__grid">
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'feature' -%}
+        <div class="strapped-features__item" {{ block.shopify_attributes }}>
+          {%- if block.settings.icon != blank -%}
+            <span class="strapped-features__icon">{{ block.settings.icon }}</span>
+          {%- endif -%}
+          <div class="strapped-features__title">{{ block.settings.title }}</div>
+          {%- if block.settings.description != blank -%}
+            <p class="strapped-features__desc">{{ block.settings.description }}</p>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Strapped — Features",
+  "tag": "section",
+  "class": "strapped-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Title Typography"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title color",
+      "default": "#3D2B1F"
+    },
+    {
+      "type": "select",
+      "id": "title_font",
+      "label": "Title font family",
+      "options": [
+        {
+          "value": "var(--sb-font-heading)",
+          "label": "Heading"
+        },
+        {
+          "value": "var(--sb-font-display)",
+          "label": "Display / Italic"
+        },
+        {
+          "value": "var(--sb-font-body)",
+          "label": "Body"
+        },
+        {
+          "value": "var(--sb-font-mono)",
+          "label": "Mono"
+        }
+      ],
+      "default": "var(--sb-font-heading)"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Title size",
+      "min": 8,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "select",
+      "id": "title_weight",
+      "label": "Title weight",
+      "options": [
+        {
+          "value": "300",
+          "label": "Light"
+        },
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "600",
+          "label": "Semibold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "select",
+      "id": "title_style",
+      "label": "Title style",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "italic",
+          "label": "Italic"
+        }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "text",
+      "id": "title_tracking",
+      "label": "Title letter spacing",
+      "default": "-0.01em"
+    },
+    {
+      "type": "select",
+      "id": "title_transform",
+      "label": "Title transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        },
+        {
+          "value": "capitalize",
+          "label": "Capitalize"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "header",
+      "content": "Description Typography"
+    },
+    {
+      "type": "color",
+      "id": "desc_color",
+      "label": "Description color",
+      "default": "#8B6B5D"
+    },
+    {
+      "type": "select",
+      "id": "desc_font",
+      "label": "Description font family",
+      "options": [
+        {
+          "value": "var(--sb-font-heading)",
+          "label": "Heading"
+        },
+        {
+          "value": "var(--sb-font-display)",
+          "label": "Display / Italic"
+        },
+        {
+          "value": "var(--sb-font-body)",
+          "label": "Body"
+        },
+        {
+          "value": "var(--sb-font-mono)",
+          "label": "Mono"
+        }
+      ],
+      "default": "var(--sb-font-body)"
+    },
+    {
+      "type": "range",
+      "id": "desc_size",
+      "label": "Description size",
+      "min": 8,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "default": 15
+    },
+    {
+      "type": "select",
+      "id": "desc_weight",
+      "label": "Description weight",
+      "options": [
+        {
+          "value": "300",
+          "label": "Light"
+        },
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "600",
+          "label": "Semibold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "desc_style",
+      "label": "Description style",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "italic",
+          "label": "Italic"
+        }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "text",
+      "id": "desc_tracking",
+      "label": "Description letter spacing",
+      "default": "0em"
+    },
+    {
+      "type": "select",
+      "id": "desc_transform",
+      "label": "Description transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        },
+        {
+          "value": "capitalize",
+          "label": "Capitalize"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "text",
+      "id": "desc_line_height",
+      "label": "Description line height",
+      "default": "1.6"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "item_pad_v",
+      "min": 16,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "label": "Item vertical padding",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "item_pad_h",
+      "min": 16,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "label": "Item horizontal padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Icon size",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "icon_margin",
+      "min": 4,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Icon bottom margin",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background",
+      "default": "#FAF6F1"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#E8D5C0"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "feature",
+      "name": "Feature",
+      "settings": [
+        {
+          "type": "text",
+          "id": "icon",
+          "label": "Icon (emoji)",
+          "default": "🎀"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Style-First Design"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "Every colorway is curated by hand — because your accessories should be an extension of you, not an afterthought."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Strapped — Features",
+      "blocks": [
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "🎀",
+            "title": "Style-First Design",
+            "description": "Every colorway is curated by hand — because your accessories should be an extension of you, not an afterthought."
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "✨",
+            "title": "Silky Comfort",
+            "description": "Skin-safe materials, zero irritation. Wear it to brunch, gym, nightout — it moves with you all day."
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "🔗",
+            "title": "Universal Fit",
+            "description": "Compatible with every Apple Watch series. One click in, one click out — swapping takes seconds."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

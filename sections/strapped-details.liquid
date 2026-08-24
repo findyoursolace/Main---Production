@@ -1,0 +1,497 @@
+{%- comment -%} ============================================================
+  STRAPPED — Section 3: Every Detail, Perfectly Considered
+  sections/strapped-detail.liquid
+============================================================ {%- endcomment -%}
+
+{%- style -%}
+  #shopify-section-{{ section.id }} {
+    --sb-bg:         {{ section.settings.bg_color }};
+    --sb-vis-start:  {{ section.settings.visual_bg_start }};
+    --sb-vis-end:    {{ section.settings.visual_bg_end }};
+    --sb-espresso:   {{ section.settings.text_color }};
+    --sb-dusty-rose: {{ section.settings.accent_color }};
+    --sb-mocha:      {{ section.settings.muted_color }};
+    --sb-champagne:  {{ section.settings.border_color }};
+    --sb-warm-white: {{ section.settings.label_bg }};
+    --sb-band-color:  {{ section.settings.band_color }};
+    --sb-band-shine:  {{ section.settings.band_shine_color }};
+    padding-top:    {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+{%- render 'strapped-fonts' -%}
+
+{%- if section.settings.visual_position == 'right' -%}
+  {%- assign visual_order = 2 -%}
+  {%- assign text_order   = 1 -%}
+{%- else -%}
+  {%- assign visual_order = 1 -%}
+  {%- assign text_order   = 2 -%}
+{%- endif -%}
+
+<style>
+  .strapped-detail {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 70vh;
+    overflow: hidden;
+    color: var(--sb-espresso);
+  }
+  .strapped-detail__visual {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5rem 3rem;
+    order: {{ visual_order }};
+    background: linear-gradient({{ section.settings.gradient_direction }}, var(--sb-vis-start) 0%, var(--sb-vis-end) 100%);
+    overflow: hidden;
+  }
+  .strapped-detail__bg-circle {
+    position: absolute;
+    width: 65%; padding-bottom: 65%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.7) 0%, var(--sb-champagne) 55%, transparent 100%);
+    animation: strapped-float 6s ease-in-out infinite;
+  }
+  @keyframes strapped-float {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50%       { transform: translateY(-18px) scale(1.02); }
+  }
+  .strapped-detail__watch-wrap {
+    position: relative; z-index: 2;
+    animation: strapped-float 6s ease-in-out infinite;
+    display: inline-block;
+  }
+  .strapped-detail__label {
+    position: absolute;
+    background: var(--sb-warm-white);
+    border: 1px solid var(--sb-champagne);
+    padding: 0.5rem 0.9rem;
+    font-family: {{ section.settings.label_font }};
+    font-size: {{ section.settings.label_size }}px;
+    font-weight: {{ section.settings.label_weight }};
+    letter-spacing: 0.12em;
+    color: var(--sb-muted_color, var(--sb-mocha));
+    text-transform: uppercase;
+    white-space: nowrap;
+    opacity: 0;
+    animation: strapped-label-in 0.8s ease forwards;
+  }
+  .strapped-detail__label:nth-child(2) { animation-delay: 0.8s; }
+  .strapped-detail__label:nth-child(3) { animation-delay: 1.3s; }
+  .strapped-detail__label:nth-child(4) { animation-delay: 1.8s; }
+  @keyframes strapped-label-in {
+    from { opacity: 0; transform: translateX(-8px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  /* Desktop label positions — float outside watch wrap */
+  .strapped-detail__label--1 { top: 14%; right: -42%; }
+  .strapped-detail__label--2 { top: 46%; left: -50%; }
+  .strapped-detail__label--3 { bottom: 16%; right: -44%; }
+
+  /* When visual is on the right, flip label sides so they point inward */
+  .strapped-detail--visual-right .strapped-detail__label--1 { right: auto; left: -42%; }
+  .strapped-detail--visual-right .strapped-detail__label--2 { left: auto; right: -50%; }
+  .strapped-detail--visual-right .strapped-detail__label--3 { right: auto; left: -44%; }
+
+  .strapped-detail__text {
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 5rem 5rem 5rem 3rem;
+    order: {{ text_order }};
+    background: var(--sb-vis-end);
+  }
+  .strapped-detail__tag {
+    font-family: {{ section.settings.eyebrow_font }};
+    font-size: {{ section.settings.eyebrow_size }}px;
+    font-weight: {{ section.settings.eyebrow_weight }};
+    font-style: {{ section.settings.eyebrow_style }};
+    letter-spacing: {{ section.settings.eyebrow_tracking }};
+    text-transform: {{ section.settings.eyebrow_transform }};
+    color: {{ section.settings.eyebrow_color }};
+    margin-bottom: 1.2rem;
+    display: flex; align-items: center; gap: 0.8rem;
+  }
+  .strapped-detail__tag::before {
+    content: ''; display: block; width: 2rem; height: 1px;
+    background: {{ section.settings.eyebrow_color }};
+  }
+  .strapped-detail__title {
+    font-family: {{ section.settings.heading_font }};
+    font-size: {{ section.settings.heading_size }};
+    font-weight: {{ section.settings.heading_weight }};
+    font-style: {{ section.settings.heading_style }};
+    line-height: {{ section.settings.heading_line_height }};
+    color: {{ section.settings.heading_color }};
+    text-transform: {{ section.settings.heading_transform }};
+  }
+  .strapped-detail__title em {
+    font-family: {{ section.settings.heading_em_font }};
+    font-style: {{ section.settings.heading_em_style }};
+    font-weight: {{ section.settings.heading_em_weight }};
+    color: {{ section.settings.heading_em_color }};
+  }
+  .strapped-detail__body {
+    font-family: {{ section.settings.body_font }};
+    font-size: {{ section.settings.body_size }}px;
+    font-weight: {{ section.settings.body_weight }};
+    font-style: {{ section.settings.body_style }};
+    color: {{ section.settings.body_color }};
+    line-height: {{ section.settings.body_line_height }};
+    margin: {{ section.settings.body_margin_top }}px 0 {{ section.settings.body_margin_bottom }}px;
+    max-width: 380px;
+  }
+  .strapped-detail__pills { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 2.5rem; }
+  .strapped-detail__pill {
+    background: var(--sb-bg);
+    border: 1px solid var(--sb-champagne);
+    padding: 0.45rem 1rem;
+    font-family: {{ section.settings.pill_font }};
+    font-size: {{ section.settings.pill_size }}px;
+    font-weight: {{ section.settings.pill_weight }};
+    letter-spacing: {{ section.settings.pill_tracking }};
+    text-transform: {{ section.settings.pill_transform }};
+    color: var(--sb-espresso);
+  }
+  .strapped-detail__cta-group { display: flex; align-items: center; gap: 2rem; flex-wrap: wrap; }
+  .strapped-detail__btn-primary {
+    background: {{ section.settings.btn_bg }};
+    color: {{ section.settings.btn_text_color }};
+    padding: {{ section.settings.btn_pad_v }}px {{ section.settings.btn_pad_h }}px;
+    font-family: {{ section.settings.btn_font }};
+    font-size: {{ section.settings.btn_size }}px;
+    font-weight: {{ section.settings.btn_weight }};
+    letter-spacing: {{ section.settings.btn_tracking }};
+    text-transform: {{ section.settings.btn_transform }};
+    border: {{ section.settings.btn_border_w }}px solid {{ section.settings.btn_border_c }};
+    border-radius: {{ section.settings.btn_radius }}px;
+    cursor: pointer; transition: opacity 0.2s, transform 0.2s;
+    text-decoration: none; display: inline-block; line-height: 1;
+  }
+  .strapped-detail__btn-primary:hover { opacity: 0.82; transform: translateY(-2px); }
+  .strapped-detail__btn-text {
+    font-family: {{ section.settings.text_link_font }};
+    font-size: {{ section.settings.text_link_size }}px;
+    font-style: {{ section.settings.text_link_style }};
+    font-weight: {{ section.settings.text_link_weight }};
+    color: {{ section.settings.text_link_color }};
+    text-decoration: none;
+    border-bottom: 1px solid var(--sb-champagne);
+    padding-bottom: 2px;
+    transition: opacity 0.3s;
+  }
+  .strapped-detail__btn-text:hover { opacity: 0.75; }
+
+  @media (max-width: 900px) {
+    /* Always stack: watch on top, text below */
+    .strapped-detail { grid-template-columns: 1fr; min-height: auto; }
+    .strapped-detail__visual { order: 1 !important; padding: 4rem 2rem 3rem; min-height: auto; }
+    .strapped-detail__text   { order: 2 !important; padding: 3rem 1.5rem 4rem; }
+
+    /* On mobile, switch labels from absolute floating to a stacked row under the watch */
+    .strapped-detail__watch-wrap { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+    .strapped-detail__label {
+      position: static !important;
+      opacity: 1 !important;
+      transform: none !important;
+      animation: none !important;
+      display: inline-block;
+    }
+    /* Stack all three labels as a centered row of chips */
+    .strapped-detail__labels-mobile {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0 1rem;
+    }
+  }
+</style>
+
+<div class="strapped-detail{% if section.settings.visual_position == 'right' %} strapped-detail--visual-right{% endif %}">
+  <div class="strapped-detail__visual">
+    <div class="strapped-detail__bg-circle"></div>
+    <div class="strapped-detail__watch-wrap">
+      <svg width="240" height="310" viewBox="0 0 220 280" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="75" y="0" width="70" height="68" rx="12" fill="{{ section.settings.band_color }}"/>
+        <rect x="82" y="5" width="56" height="60" rx="9" fill="{{ section.settings.band_shine_color }}" opacity="0.5"/>
+        <rect x="48" y="62" width="124" height="152" rx="36" fill="#2A2A2A"/>
+        <rect x="52" y="66" width="116" height="144" rx="33" fill="#1A1A1A"/>
+        <rect x="58" y="72" width="104" height="132" rx="28" fill="#0A0A0A"/>
+        <rect x="60" y="74" width="100" height="128" rx="26" fill="url(#sd-grad)"/>
+        <circle cx="110" cy="138" r="44" fill="none" stroke="{{ section.settings.band_color }}" stroke-width="1" opacity="0.3"/>
+        <text x="110" y="125" text-anchor="middle" fill="#FAF6F1" font-family="Georgia" font-size="11" font-style="italic" opacity="0.9">Mon</text>
+        <text x="110" y="145" text-anchor="middle" fill="#FAF6F1" font-family="Georgia" font-size="28" font-weight="700">10:42</text>
+        <text x="110" y="163" text-anchor="middle" fill="{{ section.settings.band_color }}" font-family="Georgia" font-size="9" opacity="0.8">April 27</text>
+        <circle cx="110" cy="84"  r="2" fill="#FAF6F1" opacity="0.4"/>
+        <circle cx="148" cy="138" r="2" fill="#FAF6F1" opacity="0.4"/>
+        <circle cx="110" cy="192" r="2" fill="#FAF6F1" opacity="0.4"/>
+        <circle cx="72"  cy="138" r="2" fill="#FAF6F1" opacity="0.4"/>
+        <rect x="169" y="102" width="8" height="30" rx="4" fill="#3A3A3A"/>
+        <rect x="170" y="104" width="6" height="26" rx="3" fill="#4A4A4A"/>
+        <rect x="75" y="211" width="70" height="68" rx="12" fill="{{ section.settings.band_color }}"/>
+        <rect x="82" y="215" width="56" height="60" rx="9" fill="{{ section.settings.band_shine_color }}" opacity="0.5"/>
+        <defs>
+          <linearGradient id="sd-grad" x1="60" y1="74" x2="160" y2="202" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#1A1A2E"/>
+            <stop offset="100%" stop-color="#16213E"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      {%- if section.settings.label_1 != blank or section.settings.label_2 != blank or section.settings.label_3 != blank -%}
+        <!-- Desktop: labels absolutely positioned around watch. Mobile: stacked chips below watch. -->
+        {%- if section.settings.label_1 != blank -%}<div class="strapped-detail__label strapped-detail__label--1">{{ section.settings.label_1 }}</div>{%- endif -%}
+        {%- if section.settings.label_2 != blank -%}<div class="strapped-detail__label strapped-detail__label--2">{{ section.settings.label_2 }}</div>{%- endif -%}
+        {%- if section.settings.label_3 != blank -%}<div class="strapped-detail__label strapped-detail__label--3">{{ section.settings.label_3 }}</div>{%- endif -%}
+      {%- endif -%}
+    </div>
+  </div>
+
+  <div class="strapped-detail__text">
+    {%- if section.settings.eyebrow != blank -%}<div class="strapped-detail__tag">{{ section.settings.eyebrow }}</div>{%- endif -%}
+    <h2 class="strapped-detail__title">{{ section.settings.heading | newline_to_br }}</h2>
+    {%- if section.settings.body != blank -%}<p class="strapped-detail__body">{{ section.settings.body }}</p>{%- endif -%}
+    {%- if section.blocks.size > 0 -%}
+      <div class="strapped-detail__pills">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'pill' -%}
+            <span class="strapped-detail__pill" {{ block.shopify_attributes }}
+              style="background:{{ block.settings.bg }};color:{{ block.settings.text_color }};border-color:{{ block.settings.border }};">
+              {{ block.settings.text }}
+            </span>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+    <div class="strapped-detail__cta-group">
+      {%- if section.settings.btn_primary_label != blank and section.settings.btn_primary_url != blank -%}
+        <a href="{{ section.settings.btn_primary_url }}" class="strapped-detail__btn-primary">{{ section.settings.btn_primary_label }}</a>
+      {%- endif -%}
+      {%- if section.settings.btn_text_label != blank and section.settings.btn_text_url != blank -%}
+        <a href="{{ section.settings.btn_text_url }}" class="strapped-detail__btn-text">{{ section.settings.btn_text_label }} →</a>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Strapped — Detail",
+  "tag": "section",
+  "class": "strapped-section",
+  "settings": [
+
+    { "type": "header", "content": "— Layout" },
+    { "type": "select", "id": "visual_position", "label": "Watch graphic position (desktop)",
+      "options": [
+        { "value": "left",  "label": "Left (default)" },
+        { "value": "right", "label": "Right" }
+      ], "default": "left",
+      "info": "On mobile the watch illustration always appears on top regardless of this setting" },
+
+    { "type": "header", "content": "— Section Background" },
+    { "type": "color", "id": "visual_bg_start", "label": "Gradient top color",    "default": "#F2D9CC" },
+    { "type": "color", "id": "visual_bg_end",   "label": "Gradient bottom color (also text column bg)", "default": "#F9ECE8" },
+    { "type": "select", "id": "gradient_direction", "label": "Gradient direction",
+      "options": [
+        { "value": "180deg", "label": "Top to bottom" },
+        { "value": "135deg", "label": "Diagonal" },
+        { "value": "90deg",  "label": "Left to right" },
+        { "value": "0deg",   "label": "Bottom to top" }
+      ], "default": "180deg" },
+
+    { "type": "header", "content": "— Eyebrow  (e.g. '— Crafted for You')" },
+    { "type": "text",   "id": "eyebrow",          "label": "Text",           "default": "— Crafted for You" },
+    { "type": "color",  "id": "eyebrow_color",    "label": "Color",          "default": "#D4A5A5" },
+    { "type": "select", "id": "eyebrow_font",     "label": "Font family",
+      "options": [
+        { "value": "var(--sb-font-mono)",    "label": "Mono (default)" },
+        { "value": "var(--sb-font-body)",    "label": "Body" },
+        { "value": "var(--sb-font-heading)", "label": "Heading" },
+        { "value": "var(--sb-font-display)", "label": "Display / Italic" }
+      ], "default": "var(--sb-font-mono)" },
+    { "type": "range",  "id": "eyebrow_size",     "label": "Size",           "min": 8, "max": 20, "step": 1, "unit": "px", "default": 10 },
+    { "type": "select", "id": "eyebrow_weight",   "label": "Weight",
+      "options": [{ "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" }, { "value": "600", "label": "Semibold" }],
+      "default": "400" },
+    { "type": "select", "id": "eyebrow_style",    "label": "Style",
+      "options": [{ "value": "normal", "label": "Normal" }, { "value": "italic", "label": "Italic" }],
+      "default": "normal" },
+    { "type": "text",   "id": "eyebrow_tracking", "label": "Letter spacing", "default": "0.2em" },
+    { "type": "select", "id": "eyebrow_transform","label": "Transform",
+      "options": [{ "value": "uppercase", "label": "Uppercase" }, { "value": "none", "label": "None" }],
+      "default": "uppercase" },
+
+    { "type": "header", "content": "— Heading  (main title)" },
+    { "type": "richtext", "id": "heading", "label": "Text", "default": "<p>Every detail, <em>perfectly</em> considered.</p>" },
+    { "type": "color",  "id": "heading_color",       "label": "Color",       "default": "#3D2B1F" },
+    { "type": "select", "id": "heading_font",         "label": "Font family",
+      "options": [
+        { "value": "var(--sb-font-heading)", "label": "Heading (default)" },
+        { "value": "var(--sb-font-display)", "label": "Display / Italic" },
+        { "value": "var(--sb-font-body)",    "label": "Body" },
+        { "value": "var(--sb-font-mono)",    "label": "Mono" }
+      ], "default": "var(--sb-font-heading)" },
+    { "type": "text",   "id": "heading_size",         "label": "Size (CSS)", "default": "clamp(2.2rem, 4vw, 4rem)", "info": "Accepts px, rem, or clamp()" },
+    { "type": "select", "id": "heading_weight",       "label": "Weight",
+      "options": [{ "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" }, { "value": "600", "label": "Semibold" }, { "value": "700", "label": "Bold" }],
+      "default": "600" },
+    { "type": "select", "id": "heading_style",        "label": "Style",
+      "options": [{ "value": "normal", "label": "Normal" }, { "value": "italic", "label": "Italic" }],
+      "default": "normal" },
+    { "type": "text",   "id": "heading_line_height",  "label": "Line height","default": "1.05" },
+    { "type": "select", "id": "heading_transform",    "label": "Transform",
+      "options": [{ "value": "none", "label": "None" }, { "value": "uppercase", "label": "Uppercase" }],
+      "default": "none" },
+
+    { "type": "header", "content": "— Heading italic word  (e.g. 'perfectly')" },
+    { "type": "color",  "id": "heading_em_color",  "label": "Color",  "default": "#D4A5A5" },
+    { "type": "select", "id": "heading_em_font",   "label": "Font family",
+      "options": [
+        { "value": "var(--sb-font-display)", "label": "Display / Italic (default)" },
+        { "value": "var(--sb-font-heading)", "label": "Heading" },
+        { "value": "var(--sb-font-body)",    "label": "Body" }
+      ], "default": "var(--sb-font-display)" },
+    { "type": "select", "id": "heading_em_style",  "label": "Style",
+      "options": [{ "value": "italic", "label": "Italic" }, { "value": "normal", "label": "Normal" }],
+      "default": "italic" },
+    { "type": "select", "id": "heading_em_weight", "label": "Weight",
+      "options": [{ "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" }, { "value": "600", "label": "Semibold" }],
+      "default": "400" },
+
+    { "type": "header", "content": "— Body paragraph" },
+    { "type": "textarea", "id": "body", "label": "Text", "default": "From the texture of the band to the way it clicks into place — we obsess over the small things so your wrist always looks intentional, effortless, and entirely you." },
+    { "type": "color",  "id": "body_color",         "label": "Color",        "default": "#8B6B5D" },
+    { "type": "select", "id": "body_font",           "label": "Font family",
+      "options": [
+        { "value": "var(--sb-font-body)",    "label": "Body (default)" },
+        { "value": "var(--sb-font-display)", "label": "Display / Italic" },
+        { "value": "var(--sb-font-heading)", "label": "Heading" },
+        { "value": "var(--sb-font-mono)",    "label": "Mono" }
+      ], "default": "var(--sb-font-body)" },
+    { "type": "range",  "id": "body_size",           "label": "Size",         "min": 12, "max": 28, "step": 1, "unit": "px", "default": 17 },
+    { "type": "select", "id": "body_weight",         "label": "Weight",
+      "options": [{ "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" }, { "value": "600", "label": "Semibold" }],
+      "default": "400" },
+    { "type": "select", "id": "body_style",          "label": "Style",
+      "options": [{ "value": "normal", "label": "Normal" }, { "value": "italic", "label": "Italic" }],
+      "default": "normal" },
+    { "type": "text",   "id": "body_line_height",    "label": "Line height",  "default": "1.7" },
+    { "type": "range",  "id": "body_margin_top",     "label": "Margin top",   "min": 0, "max": 48, "step": 4, "unit": "px", "default": 24 },
+    { "type": "range",  "id": "body_margin_bottom",  "label": "Margin bottom","min": 0, "max": 48, "step": 4, "unit": "px", "default": 32 },
+
+    { "type": "header", "content": "— Feature pills" },
+    { "type": "select", "id": "pill_font",      "label": "Font family",
+      "options": [
+        { "value": "var(--sb-font-mono)",    "label": "Mono (default)" },
+        { "value": "var(--sb-font-body)",    "label": "Body" },
+        { "value": "var(--sb-font-heading)", "label": "Heading" }
+      ], "default": "var(--sb-font-mono)" },
+    { "type": "range",  "id": "pill_size",      "label": "Size",           "min": 8, "max": 18, "step": 1, "unit": "px", "default": 10 },
+    { "type": "select", "id": "pill_weight",    "label": "Weight",
+      "options": [{ "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" }, { "value": "600", "label": "Semibold" }],
+      "default": "400" },
+    { "type": "text",   "id": "pill_tracking",  "label": "Letter spacing", "default": "0.12em" },
+    { "type": "select", "id": "pill_transform", "label": "Transform",
+      "options": [{ "value": "uppercase", "label": "Uppercase" }, { "value": "none", "label": "None" }],
+      "default": "uppercase" },
+    { "type": "color",  "id": "bg_color",       "label": "Pill background","default": "#FAF6F1" },
+    { "type": "color",  "id": "border_color",   "label": "Pill border",    "default": "#E8D5C0" },
+
+    { "type": "header", "content": "— Primary button" },
+    { "type": "text",   "id": "btn_primary_label", "label": "Label",          "default": "Shop All Bands" },
+    { "type": "url",    "id": "btn_primary_url",   "label": "Link" },
+    { "type": "color",  "id": "btn_bg",            "label": "Background",     "default": "#3D2B1F" },
+    { "type": "color",  "id": "btn_text_color",    "label": "Text color",     "default": "#FAF6F1" },
+    { "type": "color",  "id": "btn_border_c",      "label": "Border color",   "default": "#3D2B1F" },
+    { "type": "range",  "id": "btn_border_w",      "label": "Border width",   "min": 0, "max": 4,  "step": 1, "unit": "px", "default": 0 },
+    { "type": "range",  "id": "btn_radius",        "label": "Border radius",  "min": 0, "max": 50, "step": 2, "unit": "px", "default": 0 },
+    { "type": "range",  "id": "btn_pad_v",         "label": "Padding V",      "min": 6, "max": 32, "step": 2, "unit": "px", "default": 16 },
+    { "type": "range",  "id": "btn_pad_h",         "label": "Padding H",      "min": 12,"max": 64, "step": 2, "unit": "px", "default": 38 },
+    { "type": "select", "id": "btn_font",          "label": "Font family",
+      "options": [
+        { "value": "var(--sb-font-mono)",    "label": "Mono (default)" },
+        { "value": "var(--sb-font-body)",    "label": "Body" },
+        { "value": "var(--sb-font-heading)", "label": "Heading" }
+      ], "default": "var(--sb-font-mono)" },
+    { "type": "range",  "id": "btn_size",          "label": "Font size",      "min": 8, "max": 20, "step": 1, "unit": "px", "default": 11 },
+    { "type": "select", "id": "btn_weight",        "label": "Weight",
+      "options": [{ "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" }, { "value": "600", "label": "Semibold" }],
+      "default": "400" },
+    { "type": "text",   "id": "btn_tracking",      "label": "Letter spacing", "default": "0.15em" },
+    { "type": "select", "id": "btn_transform",     "label": "Transform",
+      "options": [{ "value": "uppercase", "label": "Uppercase" }, { "value": "none", "label": "None" }],
+      "default": "uppercase" },
+
+    { "type": "header", "content": "— Text link" },
+    { "type": "text",   "id": "btn_text_label",  "label": "Label",          "default": "Browse colors" },
+    { "type": "url",    "id": "btn_text_url",    "label": "Link" },
+    { "type": "color",  "id": "text_link_color", "label": "Color",          "default": "#8B6B5D" },
+    { "type": "select", "id": "text_link_font",  "label": "Font family",
+      "options": [
+        { "value": "var(--sb-font-body)",    "label": "Body (default)" },
+        { "value": "var(--sb-font-display)", "label": "Display / Italic" },
+        { "value": "var(--sb-font-mono)",    "label": "Mono" }
+      ], "default": "var(--sb-font-body)" },
+    { "type": "range",  "id": "text_link_size",   "label": "Size",   "min": 10, "max": 24, "step": 1, "unit": "px", "default": 16 },
+    { "type": "select", "id": "text_link_style",  "label": "Style",
+      "options": [{ "value": "normal", "label": "Normal" }, { "value": "italic", "label": "Italic" }],
+      "default": "normal" },
+    { "type": "select", "id": "text_link_weight", "label": "Weight",
+      "options": [{ "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" }, { "value": "600", "label": "Semibold" }],
+      "default": "400" },
+
+    { "type": "header", "content": "— Watch illustration" },
+    { "type": "color",  "id": "band_color",        "label": "Band color",           "default": "#D4A5A5" },
+    { "type": "color",  "id": "band_shine_color",  "label": "Band highlight color", "default": "#E0B5B5",
+      "info": "Slightly lighter than band color — used for the sheen overlay" },
+
+    { "type": "header", "content": "— Floating labels" },
+    { "type": "text",   "id": "label_1",     "label": "Label 1 (top right)",   "default": "Woven Nylon" },
+    { "type": "text",   "id": "label_2",     "label": "Label 2 (middle left)",  "default": "Soft-Touch Feel" },
+    { "type": "text",   "id": "label_3",     "label": "Label 3 (bottom right)", "default": "All Series ✓" },
+    { "type": "color",  "id": "label_bg",    "label": "Label background",       "default": "#FDFAF7" },
+    { "type": "select", "id": "label_font",  "label": "Font family",
+      "options": [
+        { "value": "var(--sb-font-mono)",    "label": "Mono (default)" },
+        { "value": "var(--sb-font-body)",    "label": "Body" }
+      ], "default": "var(--sb-font-mono)" },
+    { "type": "range",  "id": "label_size",  "label": "Size",   "min": 8, "max": 16, "step": 1, "unit": "px", "default": 10 },
+    { "type": "select", "id": "label_weight","label": "Weight",
+      "options": [{ "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" }],
+      "default": "400" },
+
+    { "type": "header", "content": "— Spacing" },
+    { "type": "range", "id": "padding_top",    "min": 0, "max": 120, "step": 4, "unit": "px", "label": "Section padding top",    "default": 0 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "label": "Section padding bottom", "default": 0 },
+
+    { "type": "header", "content": "— Fallback colors", "info": "Used only by elements that don't have their own color setting above" },
+    { "type": "color", "id": "text_color",   "label": "Fallback text color",   "default": "#3D2B1F" },
+    { "type": "color", "id": "accent_color", "label": "Fallback accent color", "default": "#D4A5A5" },
+    { "type": "color", "id": "muted_color",  "label": "Fallback muted color",  "default": "#8B6B5D" }
+
+  ],
+  "blocks": [
+    { "type": "pill", "name": "Feature pill",
+      "settings": [
+        { "type": "text",  "id": "text",       "label": "Pill text",       "default": "Skin-safe materials" },
+        { "type": "header","content": "Colors (optional overrides)" },
+        { "type": "color", "id": "bg",         "label": "Background",      "default": "#FAF6F1" },
+        { "type": "color", "id": "text_color", "label": "Text color",      "default": "#3D2B1F" },
+        { "type": "color", "id": "border",     "label": "Border color",    "default": "#E8D5C0" }
+      ]
+    }
+  ],
+  "presets": [
+    { "name": "Strapped — Detail",
+      "blocks": [
+        { "type": "pill", "settings": { "text": "Skin-safe materials" } },
+        { "type": "pill", "settings": { "text": "Secure click-lock fit" } },
+        { "type": "pill", "settings": { "text": "Series 1–10 + Ultra" } },
+        { "type": "pill", "settings": { "text": "38 · 40 · 41 · 42 · 44 · 45 · 49mm" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

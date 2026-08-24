@@ -1,0 +1,780 @@
+{% comment %}
+  Comparison Table (Us vs Them) - SECTION
+{% endcomment %}
+
+{% assign sid = 'comparison-' | append: section.id %}
+
+{% style %}
+
+  /* =========================================
+     SECTION BACKGROUND
+     Pull directly from selected color scheme
+     ========================================= */
+
+  #{{ sid }} {
+    padding: {{ section.settings.section_padding }}px 0;
+
+    background-color:
+      {{ section.settings.color_scheme.settings.background }};
+
+    {% if section.settings.color_scheme.settings.background_gradient != blank %}
+      background:
+        {{ section.settings.color_scheme.settings.background_gradient }};
+    {% endif %}
+
+    color:
+      {{ section.settings.color_scheme.settings.text }};
+
+    width: 100%;
+  }
+
+
+  /* =========================================
+     GLOBAL SECTION STYLES
+     ========================================= */
+
+  #{{ sid }} * {
+    box-sizing: border-box;
+  }
+
+  #{{ sid }} img {
+    max-width: 100%;
+    height: auto;
+  }
+
+
+  /* =========================================
+     TABLE WRAPPER
+     ========================================= */
+
+  #{{ sid }} .ct-scroller {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+
+    margin: 0 auto;
+
+    max-width: 600px;
+
+    padding: 0 10px;
+
+    line-height: 1.3;
+
+    text-align: left;
+  }
+
+
+  /* =========================================
+     TABLE CARD
+     ========================================= */
+
+  #{{ sid }} .ct-card {
+    width: 100%;
+
+    background:
+      {{ section.settings.background_color }};
+
+    border:
+      {{ section.settings.border_width }}px
+      solid
+      {{ section.settings.border_color }};
+
+    border-radius:
+      {{ section.settings.border_radius }}px;
+
+    overflow: hidden;
+  }
+
+
+  /* =========================================
+     TABLE RESET
+     Prevent theme table styles interfering
+     ========================================= */
+
+  #{{ sid }} table {
+    width: 100% !important;
+
+    border-collapse: collapse !important;
+
+    table-layout: fixed !important;
+
+    display: table !important;
+
+    margin: 0 !important;
+  }
+
+  #{{ sid }} thead {
+    display: table-header-group !important;
+  }
+
+  #{{ sid }} tbody {
+    display: table-row-group !important;
+  }
+
+  #{{ sid }} tr {
+    display: table-row !important;
+  }
+
+  #{{ sid }} th,
+  #{{ sid }} td {
+    display: table-cell !important;
+  }
+
+
+  /* =========================================
+     TABLE HEADER
+     ========================================= */
+
+  #{{ sid }} thead th {
+    background:
+      {{ section.settings.header_background }};
+
+    color:
+      {{ section.settings.header_text_color }};
+
+    font-size:
+      {{ section.settings.header_font_size }}px;
+
+    font-weight: 700;
+
+    padding:
+      {{ section.settings.cell_padding }}px;
+
+    border-bottom:
+      {{ section.settings.border_width }}px
+      solid
+      {{ section.settings.border_color }};
+
+    text-align: center;
+
+    vertical-align: middle;
+  }
+
+  #{{ sid }} thead th:first-child {
+    text-align: left;
+    width: 44%;
+  }
+
+  #{{ sid }} thead th:nth-child(2),
+  #{{ sid }} thead th:nth-child(3) {
+    width: 28%;
+  }
+
+
+  /* =========================================
+     TABLE BODY
+     ========================================= */
+
+  #{{ sid }} tbody td {
+    background:
+      {{ section.settings.background_color }};
+
+    color:
+      {{ section.settings.text_color }};
+
+    font-size:
+      {{ section.settings.text_font_size }}px;
+
+    padding:
+      {{ section.settings.cell_padding }}px;
+
+    border-bottom:
+      {{ section.settings.border_width }}px
+      solid
+      {{ section.settings.border_color }};
+
+    text-align: center;
+
+    vertical-align: middle;
+
+    word-break: break-word;
+  }
+
+  #{{ sid }} tbody td:first-child {
+    text-align: left;
+    font-weight: 500;
+  }
+
+
+  /* Alternate row color */
+
+  #{{ sid }} tbody tr:nth-child(even) td {
+    background:
+      {{ section.settings.row_alternate_bg }};
+  }
+
+
+  /* Remove last row border */
+
+  #{{ sid }} tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+
+  /* =========================================
+     BRAND TEXT
+     ========================================= */
+
+  #{{ sid }} .ct-brand-text {
+    font-weight: 400;
+  }
+
+
+  /* =========================================
+     LOGO
+     ========================================= */
+
+  #{{ sid }} .ct-logo {
+    display: inline-block;
+
+    width: auto !important;
+
+    max-width:
+      {{ section.settings.logo_width }}px !important;
+
+    max-height: 48px;
+
+    height: auto;
+
+    object-fit: contain;
+
+    vertical-align: middle;
+  }
+
+
+  /* =========================================
+     CHECK / X ICONS
+     ========================================= */
+
+  #{{ sid }} .ct-mark {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width:
+      {{ section.settings.icon_size }}px;
+
+    height:
+      {{ section.settings.icon_size }}px;
+  }
+
+  #{{ sid }} .ct-mark svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  #{{ sid }} .ct-check {
+    color:
+      {{ section.settings.checkmark_color }};
+  }
+
+  #{{ sid }} .ct-x {
+    color:
+      {{ section.settings.x_color }};
+  }
+
+
+  /* =========================================
+     MOBILE
+     ========================================= */
+
+  @media (max-width: 749px) {
+
+    #{{ sid }} thead th:first-child {
+      width: 43%;
+    }
+
+    #{{ sid }} thead th:nth-child(2),
+    #{{ sid }} thead th:nth-child(3) {
+      width: 30%;
+    }
+
+    #{{ sid }} thead th {
+      font-size:
+        calc(
+          {{ section.settings.header_font_size }}px * 0.9
+        );
+    }
+
+    #{{ sid }} tbody td {
+      font-size:
+        calc(
+          {{ section.settings.text_font_size }}px * 0.92
+        );
+
+      padding:
+        calc(
+          {{ section.settings.cell_padding }}px * 0.5
+        );
+    }
+
+    #{{ sid }} .ct-logo {
+      max-width:
+        calc(
+          {{ section.settings.logo_width }}px * 0.8
+        ) !important;
+
+      max-height: 40px;
+    }
+
+  }
+
+{% endstyle %}
+
+
+{% capture svg_check %}
+
+  <svg
+    viewBox="0 0 20 20"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      fill="currentColor"
+      fill-rule="evenodd"
+      d="M16.36 6.02c.23.2.25.55.05.78l-7.2 8.2c-.1.11-.24.18-.39.19-.15 0-.3-.05-.41-.16L3.7 10.6c-.22-.21-.22-.57 0-.8.21-.22.57-.22.8 0l4.33 4.3 6.8-7.74c.2-.23.55-.25.78-.04Z"
+      clip-rule="evenodd"
+    />
+  </svg>
+
+{% endcapture %}
+
+
+{% capture svg_x %}
+
+  <svg
+    viewBox="0 0 20 20"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      fill="currentColor"
+      fill-rule="evenodd"
+      d="M6.11 5.36c.2-.2.53-.2.73 0L10 8.52l3.16-3.16c.2-.2.53-.2.73 0 .2.2.2.53 0 .73L10.73 9.25l3.16 3.16c.2.2.2.53 0 .73-.2.2-.53.2-.73 0L10 9.98l-3.16 3.16c-.2.2-.53.2-.73 0-.2-.2-.2-.53 0-.73l3.16-3.16-3.16-3.16c-.2-.2-.2-.53 0-.73Z"
+      clip-rule="evenodd"
+    />
+  </svg>
+
+{% endcapture %}
+
+
+<div
+  id="{{ sid }}"
+  class="comparisontable"
+  {{ section.shopify_attributes }}
+>
+
+  <div class="ct-scroller">
+
+    <div class="ct-card">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>
+              <span class="ct-brand-text">
+                {{ section.settings.features_heading }}
+              </span>
+            </th>
+
+
+            <th>
+
+              {% if section.settings.us_logo != blank %}
+
+                <img
+                  class="ct-logo"
+                  src="{{ section.settings.us_logo | image_url: width: 400 }}"
+                  alt="{{ section.settings.us_logo.alt | escape }}"
+                  loading="lazy"
+                  width="{{ section.settings.us_logo.width }}"
+                  height="{{ section.settings.us_logo.height }}"
+                >
+
+              {% else %}
+
+                <span class="ct-brand-text">
+                  {{ section.settings.us_heading }}
+                </span>
+
+              {% endif %}
+
+            </th>
+
+
+            <th>
+
+              <span class="ct-brand-text">
+                {{ section.settings.them_heading }}
+              </span>
+
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          {% for i in (1..10) %}
+
+            {% assign key = 'feature_' | append: i %}
+
+            {% assign feature_text = section.settings[key] %}
+
+
+            {% if feature_text != blank %}
+
+              {% assign them_is_check = false %}
+
+
+              {% if i == 4 %}
+                {% assign them_is_check = true %}
+              {% endif %}
+
+
+              <tr>
+
+                <td>
+                  {{ feature_text }}
+                </td>
+
+
+                <td>
+
+                  <span class="ct-mark ct-check">
+                    {{ svg_check }}
+                  </span>
+
+                </td>
+
+
+                <td>
+
+                  {% if them_is_check %}
+
+                    <span class="ct-mark ct-check">
+                      {{ svg_check }}
+                    </span>
+
+                  {% else %}
+
+                    <span class="ct-mark ct-x">
+                      {{ svg_x }}
+                    </span>
+
+                  {% endif %}
+
+                </td>
+
+              </tr>
+
+            {% endif %}
+
+          {% endfor %}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+{% schema %}
+{
+  "name": "Comparison table",
+
+  "settings": [
+
+    {
+      "type": "header",
+      "content": "Section"
+    },
+
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+
+    {
+      "type": "range",
+      "id": "section_padding",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Section padding",
+      "default": 20
+    },
+
+
+    {
+      "type": "header",
+      "content": "Headers"
+    },
+
+    {
+      "type": "text",
+      "id": "features_heading",
+      "label": "Features column heading",
+      "default": "What sets us apart"
+    },
+
+
+    {
+      "type": "header",
+      "content": "Your brand header"
+    },
+
+    {
+      "type": "image_picker",
+      "id": "us_logo",
+      "label": "Your logo"
+    },
+
+    {
+      "type": "text",
+      "id": "us_heading",
+      "label": "Your brand heading (used if no logo uploaded)",
+      "default": "Solace"
+    },
+
+    {
+      "type": "text",
+      "id": "them_heading",
+      "label": "Competitor heading",
+      "default": "Competitor"
+    },
+
+
+    {
+      "type": "header",
+      "content": "Features"
+    },
+
+    {
+      "type": "text",
+      "id": "feature_1",
+      "label": "Feature 1",
+      "default": "Free of Toxic PFAS"
+    },
+
+    {
+      "type": "text",
+      "id": "feature_2",
+      "label": "Feature 2",
+      "default": "Lifetime Warranty"
+    },
+
+    {
+      "type": "text",
+      "id": "feature_3",
+      "label": "Feature 3",
+      "default": "Money-Back Guarantee"
+    },
+
+    {
+      "type": "text",
+      "id": "feature_4",
+      "label": "Feature 4",
+      "default": "Fast Shipping"
+    },
+
+    {
+      "type": "text",
+      "id": "feature_5",
+      "label": "Feature 5",
+      "default": "All-Day Comfort"
+    },
+
+    {
+      "type": "text",
+      "id": "feature_6",
+      "label": "Feature 6",
+      "default": "Machine Washable"
+    },
+
+    {
+      "type": "text",
+      "id": "feature_7",
+      "label": "Feature 7"
+    },
+
+    {
+      "type": "text",
+      "id": "feature_8",
+      "label": "Feature 8"
+    },
+
+    {
+      "type": "text",
+      "id": "feature_9",
+      "label": "Feature 9"
+    },
+
+    {
+      "type": "text",
+      "id": "feature_10",
+      "label": "Feature 10"
+    },
+
+
+    {
+      "type": "header",
+      "content": "Table style"
+    },
+
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Table background",
+      "default": "#ffffff"
+    },
+
+    {
+      "type": "color",
+      "id": "header_background",
+      "label": "Header background",
+      "default": "#f5f5f5"
+    },
+
+    {
+      "type": "color",
+      "id": "header_text_color",
+      "label": "Header text",
+      "default": "#000000"
+    },
+
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Table text",
+      "default": "#000000"
+    },
+
+    {
+      "type": "color",
+      "id": "row_alternate_bg",
+      "label": "Alternate row background",
+      "default": "#fafafa"
+    },
+
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border",
+      "default": "#e6e6e6"
+    },
+
+    {
+      "type": "color",
+      "id": "checkmark_color",
+      "label": "Checkmark",
+      "default": "#008060"
+    },
+
+    {
+      "type": "color",
+      "id": "x_color",
+      "label": "X mark",
+      "default": "#d82c0d"
+    },
+
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 8
+    },
+
+    {
+      "type": "range",
+      "id": "border_width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "label": "Border width",
+      "default": 1
+    },
+
+    {
+      "type": "range",
+      "id": "cell_padding",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Cell padding",
+      "default": 16
+    },
+
+    {
+      "type": "range",
+      "id": "logo_width",
+      "min": 40,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Logo width",
+      "default": 120
+    },
+
+    {
+      "type": "range",
+      "id": "header_font_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Header font size",
+      "default": 16
+    },
+
+    {
+      "type": "range",
+      "id": "text_font_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Text font size",
+      "default": 14
+    },
+
+    {
+      "type": "range",
+      "id": "icon_size",
+      "min": 16,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Icon size",
+      "default": 24
+    }
+
+  ],
+
+  "presets": [
+    {
+      "name": "Comparison table"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,227 @@
+<div id="solace-comparison-{{ section.id }}" class="solace-comparison-wrapper">
+  <style>
+    /* 1. SCOPED RESET */
+    #solace-comparison-{{ section.id }} {
+      all: unset;
+      display: block;
+      background-color: #0f172a; /* Slate-900 */
+      color: #ffffff;
+      padding: 80px 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+    #solace-comparison-{{ section.id }} * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+    }
+
+    @media (min-width: 768px) {
+      #solace-comparison-{{ section.id }} { padding: 120px 48px; }
+    }
+
+    /* 2. CONTAINER & HEADER */
+    .solace-comp-container {
+      max-width: 1024px; /* Max-w-5xl */
+      margin: 0 auto !important;
+    }
+
+    .solace-comp-header {
+      text-align: center;
+      margin-bottom: 60px !important;
+    }
+
+    .solace-comp-title {
+      font-size: clamp(2rem, 8vw, 3.75rem); /* Responsive 3xl to 6xl */
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      text-transform: uppercase;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      color: #ffffff !important;
+    }
+
+    .solace-comp-p {
+      color: #94a3b8;
+      font-size: 1.125rem;
+      font-weight: 500;
+      max-width: 650px;
+      margin: 0 auto !important;
+      line-height: 1.6;
+    }
+
+    /* 3. TABLE STYLING */
+    .solace-table-box {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      overflow: hidden;
+    }
+
+    @media (min-width: 768px) {
+      .solace-table-box { border-radius: 48px; }
+    }
+
+    .solace-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    /* Header Row */
+    .solace-thead {
+      background: rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .solace-th {
+      padding: 24px 12px !important;
+      color: #94a3b8;
+      font-size: 14px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      text-align: center;
+    }
+
+    .solace-th-feature { text-align: left; padding-left: 24px !important; width: 40%; }
+    .solace-th-solace { color: #60a5fa; background: rgba(255, 255, 255, 0.03); }
+
+    /* Body Rows */
+    .solace-tr {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      transition: background 0.3s ease;
+    }
+    .solace-tr:hover { background: rgba(255, 255, 255, 0.08); }
+
+    .solace-td {
+      padding: 20px 8px !important;
+      text-align: center;
+      vertical-align: middle;
+      font-size:14px !important;
+    }
+
+    @media (min-width: 768px) {
+      .solace-td { padding: 32px 24px; }
+    }
+
+    .solace-td-feature {
+      text-align: left;
+      padding-left: 24px !important;
+      font-weight: 700;
+      font-size: 14px !important;
+      line-height: 1.2;
+      color: #ffffff;
+    }
+
+    @media (min-width: 768px) {
+      .solace-td-feature { font-size: 18px; }
+    }
+
+    .solace-td-highlight { background: rgba(255, 255, 255, 0.03); }
+
+    /* Icons and Text Labels */
+    .cell-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cell-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #64748b;
+    }
+
+    .solace-label {
+      color: #dbeafe;
+      font-weight: 900;
+    }
+
+    /* Icon Colors */
+    .icon-fail { color: #ef4444; }
+    .icon-pass { color: #4ade80; }
+  </style>
+
+  <div class="solace-comp-container">
+    <div class="solace-comp-header">
+      <h2 class="solace-comp-title">
+        {{ section.settings.heading | default: 'THE BETTER CHOICE' }}
+      </h2>
+      <p class="solace-comp-p">
+        {{ section.settings.description | default: 'We stack up against standard factory-produced bands.' }}
+      </p>
+    </div>
+
+    <div class="solace-table-box">
+      <table class="solace-table">
+        <thead class="solace-thead">
+          <tr>
+            <th class="solace-th solace-th-feature">Feature</th>
+            <th class="solace-th">Standard Brands</th>
+            <th class="solace-th solace-th-solace">Solace Bands</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for block in section.blocks %}
+            <tr class="solace-tr" {{ block.shopify_attributes }}>
+              <td class="solace-td solace-td-feature">{{ block.settings.feature }}</td>
+              
+              <td class="solace-td">
+                <div class="cell-content">
+                  <svg class="icon-fail" style="width:20px; height:20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                  <span class="cell-label">{{ block.settings.competitor }}</span>
+                </div>
+              </td>
+              
+              <td class="solace-td solace-td-highlight">
+                <div class="cell-content">
+                  <svg class="icon-pass" style="width:20px; height:20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span class="cell-label solace-label">{{ block.settings.solace }}</span>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Solace Comparison",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "THE BETTER CHOICE"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "We stack up against standard factory-produced bands."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "row",
+      "name": "Feature Row",
+      "settings": [
+        { "type": "text", "id": "feature", "label": "Feature Name", "default": "Primary Material" },
+        { "type": "text", "id": "competitor", "label": "Standard Brand Value", "default": "Irritating Silicone" },
+        { "type": "text", "id": "solace", "label": "Solace Value", "default": "Cloud-Woven Elastic" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Solace Comparison" }]
+}
+{% endschema %}

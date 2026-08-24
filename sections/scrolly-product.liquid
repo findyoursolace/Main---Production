@@ -1,0 +1,438 @@
+{% comment %}
+  Section: Scrollytelling
+  - Pinned image + text block
+  - Image animates in (subtle, with fade)
+  - Heading fades in
+  - Each "step" = subheading + body fades in sequentially
+{% endcomment %}
+
+<section
+  id="scrollytelling-{{ section.id }}"
+  class="scrollytelling"
+  style="background-color: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }};"
+>
+  <div class="st-inner">
+    <div class="st-track" data-st-track>
+      <div
+        class="st-layout"
+        style="--st-offset: {{ section.settings.sticky_offset | default: 0 }}px;"
+      >
+        <div class="st-visual">
+          {% assign main_image = section.settings.main_image %}
+          {% if main_image != blank %}
+            <div class="st-image-wrap">
+              {{ main_image | image_url: width: 1600 | image_tag: loading: 'lazy', class: 'st-image' }}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="st-text">
+          {% if section.settings.heading != blank %}
+            <h2 class="st-heading-main">{{ section.settings.heading }}</h2>
+          {% endif %}
+
+          {%- comment -%} First step (lead subheading + body) {%- endcomment -%}
+          {% if section.settings.lead_subheading != blank or section.settings.lead_body != blank %}
+            <div class="st-step">
+              {% if section.settings.lead_subheading != blank %}
+                <p class="st-sub st-sub--lead">{{ section.settings.lead_subheading }}</p>
+              {% endif %}
+              {% if section.settings.lead_body != blank %}
+                <p class="st-body">{{ section.settings.lead_body }}</p>
+              {% endif %}
+            </div>
+          {% endif %}
+
+          {%- comment -%} Additional steps from blocks {%- endcomment -%}
+          {%- for block in section.blocks -%}
+            {% if block.type == 'subheading' %}
+              {% if block.settings.text != blank or block.settings.body != blank %}
+                <div class="st-step" {{ block.shopify_attributes }}>
+                  {% if block.settings.text != blank %}
+                    <p class="st-sub">{{ block.settings.text }}</p>
+                  {% endif %}
+                  {% if block.settings.body != blank %}
+                    <p class="st-body">{{ block.settings.body }}</p>
+                  {% endif %}
+                </div>
+              {% endif %}
+            {% endif %}
+          {%- endfor -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  #scrollytelling-{{ section.id }} {
+    padding: 6rem 1.5rem;
+  }
+
+  #scrollytelling-{{ section.id }} .st-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* Track that GSAP pins */
+  #scrollytelling-{{ section.id }} .st-track {
+    /* ScrollTrigger controls pinning & spacing */
+  }
+
+  #scrollytelling-{{ section.id }} .st-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2rem;
+    padding-top: var(--st-offset, 0px); /* offset for sticky header */
+  }
+
+  /* Image / visual */
+  #scrollytelling-{{ section.id }} .st-visual {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+
+  #scrollytelling-{{ section.id }} .st-image-wrap {
+    width: 70%;
+    max-width: 380px;
+    margin: 0 auto;
+  }
+
+  #scrollytelling-{{ section.id }} .st-image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* Text stack */
+  #scrollytelling-{{ section.id }} .st-text {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  #scrollytelling-{{ section.id }} .st-heading-main {
+    font-size: 2.2rem;
+    line-height: 1.05;
+    margin: 0 0 0.8rem;
+  }
+
+  /* Each "step" (subheading + body) animates as one unit */
+  #scrollytelling-{{ section.id }} .st-step {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    margin-bottom: 0.75rem;
+  }
+
+  #scrollytelling-{{ section.id }} .st-sub,
+  #scrollytelling-{{ section.id }} .st-body {
+    color: {{ section.settings.sub_color }};
+  }
+
+  #scrollytelling-{{ section.id }} .st-sub {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0.25rem 0 0.1rem;
+  }
+
+  #scrollytelling-{{ section.id }} .st-sub--lead {
+    margin-top: 0.4rem;
+  }
+
+  #scrollytelling-{{ section.id }} .st-body {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0;
+    opacity: 0.95;
+  }
+
+  /* Desktop: image left, text right */
+  @media (min-width: 900px) {
+    #scrollytelling-{{ section.id }} .st-layout {
+      flex-direction: row;
+      align-items: center;
+      gap: 3.5rem;
+    }
+
+    #scrollytelling-{{ section.id }} .st-visual {
+      width: 50%;
+      display: flex;
+      justify-content: center;
+    }
+
+    #scrollytelling-{{ section.id }} .st-image-wrap {
+      width: 80%;
+      max-width: 460px;
+      margin: 0;
+    }
+
+    #scrollytelling-{{ section.id }} .st-text {
+      width: 50%;
+      margin: 0;
+    }
+
+    #scrollytelling-{{ section.id }} .st-heading-main {
+      font-size: 2.6rem;
+    }
+  }
+
+  /* Mobile: slightly less top padding so animation feels earlier */
+  @media (max-width: 899px) {
+    #scrollytelling-{{ section.id }} {
+      padding: 4rem 1.5rem 4.5rem;
+    }
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var root = document.getElementById('scrollytelling-{{ section.id }}');
+  if (!root) return;
+
+  var track = root.querySelector('[data-st-track]');
+  var image = root.querySelector('.st-image');
+  var heading = root.querySelector('.st-heading-main');
+  var steps = Array.prototype.slice.call(root.querySelectorAll('.st-step'));
+
+  if (!track || !image) return;
+
+  function initScrollytelling() {
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
+      console.warn('GSAP or ScrollTrigger not available');
+      // Fallback: show everything
+      if (heading) {
+        heading.style.opacity = 1;
+        heading.style.transform = 'none';
+      }
+      steps.forEach(function(step) {
+        step.style.opacity = 1;
+        step.style.transform = 'none';
+      });
+      return;
+    }
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    var isMobile = window.matchMedia('(max-width: 899px)').matches;
+
+    /* ---------------------------------------------------------
+       INITIAL STATES
+       --------------------------------------------------------- */
+
+    if (isMobile) {
+      // ⭐ Mobile: static full image (no intro animation)
+      gsap.set(image, {
+        scale: 1,
+        rotation: 0,
+        yPercent: 0,
+        opacity: 1
+      });
+    } else {
+      // ⭐ Desktop: animated subtle intro
+      gsap.set(image, {
+        scale: 0.9,
+        rotation: -3,
+        yPercent: 2,
+        opacity: 0.25
+      });
+    }
+
+    if (heading) {
+      gsap.set(heading, {
+        opacity: 0,
+        y: 20
+      });
+    }
+
+    steps.forEach(function(step) {
+      gsap.set(step, { opacity: 0, y: 20 });
+    });
+
+    /* ---------------------------------------------------------
+       TIMELINE
+       --------------------------------------------------------- */
+
+    var stepCount = steps.length;
+    var baseDistance = 800;
+    var perStep = 300;
+    var totalDistance = baseDistance + stepCount * perStep;
+
+    var tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: track,
+        start: 'top top',
+        end: '+=' + totalDistance,
+        scrub: true,
+        pin: true,
+        anticipatePin: 1
+      }
+    });
+
+    // ----------------------
+    // IMAGE INTRO
+    // ----------------------
+
+    if (!isMobile) {
+      // ⭐ Desktop only image animation
+      tl.to(image, {
+        scale: 1,
+        rotation: 0,
+        yPercent: 0,
+        opacity: 1,
+        ease: 'power2.out',
+        duration: 0.35
+      });
+    }
+    // ⭐ Mobile: skip image intro entirely
+
+
+    // ----------------------
+    // HEADING FADE-IN
+    // ----------------------
+    if (heading) {
+      tl.to(heading, {
+        opacity: 1,
+        y: 0,
+        ease: 'power2.out',
+        duration: 0.3
+      }, isMobile ? 0 : '>-0.1');  
+      // Mobile: heading appears immediately at scroll start
+    }
+
+    // ----------------------
+    // STEPS FADE-IN
+    // ----------------------
+    if (steps.length) {
+      tl.to(steps, {
+        opacity: 1,
+        y: 0,
+        ease: 'power2.out',
+        duration: 0.3,
+        stagger: { each: 0.4 }
+      }, '>');
+    }
+
+    // ScrollTrigger will unpin at end
+  }
+
+  function loadScript(src, callback) {
+    var existing = document.querySelector('script[src="' + src + '"]');
+    if (existing) {
+      if (callback) {
+        if (existing.dataset.loaded === 'true') {
+          callback();
+        } else {
+          existing.addEventListener('load', callback);
+        }
+      }
+      return;
+    }
+    var script = document.createElement('script');
+    script.src = src;
+    script.async = true;
+    if (callback) {
+      script.onload = function() {
+        script.dataset.loaded = 'true';
+        callback();
+      };
+    }
+    document.head.appendChild(script);
+  }
+
+  if (typeof gsap === 'undefined') {
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js', function() {
+      loadScript('https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js', initScrollytelling);
+    });
+  } else if (typeof ScrollTrigger === 'undefined') {
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js', initScrollytelling);
+  } else {
+    initScrollytelling();
+  }
+});
+</script>
+
+
+{% schema %}
+{
+  "name": "Scrollytelling",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "main_image",
+      "label": "Main image"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "lead_subheading",
+      "label": "First subheading",
+      "default": "Subheading"
+    },
+    {
+      "type": "textarea",
+      "id": "lead_body",
+      "label": "First body text",
+      "default": "Body text explaining the first point."
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Heading color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "sub_color",
+      "label": "Subheading & body text color",
+      "default": "#000000"
+    },
+    {
+      "type": "number",
+      "id": "sticky_offset",
+      "label": "Sticky top offset (px)",
+      "default": 80,
+      "info": "Approximate height of your sticky header so the pinned content sits below it."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "subheading",
+      "name": "Additional step",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Subheading text",
+          "default": "Subheading 2"
+        },
+        {
+          "type": "textarea",
+          "id": "body",
+          "label": "Body text",
+          "default": "More detail about this step."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Scrollytelling",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}

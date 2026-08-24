@@ -1,0 +1,823 @@
+{% doc %}
+  @prompt
+    An us vs them table showing columns for features, us with our logo, and them.
+    the ability to add feature rows with text descriptions and checkmark or x svgs for us and them.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-comparison-table-{{ ai_gen_id }} {
+    width: 100%;
+    overflow-x: auto;
+    padding: {{ block.settings.section_padding }}px 0;
+  }
+
+  .ai-comparison-table__wrapper-{{ ai_gen_id }} {
+    min-width: 100%;
+    background-color: {{ block.settings.background_color }};
+    border-radius: {{ block.settings.border_radius }}px;
+    overflow: hidden;
+  }
+
+  .ai-comparison-table__table-{{ ai_gen_id }} {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .ai-comparison-table__header-{{ ai_gen_id }} {
+    background-color: {{ block.settings.header_background }};
+  }
+
+  .ai-comparison-table__header-cell-{{ ai_gen_id }} {
+    padding: {{ block.settings.cell_padding }}px;
+    text-align: center;
+    border-bottom: {{ block.settings.border_width }}px solid {{ block.settings.border_color }};
+    font-weight: 600;
+    color: {{ block.settings.header_text_color }};
+  }
+
+  .ai-comparison-table__header-cell-{{ ai_gen_id }}:first-child {
+    text-align: left;
+    width: 40%;
+  }
+
+  .ai-comparison-table__header-cell-{{ ai_gen_id }}:not(:first-child) {
+    width: 30%;
+  }
+
+  .ai-comparison-table__logo-{{ ai_gen_id }} {
+    max-width: {{ block.settings.logo_width }}px;
+    height: auto;
+    display: inline-block;
+  }
+
+  .ai-comparison-table__header-text-{{ ai_gen_id }} {
+    font-size: {{ block.settings.header_font_size }}px;
+    font-weight: 700;
+  }
+
+  .ai-comparison-table__row-{{ ai_gen_id }} {
+    border-bottom: {{ block.settings.border_width }}px solid {{ block.settings.border_color }};
+  }
+
+  .ai-comparison-table__row-{{ ai_gen_id }}:last-child {
+    border-bottom: none;
+  }
+
+  .ai-comparison-table__row-{{ ai_gen_id }}:nth-child(even) {
+    background-color: {{ block.settings.row_alternate_bg }};
+  }
+
+  .ai-comparison-table__cell-{{ ai_gen_id }} {
+    padding: {{ block.settings.cell_padding }}px;
+    text-align: center;
+    color: {{ block.settings.text_color }};
+    font-size: {{ block.settings.text_font_size }}px;
+  }
+
+  .ai-comparison-table__cell-{{ ai_gen_id }}:first-child {
+    text-align: left;
+    font-weight: 500;
+  }
+
+  .ai-comparison-table__icon-{{ ai_gen_id }} {
+    width: {{ block.settings.icon_size }}px;
+    height: {{ block.settings.icon_size }}px;
+    display: inline-block;
+  }
+
+  .ai-comparison-table__checkmark-{{ ai_gen_id }} {
+    color: {{ block.settings.checkmark_color }};
+  }
+
+  .ai-comparison-table__x-{{ ai_gen_id }} {
+    color: {{ block.settings.x_color }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-comparison-table__header-cell-{{ ai_gen_id }}:first-child {
+      width: 50%;
+    }
+
+    .ai-comparison-table__header-cell-{{ ai_gen_id }}:not(:first-child) {
+      width: 25%;
+    }
+
+    .ai-comparison-table__logo-{{ ai_gen_id }} {
+      max-width: {{ block.settings.logo_width | times: 0.7 }}px;
+    }
+
+    .ai-comparison-table__header-text-{{ ai_gen_id }} {
+      font-size: {{ block.settings.header_font_size | times: 0.85 }}px;
+    }
+
+    .ai-comparison-table__cell-{{ ai_gen_id }} {
+      font-size: {{ block.settings.text_font_size | times: 0.9 }}px;
+      padding: {{ block.settings.cell_padding | times: 0.75 }}px;
+    }
+
+    .ai-comparison-table__icon-{{ ai_gen_id }} {
+      width: {{ block.settings.icon_size | times: 0.8 }}px;
+      height: {{ block.settings.icon_size | times: 0.8 }}px;
+    }
+  }
+
+
+  /* Make the app block wrapper full-width inside the layout section */
+  #shopify-block-{{ block.id }} {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* If the section uses flexbox for children, force this one to stretch */
+  @media screen and (min-width: 750px) {
+    #shopify-block-{{ block.id }} {
+      flex: 1 1 100%;
+    }
+  }
+
+  .ai-comparison-table-{{ ai_gen_id }} {
+    width: 100%;
+    overflow-x: auto;
+    padding: {{ block.settings.section_padding }}px 0;
+  }
+
+  .ai-comparison-table__wrapper-{{ ai_gen_id }} {
+    width: 100%;
+    background-color: {{ block.settings.background_color }};
+    border-radius: {{ block.settings.border_radius }}px;
+    overflow: hidden;
+  }
+{% endstyle %}
+
+<div class="ai-comparison-table-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-comparison-table__wrapper-{{ ai_gen_id }}">
+    <table class="ai-comparison-table__table-{{ ai_gen_id }}">
+      <thead class="ai-comparison-table__header-{{ ai_gen_id }}">
+        <tr>
+          <th class="ai-comparison-table__header-cell-{{ ai_gen_id }}">
+            {% if block.settings.features_heading != blank %}
+              <span class="ai-comparison-table__header-text-{{ ai_gen_id }}">{{ block.settings.features_heading }}</span>
+            {% endif %}
+          </th>
+          <th class="ai-comparison-table__header-cell-{{ ai_gen_id }}">
+            {% if block.settings.us_logo %}
+              <img
+                src="{{ block.settings.us_logo | image_url: width: 400 }}"
+                alt="{{ block.settings.us_logo.alt | escape }}"
+                class="ai-comparison-table__logo-{{ ai_gen_id }}"
+                loading="lazy"
+                width="{{ block.settings.us_logo.width }}"
+                height="{{ block.settings.us_logo.height }}"
+              >
+            {% elsif block.settings.us_heading != blank %}
+              <span class="ai-comparison-table__header-text-{{ ai_gen_id }}">{{ block.settings.us_heading }}</span>
+            {% endif %}
+          </th>
+          <th class="ai-comparison-table__header-cell-{{ ai_gen_id }}">
+            {% if block.settings.them_heading != blank %}
+              <span class="ai-comparison-table__header-text-{{ ai_gen_id }}">{{ block.settings.them_heading }}</span>
+            {% endif %}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in (1..10) %}
+          {% liquid
+            assign feature_key = 'feature_' | append: i
+            assign us_key = 'feature_' | append: i | append: '_us'
+            assign them_key = 'feature_' | append: i | append: '_them'
+
+            assign feature_text = block.settings[feature_key]
+            assign us_value = block.settings[us_key]
+            assign them_value = block.settings[them_key]
+          %}
+
+          {% if feature_text != blank %}
+            <tr class="ai-comparison-table__row-{{ ai_gen_id }}">
+              <td class="ai-comparison-table__cell-{{ ai_gen_id }}">{{ feature_text }}</td>
+              <td class="ai-comparison-table__cell-{{ ai_gen_id }}">
+                {% if us_value == 'check' %}
+                  <span class="ai-comparison-table__icon-{{ ai_gen_id }} ai-comparison-table__checkmark-{{ ai_gen_id }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </span>
+                {% elsif us_value == 'x' %}
+                  <span class="ai-comparison-table__icon-{{ ai_gen_id }} ai-comparison-table__x-{{ ai_gen_id }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </span>
+                {% endif %}
+              </td>
+              <td class="ai-comparison-table__cell-{{ ai_gen_id }}">
+                {% if them_value == 'check' %}
+                  <span class="ai-comparison-table__icon-{{ ai_gen_id }} ai-comparison-table__checkmark-{{ ai_gen_id }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </span>
+                {% elsif them_value == 'x' %}
+                  <span class="ai-comparison-table__icon-{{ ai_gen_id }} ai-comparison-table__x-{{ ai_gen_id }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Comparison table",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Table headers"
+    },
+    {
+      "type": "text",
+      "id": "features_heading",
+      "label": "Features column heading",
+      "default": "Features"
+    },
+    {
+      "type": "image_picker",
+      "id": "us_logo",
+      "label": "Your logo"
+    },
+    {
+      "type": "text",
+      "id": "us_heading",
+      "label": "Your brand heading",
+      "default": "Us",
+      "info": "Shown if no logo is uploaded"
+    },
+    {
+      "type": "text",
+      "id": "them_heading",
+      "label": "Competitor heading",
+      "default": "Them"
+    },
+    {
+      "type": "header",
+      "content": "Feature 1"
+    },
+    {
+      "type": "text",
+      "id": "feature_1",
+      "label": "Feature description",
+      "default": "Premium materials"
+    },
+    {
+      "type": "select",
+      "id": "feature_1_us",
+      "label": "Your brand",
+      "options": [
+        {
+          "value": "check",
+          "label": "Checkmark"
+        },
+        {
+          "value": "x",
+          "label": "X"
+        }
+      ],
+      "default": "check"
+    },
+    {
+      "type": "select",
+      "id": "feature_1_them",
+      "label": "Competitor",
+      "options": [
+        {
+          "value": "check",
+          "label": "Checkmark"
+        },
+        {
+          "value": "x",
+          "label": "X"
+        }
+      ],
+      "default": "x"
+    },
+    {
+      "type": "header",
+      "content": "Feature 2"
+    },
+    {
+      "type": "text",
+      "id": "feature_2",
+      "label": "Feature description",
+      "default": "Lifetime warranty"
+    },
+    {
+      "type": "select",
+      "id": "feature_2_us",
+      "label": "Your brand",
+      "options": [
+        {
+          "value": "check",
+          "label": "Checkmark"
+        },
+        {
+          "value": "x",
+          "label": "X"
+        }
+      ],
+      "default": "check"
+    },
+    {
+      "type": "select",
+      "id": "feature_2_them",
+      "label": "Competitor",
+      "options": [
+        {
+          "value": "check",
+          "label": "Checkmark"
+        },
+        {
+          "value": "x",
+          "label": "X"
+        }
+      ],
+      "default": "x"
+    },
+    {
+      "type": "header",
+      "content": "Feature 3"
+    },
+    {
+      "type": "text",
+      "id": "feature_3",
+      "label": "Feature description",
+      "default": "Free shipping"
+    },
+    {
+      "type": "select",
+      "id": "feature_3_us",
+      "label": "Your brand",
+      "options": [
+        {
+          "value": "check",
+          "label": "Checkmark"
+        },
+        {
+          "value": "x",
+          "label": "X"
+        }
+      ],
+      "default": "check"
+    },
+    {
+      "type": "select",
+      "id": "feature_3_them",
+      "label": "Competitor",
+      "options": [
+        {
+          "value": "check",
+          "label": "Checkmark"
+        },
+        {
+          "value": "x",
+          "label": "X"
+        }
+      ],
+      "default": "x"
+    },
+    {
+      "type": "header",
+      "content": "Feature 4"
+    },
+    {
+      "type": "text",
+      "id": "feature_4",
+      "label": "Feature description"
+    },
+    {
+      "type": "select",
+      "id": "feature_4_us",
+      "label": "Your brand",
+      "options": [
+        {
+          "value": "check",
+          "label": "Checkmark"
+        },
+        {
+          "value": "x",
+          "label": "X"
+        }
+      ],
+      "default": "check"
+    },
+    {
+      "type": "select",
+      "id": "feature_4_them",
+      "label": "Competitor",
+      "options": [
+        {
+          "value": "check",
+          "label": "Checkmark"
+        },
+        {
+          "value": "x",
+          "label": "X"
+        }
+      ],
+      "default": "x"
+    },
+    {
+      "type": "header",
+      "content": "Feature 5"
+    },
+    {
+      "type": "text",
+      "id": "feature_5",
+      "label": "Feature description"
+    },
+    {
+      "type": "select",
+      "id": "feature_5_us",
+      "label": "Your brand",
+      "options": [
+        {
+          "value": "check",
+          "label": "Checkmark"
+        },
+        {
+          "value": "x",
+          "label": "X"
+        }
+      ],
+      "default": "check"
+    },
+    {
+      "type": "select",
+      "id": "feature_5_them",
+      "label": "Competitor",
+      "options": [
+        {
+          "value": "check",
+          "label": "Checkmark"
+        },
+        {
+          "value": "x",
+          "label": "X"
+        }
+      ],
+      "default": "x"
+    },
+    {
+      "type": "header",
+      "content": "Feature 6"
+    },
+    {
+      "type": "text",
+      "id": "feature_6",
+      "label": "Feature description"
+    },
+    {
+      "type": "select",
+      "id": "feature_6_us",
+      "label": "Your brand",
+      "options": [
+        {
+          "value": "check",
+          "label": "Checkmark"
+        },
+        {
+          "value": "x",
+          "label": "X"
+        }
+      ],
+      "default": "check"
+    },
+    {
+      "type": "select",
+      "id": "feature_6_them",
+      "label": "Competitor",
+      "options": [
+        {
+          "value": "check",
+          "label": "Checkmark"
+        },
+        {
+          "value": "x",
+          "label": "X"
+        }
+      ],
+      "default": "x"
+    },
+    {
+      "type": "header",
+      "content": "Feature 7"
+    },
+    {
+      "type": "text",
+      "id": "feature_7",
+      "label": "Feature description"
+    },
+    {
+      "type": "select",
+      "id": "feature_7_us",
+      "label": "Your brand",
+      "options": [
+        {
+          "value": "check",
+          "label": "Checkmark"
+        },
+        {
+          "value": "x",
+          "label": "X"
+        }
+      ],
+      "default": "check"
+    },
+    {
+      "type": "select",
+      "id": "feature_7_them",
+      "label": "Competitor",
+      "options": [
+        {
+          "value": "check",
+          "label": "Checkmark"
+        },
+        {
+          "value": "x",
+          "label": "X"
+        }
+      ],
+      "default": "x"
+    },
+    {
+      "type": "header",
+      "content": "Feature 8"
+    },
+    {
+      "type": "text",
+      "id": "feature_8",
+      "label": "Feature description"
+    },
+    {
+      "type": "select",
+      "id": "feature_8_us",
+      "label": "Your brand",
+      "options": [
+        {
+          "value": "check",
+          "label": "Checkmark"
+        },
+        {
+          "value": "x",
+          "label": "X"
+        }
+      ],
+      "default": "check"
+    },
+    {
+      "type": "select",
+      "id": "feature_8_them",
+      "label": "Competitor",
+      "options": [
+        {
+          "value": "check",
+          "label": "Checkmark"
+        },
+        {
+          "value": "x",
+          "label": "X"
+        }
+      ],
+      "default": "x"
+    },
+    {
+      "type": "header",
+      "content": "Feature 9"
+    },
+    {
+      "type": "text",
+      "id": "feature_9",
+      "label": "Feature description"
+    },
+    {
+      "type": "select",
+      "id": "feature_9_us",
+      "label": "Your brand",
+      "options": [
+        {
+          "value": "check",
+          "label": "Checkmark"
+        },
+        {
+          "value": "x",
+          "label": "X"
+        }
+      ],
+      "default": "check"
+    },
+    {
+      "type": "select",
+      "id": "feature_9_them",
+      "label": "Competitor",
+      "options": [
+        {
+          "value": "check",
+          "label": "Checkmark"
+        },
+        {
+          "value": "x",
+          "label": "X"
+        }
+      ],
+      "default": "x"
+    },
+    {
+      "type": "header",
+      "content": "Feature 10"
+    },
+    {
+      "type": "text",
+      "id": "feature_10",
+      "label": "Feature description"
+    },
+    {
+      "type": "select",
+      "id": "feature_10_us",
+      "label": "Your brand",
+      "options": [
+        {
+          "value": "check",
+          "label": "Checkmark"
+        },
+        {
+          "value": "x",
+          "label": "X"
+        }
+      ],
+      "default": "check"
+    },
+    {
+      "type": "select",
+      "id": "feature_10_them",
+      "label": "Competitor",
+      "options": [
+        {
+          "value": "check",
+          "label": "Checkmark"
+        },
+        {
+          "value": "x",
+          "label": "X"
+        }
+      ],
+      "default": "x"
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "header_background",
+      "label": "Header background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "header_text_color",
+      "label": "Header text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "row_alternate_bg",
+      "label": "Alternate row background",
+      "default": "#fafafa"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "color",
+      "id": "checkmark_color",
+      "label": "Checkmark",
+      "default": "#008060"
+    },
+    {
+      "type": "color",
+      "id": "x_color",
+      "label": "X mark",
+      "default": "#d82c0d"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "label": "Border width",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "cell_padding",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Cell padding",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "label": "Section padding",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "min": 40,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Logo width",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "header_font_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Header font size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "text_font_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Text font size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "min": 16,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Icon size",
+      "default": 24
+    }
+  ],
+  "presets": [
+    {
+      "name": "Comparison table"
+    }
+  ]
+}
+{% endschema %}

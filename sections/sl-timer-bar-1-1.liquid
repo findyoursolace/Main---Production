@@ -1,0 +1,607 @@
+<div class='sl-brandstyle-12ab3e12-0324-4e6f-aae1-e5bf60efcd7b'>
+<div class='sl-pattern-030b88c9-c124-41c0-9f6b-c0a503753426{{ section.settings.pattern_select }} sl-pattern-{{ section.settings.pattern_select }}'>
+{{ 'shoplift.css' | asset_url | stylesheet_tag }}
+{% render 'sl-bar-styling' with section.settings as section_settings, section_id: section.id, universal_custom_colors: true %}
+
+{{ 'https://unicons.iconscout.com/release/v4.0.0/css/line.css' | stylesheet_tag }}
+
+{% style %}
+    #shoplift--{{ section.id }} .sl-timer-order-controller {
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+        flex-direction: column;
+    }
+
+    #shoplift--{{ section.id }} .offer__secondary {
+        {% case section.settings.timer_position %}
+            {% when "below_message" %}
+                margin: 10px 0;
+            {% when "above_message" %}
+                margin: 10px 0;
+            {% when "left_message" %}
+                margin: 0px 2.5rem;
+            {% when "right_message" %}
+                margin: 0px 2.5rem;
+        {% endcase %}
+    }
+
+    #shoplift--{{ section.id }} .offer__container {
+        font-weight: bold;
+        {% if section.settings.timer_position == "left_message" or section.settings.timer_position == "right_message" %}
+            width: unset;
+        {% endif %}
+    }
+
+    @media screen and (max-width: 749px) {
+        #shoplift--{{ section.id }} .sl-timer-order-controller {
+            {% case section.settings.timer_position %}
+                {% when "below_message" %}
+                    flex-direction: column;
+                {% when "above_message" %}
+                    flex-direction: column-reverse;
+                {% when "left_message" %}
+                    flex-direction: column-reverse;
+                {% when "right_message" %}
+                    flex-direction: column;
+            {% endcase %}
+        }
+    }
+{% endstyle %}
+
+{% liquid
+    assign using_date = section.settings.offer_countdown_date
+    assign invalid_date = false
+    if section.settings.offer_countdown_date == blank
+        assign invalid_date = true
+        assign using_date = "invalid"
+    endif
+
+    assign time = section.settings.offer_countdown_time
+    if section.settings.offer_countdown_time == blank
+        assign time = '0:00'
+    else
+        assign timezone = ""
+        if time contains "+" or time contains "-"
+            if time contains "+"
+                assign offsetSign = "+"
+            else
+                assign offsetSign = "-"
+            endif
+            assign timezone = time | split: offsetSign | last
+            assign time = time | split: offsetSign | first
+        endif
+        assign hour = time | split: ':' | first
+        assign minute = time | replace: ' ', '' | replace: 'PM', '' | replace: 'AM', '' | split: ':' | last
+        if time contains 'AM'
+            if hour == "12"
+                assign hour = "00"
+            endif
+        else
+            if hour != "12"
+                assign hour = hour | plus: 12
+            endif
+        endif
+        assign time = hour | append: ':' | append: minute | append: offsetSign | append: timezone
+    endif
+
+    assign extra_classes = " "
+
+    unless section.settings.text_color == "rgba(0,0,0,0)" or section.settings.text_color == "transparent"
+        assign extra_classes = extra_classes | append: " custom_color"
+    endunless
+
+    unless section.settings.background_color == "rgba(0,0,0,0)" or section.settings.background_color == "transparent"
+        assign extra_classes = extra_classes | append: " custom_bg"
+    endunless
+
+    unless section.settings.border_color == "rgba(0,0,0,0)" or section.settings.border_color == "transparent"
+        assign extra_classes = extra_classes | append: " custom_border"
+    endunless
+
+    unless section.settings.custom_timer_color == "rgba(0,0,0,0)" or section.settings.custom_timer_color == "transparent"
+        assign extra_classes = extra_classes | append: " custom_timer_color"
+    endunless
+%}
+
+<!-- {{using_date}} {{ today_date }} {{ pre_date }} {{ section.settings.offer_countdown_date | date: '%s' }} -->
+
+{% if invalid_date == false %}
+<section id="shoplift--{{ section.id }}" class="shoplift-offer--bar{{extra_classes}} sl-section">
+    <div class="offer-bar__content shoplift-offer--timer-bar">
+        {% if section.settings.message_link %}
+        <a href="{{ section.settings.message_link }}" class="message__link height__controller sl-timer-order-controller">
+        {% else %}
+        <span class="message__link height__controller sl-timer-order-controller">
+        {% endif %}
+        <div class="offer__container">
+            <div class="banner__heading banner__heading--{{ section.settings.text_size }} sl-font-style--{{section.settings.font_style}}">
+                {% if section.settings.message_icon != "" %}
+                    <i class="sl-message-icon uil uil-{{ section.settings.message_icon }}" aria-label="Icon {{section.settings.message_icon}}"></i>
+                {% endif %}
+                <span>
+                    {% if section.settings.strikethrough_text != blank %}
+                        {% capture strikeHtml %}<s>{{ section.settings.strikethrough_text }}</s>{% endcapture %}
+                        {{ section.settings.headline_text | replace: section.settings.strikethrough_text, strikeHtml }}
+                    {% else %}
+                        {{ section.settings.headline_text }}
+                    {% endif %}
+                </span>
+                {% if section.settings.message_link %}
+                    {% if section.settings.link_style == 'arrow' %}
+                        <span class="sl-arrow-caret" aria-hidden>
+                        <svg width="20" height="16" viewBox="0 0 20 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="m -2,7.00008 v 2 H 14 L 8.5,14.5001 9.92,15.9201 17.84,8.00008 9.92,0.0800781 8.5,1.50008 l 5.5,5.5 z" fill="currentColor"/>
+                        </svg>
+                        </span>
+                    {% else %}
+                        <span class="banner__heading__cta {% if section.settings.use_caps %}banner__heading__cta--uppercase{% endif %}">Shop Now</span>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        <div class="offer__secondary">
+        {% render 'sl-timer-bar__countdown',
+            block_id: section.id
+            section_id: section.id
+            countdown_date: using_date,
+            countdown_time: time,
+            timer_design: section.settings.timer_design
+            timer_alignment: section.settings.timer_alignment
+            custom_bg_color: section.settings.custom_bg_color
+            custom_number_color: section.settings.custom_timer_color
+            custom_label_color: section.settings.custom_timer_color
+            timer_size: section.settings.timer_size
+            label_size: section.settings.label_size
+            mobile_label_size: section.settings.mobile_label_size
+        %}
+        </div>
+        {% if section.settings.message_link %}
+        </a>
+        {% else %}
+        </span>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
+{% if hide_timer and request.design_mode and invalid_date == true %}
+    <div>
+        Timer is in invalid format. Please use format of "YYYY-MM-DD", e.g. "2023-01-15". This text can be seen only in the theme editor.
+    </div>
+{% endif%}
+{% if hide_timer and request.design_mode and invalid_date != true %}
+    <div>
+        Timer has run out (target {{ section.settings.offer_countdown_date | date: '%Y-%m-%d' }} vs now {{ 'now' | date: '%Y-%m-%d' }}), preview unavailable. This text can be seen only in the theme editor.
+    </div>
+{% endif%}
+
+<script>
+{% if section.settings.sticky_on_scroll == true %}
+    window.addEventListener('load', (event) => {
+        const thisHeader = document.querySelector('.shoplift-offerbar-timed-wrapper');
+        thisHeader.classList.add("shoplift-offer-bar-sticky");
+
+        const mainHeader = document.querySelector('#shopify-section-header > sticky-header');
+        const offerBar = document.querySelector('.shoplift-offerbar-wrapper');
+        const benefitBar = document.querySelector('.shoplift-offerbar-benefit-wrapper');
+
+        const mainInitialTop = mainHeader.offsetTop;
+        const stickyStart = mainHeader ? (mainHeader.offsetTop + mainHeader.clientHeight + 1) : 0;
+        let lastScroll = window.scrollY;
+        document.addEventListener("scroll", (scrollEvent) => {
+            if (!thisHeader) return;
+
+            // Do it quick and dirty
+            const mainHidden = mainHeader && (window.scrollY > lastScroll);
+            lastScroll = window.scrollY;
+
+            const makeSticky = window.pageYOffset > stickyStart || mainHeader && window.pageYOffset > mainInitialTop && mainHeader.parentElement.classList.contains("shopify-section-header-sticky");
+
+            thisHeader.classList.toggle("shoplift-offer-bar-sticky", makeSticky);
+
+            if (!makeSticky) return;
+
+            let topPosition = 0;
+
+            if (mainHeader && !mainHidden)
+                topPosition += mainHeader.clientHeight;
+
+            if (offerBar && offerBar.classList.contains('shoplift-offer-bar-sticky'))
+                topPosition += offerBar.clientHeight;
+
+            if (benefitBar && benefitBar.classList.contains('shoplift-offer-bar-sticky'))
+                topPosition += benefitBar.clientHeight;
+
+            thisHeader.style.top = topPosition + "px";
+        });
+    });
+{% endif %}
+</script>
+
+{% schema %}
+{
+    "name": "⚡ Timed message bar 1.1",
+    "class": "shoplift-offerbar-timed-wrapper",
+    "limit": 1,
+    "settings": [
+        {
+            "type": "select",
+            "id": "devices",
+            "label": "Show on",
+            "options": [
+                {
+                    "value": "all",
+                    "label": "All devices"
+                },
+                {
+                    "value": "desktop",
+                    "label": "Desktop only"
+                },
+                {
+                    "value": "mobile",
+                    "label": "Mobile only"
+                }
+            ],
+            "default": "all"
+        },
+        {
+            "type": "checkbox",
+            "id": "sticky_on_scroll",
+            "label": "Sticky on scroll",
+            "default": true,
+            "info": "Save your changes to see your edits apply"
+        },
+        {
+            "type": "text",
+            "id": "headline_text",
+            "label": "Message text",
+            "default": "Get 50% off this week only"
+        },
+        {
+            "type": "text",
+            "id": "strikethrough_text",
+            "label": "Strikethrough text",
+            "info": "Strike through specific text in your message for sale prices"
+        },
+        {
+            "type": "url",
+            "id": "message_link",
+            "label": "Message link"
+        },
+        {
+            "type": "select",
+            "id": "link_style",
+            "label": "Link style",
+            "options": [
+                {
+                    "value": "arrow",
+                    "label": "Arrow"
+                },
+                {
+                    "value": "call_to_action",
+                    "label": "Call to action"
+                }
+            ],
+            "default": "arrow"
+        },
+        {
+            "type": "checkbox",
+            "id": "use_caps",
+            "label": "Use ALL CAPS for call to action link style",
+            "default": true
+        },
+        {
+            "type": "text",
+            "id": "message_icon",
+            "label": "Message icon",
+            "placeholder": "icon-name",
+            "info": "To add an icon, copy the icon namer from the [Unicons library](https://iconscout.com/unicons/explore/line)",
+            "default": "icon-name"
+        },
+        {
+            "type": "text",
+            "id": "offer_countdown_date",
+            "label": "Timer countdown date",
+            "default": "2025-12-31",
+            "info": "Enter your date in YYYY-MM-DD format. Save to refresh the editor and preview. Timer bar will auto-hide when timer runs out."
+        },
+        {
+          "type": "text",
+          "label": "Timer countdown time",
+          "id": "offer_countdown_time",
+          "default": "12:00 AM -05:00",
+          "info": "Please use the following format HH:MM AM/PM +/-00:00 to define the exact time and timezone. For example, use 12:00 AM -05:00 to define midnight, Eastern Time (ET). Save to refresh the editor and preview."
+        },
+{
+          "type": "select",
+          "id": "pattern_select",
+          "label": "Pattern",
+          "info": "To edit your color schemes, visit your Brand Styles settings",
+          "options": [
+{
+                "value":"030b88c9-c124-41c0-9f6b-c0a503753426",
+                "label": "Content Pattern 1"
+            },
+{
+                "value":"031dc0eb-9ff5-4f3e-a43b-80141dba8e2a",
+                "label": "Content Pattern 5"
+            },
+{
+                "value":"037845d0-f229-4b1d-98d3-c4a580a368f1",
+                "label": "Product Pattern 3"
+            },
+{
+                "value":"2fbb74f1-8c29-4d52-8321-212eb4a5b8f9",
+                "label": "Content Pattern 2"
+            },
+{
+                "value":"50bf852e-7209-47ea-9068-63433d1b422d",
+                "label": "Content Pattern 4"
+            },
+{
+                "value":"6725723a-8483-4440-8c9a-6591f0859d77",
+                "label": "Product Pattern 2"
+            },
+{
+                "value":"7a47b688-19ea-4ff4-9079-46209f56f078",
+                "label": "Highlight Pattern 1"
+            },
+{
+                "value":"d626eb1a-e38a-4227-926e-e15c97115aca",
+                "label": "Content Pattern 3"
+            },
+{
+                "value":"e9db91aa-5066-49a3-b711-a7147ae23efa",
+                "label": "Product Pattern 1"
+            }
+]},
+
+        {
+          "type": "select",
+          "id": "bar_height",
+          "label": "Bar height",
+          "info": "Minimum height of the bar. Actual height could be higher to fit the content",
+          "options": [
+              {
+                  "value": "large",
+                  "label": "Large"
+              },
+              {
+                  "value": "medium",
+                  "label": "Medium"
+              },
+              {
+                  "value": "small",
+                  "label": "Small"
+              }
+          ],
+          "default": "medium"
+        },
+        {
+            "type": "select",
+            "id": "text_size",
+            "label": "Message text size",
+            "options": [
+                {
+                    "value": "large",
+                    "label": "Large"
+                },
+                {
+                    "value": "medium",
+                    "label": "Medium"
+                },
+                {
+                    "value": "small",
+                    "label": "Small"
+                }
+            ],
+            "default": "medium"
+        },
+        {
+            "type": "select",
+            "id": "font_style",
+            "label": "Message font style",
+            "options": [
+                {
+                    "value": "title",
+                    "label": "Title"
+                },
+                {
+                    "value": "body",
+                    "label": "Body"
+                },
+                {
+                    "value": "button",
+                    "label": "Button"
+                },
+                {
+                    "value": "label",
+                    "label": "Label"
+                }
+            ],
+            "default": "body"
+        },
+        {
+            "type": "select",
+            "id": "timer_size",
+            "label": "Timer size",
+            "options": [
+                {
+                    "value": "large",
+                    "label": "Large"
+                },
+                {
+                    "value": "medium",
+                    "label": "Medium"
+                },
+                {
+                    "value": "small",
+                    "label": "Small"
+                }
+            ],
+            "default": "medium"
+        },
+        {
+            "type": "select",
+            "id": "timer_font_style",
+            "label": "Timer font style",
+            "options": [
+                {
+                    "value": "heading",
+                    "label": "Title"
+                },
+                {
+                    "value": "body",
+                    "label": "Body"
+                },
+                {
+                    "value": "accent",
+                    "label": "Button"
+                },
+                {
+                    "value": "subheading",
+                    "label": "Label"
+                }
+            ],
+            "default": "body"
+        },
+        {
+            "type": "select",
+            "id": "label_font_style",
+            "label": "Label font style",
+            "options": [
+                {
+                    "value": "heading",
+                    "label": "Title"
+                },
+                {
+                    "value": "body",
+                    "label": "Body"
+                },
+                {
+                    "value": "accent",
+                    "label": "Button"
+                },
+                {
+                    "value": "subheading",
+                    "label": "Label"
+                }
+            ],
+            "default": "subheading"
+        },
+        {
+            "type": "select",
+            "id": "border_type",
+            "label": "Section Border",
+            "options": [
+                {
+                    "value": "brand_style",
+                    "label": "Match Brand Styles"
+                },
+                {
+                    "value": "none",
+                    "label": "Don't show"
+                },
+                {
+                    "value": "bottom",
+                    "label": "Bottom"
+                },
+                {
+                    "value": "all",
+                    "label": "All"
+                }
+            ],
+            "default": "brand_style"
+        },
+        {
+            "type": "header",
+            "content": "Mobile"
+        },
+        {
+          "type": "select",
+          "id": "mobile_bar_height",
+          "label": "Bar height",
+          "options": [
+              {
+                  "value": "match_desktop",
+                  "label": "Match desktop"
+              },
+              {
+                  "value": "large",
+                  "label": "Large"
+              },
+              {
+                  "value": "medium",
+                  "label": "Medium"
+              },
+              {
+                  "value": "small",
+                  "label": "Small"
+              }
+          ],
+          "default": "match_desktop"
+        },
+        {
+            "type": "select",
+            "id": "mobile_text_size",
+            "label": "Text size",
+            "options": [
+                {
+                    "value": "match_desktop",
+                    "label": "Match Desktop"
+                },
+                {
+                    "value": "large",
+                    "label": "Large"
+                },
+                {
+                    "value": "medium",
+                    "label": "Medium"
+                },
+                {
+                    "value": "small",
+                    "label": "Small"
+                }
+            ],
+            "default": "match_desktop"
+        },
+        {
+            "type": "header",
+            "content": "Custom Colors",
+            "info": "These color pickers allow you to deviate from your Brand Styles color schemes. To revert to a preset color scheme, remove the hex code below."
+        },
+        {
+            "type": "color",
+            "id": "background_color",
+            "label": "Background color",
+            "default": "transparent"
+        },
+        {
+            "type": "color",
+            "id": "text_color",
+            "label": "Text color",
+            "default": "transparent"
+        },
+        {
+            "type": "color",
+            "id": "border_color",
+            "label": "Border color",
+            "default": "transparent"
+        },
+        {
+            "type": "color",
+            "id": "custom_timer_color",
+            "label": "Timer color",
+            "default": "transparent"
+        }
+    ],
+    "presets": [
+        {
+            "name": "⚡ Timed message bar 1.1"
+        }
+    ]
+}
+{% endschema %}
+
+</div>
+</div>

@@ -1,0 +1,165 @@
+{% style %}
+
+#shoplift--{{ section.id }} .banner__buttons {
+    display: inline-flex;
+}
+
+#shoplift--{{ section_id }} .timer--expired {
+    display: none;
+}
+
+#shoplift--{{ section_id }} .timer__title {
+    @extend .paragraph;
+    text-align: center;
+}
+
+#shoplift--{{ section_id }} .timer-display {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    justify-content: space-evenly;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    margin-top: 8px;
+}
+
+#shoplift--{{ section_id }} .timer-block {
+    position: relative;
+    padding: 0 5px;
+    width: 100%;
+}
+
+#shoplift--{{ section_id }} .timer-block__num_{{ block_id }}{
+    padding-left: 5px;
+    padding-right: 5px;
+    font-weight: bold;
+
+    {% case timer_size %}
+        {% when "large" %}
+            font-size: 20px;
+            min-width: 37px;
+        {% when "medium" %}
+            font-size: 16px;
+            min-width: 37px;
+        {% when "small" %}
+            font-size: 14px;
+            min-width: 37px;
+    {% endcase %}
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+}
+
+#shoplift--{{ section_id }} .timer-block__num_{{ block_id }},
+#shoplift--{{ section_id }} .timer-block__unit_{{ block_id }} {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+}
+
+#shoplift--{{ section_id }} .timer-block__unit_{{ block_id }} {
+    {% if timer_size == "large" %}
+        font-size: 12px;
+    {% elsif timer_size == "medium" %}
+        font-size: 10px;
+    {% elsif timer_size == "small" %}
+        font-size: 10px;
+    {% endif %}
+    line-height: 14px;
+    text-transform: uppercase;
+}
+
+
+{% unless custom_number_color == "rgba(0,0,0,0)" or custom_number_color == "transparent" %}
+    #shoplift--{{ section_id }}.custom_timer_color .timer-block__num_{{ block_id }} {
+        color: {{ custom_number_color }};
+    }
+{% endunless %}
+
+{% unless custom_number_color == "rgba(0,0,0,0)" or custom_number_color == "transparent" %}
+    #shoplift--{{ section_id }}.custom_timer_color .timer-block__unit_{{ block_id }} {
+        color: {{ custom_label_color }};
+    }
+{% endunless %}
+
+@media screen and (max-width: 749px) {
+    #shoplift--{{ section_id }}  .timer-block__num_{{ block_id }} {
+        {% case timer_size %}
+            {% when "large" %}
+                font-size: 16px;
+            {% when "medium" %}
+                font-size: 14px;
+            {% when "small" %}
+                font-size: 12px;
+        {% endcase %}
+    }
+
+    #shoplift--{{ section_id }}  .timer-block__unit {
+        font-size: 10px;
+    }
+}
+{% endstyle %}
+
+<div id="lk-timer-{{ section_id }}-{{ block_id }}" class="timer-display" {% if request.design_mode %}data-timer-date="{{ countdown_date }}"{%endif%}>
+    <div class="timer-block">
+    <span class="timer-block__num_{{ block_id }}" id="lk-timer-{{ section_id }}-{{ block_id }}-days">--</span>
+    <span class="timer-block__unit_{{ block_id }}">Days</span>
+    </div>
+    <div class="timer-block">
+    <span class="timer-block__num_{{ block_id }}" id="lk-timer-{{ section_id }}-{{ block_id }}-hours">--</span>
+    <span class="timer-block__unit_{{ block_id }}">Hrs</span>
+    </div>
+    <div class="timer-block">
+    <span class="timer-block__num_{{ block_id }}" id="lk-timer-{{ section_id }}-{{ block_id }}-minutes">--</span>
+    <span class="timer-block__unit_{{ block_id }}">Mins</span>
+    </div>
+    <div class="timer-block">
+    <span class="timer-block__num_{{ block_id }}" id="lk-timer-{{ section_id }}-{{ block_id }}-seconds">--</span>
+    <span class="timer-block__unit_{{ block_id }}">Secs</span>
+    </div>
+</div>
+
+{% if section_id %}
+    <script type="text/javascript">
+        let countdown = new Date('{{ countdown_date }} {{ countdown_time }}').getTime();
+        let initHandler = null;
+        function initTimer() {
+            if (Number.isNaN(countdown)) {
+              document.querySelector('#lk-timer-{{ section_id }}-{{ block_id }}-days').innerText = "--";
+              document.querySelector('#lk-timer-{{ section_id }}-{{ block_id }}-hours').innerText = "--";
+              document.querySelector('#lk-timer-{{ section_id }}-{{ block_id }}-minutes').innerText = "--";
+              document.querySelector('#lk-timer-{{ section_id }}-{{ block_id }}-seconds').innerText = "--";
+              return;
+            }
+            const second = 1000,
+                minute = second * 60,
+                hour = minute * 60,
+                day = hour * 24;
+
+            let intervalId = setInterval(function () {
+                const now = new Date().getTime();
+                const distance = countdown - now;
+                document.querySelector('#lk-timer-{{ section_id }}-{{ block_id }}-days').innerText = Math.floor(distance / (day));
+                document.querySelector('#lk-timer-{{ section_id }}-{{ block_id }}-hours').innerText = Math.floor((distance % (day)) / (hour));
+                document.querySelector('#lk-timer-{{ section_id }}-{{ block_id }}-minutes').innerText = Math.floor((distance % (hour)) / (minute));
+                document.querySelector('#lk-timer-{{ section_id }}-{{ block_id }}-seconds').innerText = Math.floor((distance % (minute)) / second);
+                if (distance <= 0) {
+                    document.querySelector('#shoplift--{{ section_id }}').style.display = 'none';
+                }
+            }, second)
+            let cleanupHandler = null;
+            function cleanup() {
+                console.log("Cleaning up");
+                clearInterval(intervalId)
+            }
+            document.addEventListener("shopify:section:unload", () => cleanup());
+        }
+        initTimer();
+        document.addEventListener("shopify:section:load", () => {
+            console.log("Theme editor - timer bar init to {{ countdown_date }}");
+            const dateAttribute = document.querySelector("#lk-timer-{{ section_id }}-{{ block_id }}").attributes["data-timer-date"].value;
+            countdown = new Date(dateAttribute).getTime();
+            initTimer();
+        });
+    </script>
+{% endif %}

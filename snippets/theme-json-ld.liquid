@@ -1,0 +1,237 @@
+{% comment %}
+BT updated product schema 8/7/26
+{% unless template contains "index" %}
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "item": {
+                            "@type": "Website",
+                            "@id": "{{ shop.url }}",
+                        "name": "Home"
+                    }
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "item": {
+                        "@type": "WebPage",
+                        "@id": "{{ canonical_url }}",
+                        "name": {{ page_title | json }}
+        }
+    }
+]
+}
+    </script>
+{% endunless %}
+
+<script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "url": "{{ shop.url }}",
+        "name": {{ shop.name | json }},
+        "description": {{ shop.description | json }}
+    }
+</script>
+
+{% if product %}
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            "name": {{ product.title | json }},
+            "image": "{{ product.featured_image.src | image_url | replace_first: "//", "https://" }}",
+            "offers": {
+                "@type": "Offer",
+                "url": "{{ shop.url }}{{ product.url }}",
+                "priceCurrency": "{{ shop.currency }}",
+                "price": "{{ product.price | divided_by: 100 }}",
+                "availability": "https://schema.org/InStock",
+                "itemCondition": "https://schema.org/NewCondition",
+                "priceValidUntil": "{{ 'now' | date: '%s' | plus: 31536000 | date: '%Y-%m-%d' }}"
+            },
+            "description": {{ product.description | strip_html | strip_newlines | json }},
+            "brand": {
+                "@type": "Brand",
+                "name": {{ shop.name | json }}
+        }
+    }
+    </script>
+
+{% endif %}
+
+{% if article %}
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "mainEntityOfPage": {
+                "@type": "webPage",
+                "id": "{{ shop.url }}{{ article.url }}"
+            },
+            "headline": {{ article.title | json }},
+            "description": {{ article.content | strip_html | json }},
+            "datePublished": "{{ article.published_at | date: "%Y-%m-%d" }}",
+            "dateModified": "{{ article.updated_at | date: "%Y-%m-%d" }}",
+            "image": [
+                "{{ article.image | image_url | replace_first: "//", "https://" }}"
+            ],
+            "author": [
+                {
+                    "@type": "Organization",
+                    "name": "{{ shop.name }}",
+                    "url": "{{ shop.url }}",
+                    "type": "Organization"
+                }
+            ],
+            "publisher": {
+                "@type": "Organization",
+                "name": "{{ shop.name }}"
+            }
+        }
+    </script>
+
+{% endif %}
+
+{% endcomment %}
+
+
+{% unless template contains "index" %}
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "item": {
+        "@type": "WebSite",
+        "@id": "{{ shop.url }}",
+        "name": "Home"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "item": {
+        "@type": "WebPage",
+        "@id": "{{ canonical_url }}",
+        "name": {{ page_title | json }}
+      }
+    }
+  ]
+}
+</script>
+{% endunless %}
+<script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "url": "{{ shop.url }}",
+        "name": {{ shop.name | json }},
+        "description": {{ shop.description | json }}
+    }
+</script>
+{% if product %}
+{% assign junip_rating = product.metafields.reviews.rating.value.rating %}
+{% assign junip_review_count = product.metafields.reviews.rating_count.value %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "Product",
+  "name": {{ product.title | json }},
+  "image": "{{ product.featured_image.src | image_url | replace_first: "//", "https://" }}",
+  "offers": {
+    "@type": "Offer",
+    "url": "{{ shop.url }}{{ product.url }}",
+    "priceCurrency": "{{ shop.currency }}",
+    "price": "{{ product.price | divided_by: 100 }}",
+    "availability": "https://schema.org/InStock",
+    "itemCondition": "https://schema.org/NewCondition",
+    "priceValidUntil": "{{ 'now' | date: '%s' | plus: 31536000 | date: '%Y-%m-%d' }}",
+
+    "shippingDetails": {
+      "@type": "OfferShippingDetails",
+      "shippingRate": {
+        "@type": "MonetaryAmount",
+        "value": 5.99,
+        "currency": "{{ shop.currency }}"
+      },
+      "shippingDestination": {
+        "@type": "DefinedRegion",
+        "addressCountry": "US"
+      },
+      "deliveryTime": {
+        "@type": "ShippingDeliveryTime",
+        "transitTime": {
+          "@type": "QuantitativeValue",
+          "minValue": 2,
+          "maxValue": 5,
+          "unitCode": "DAY"
+        }
+      }
+    },
+
+    "hasMerchantReturnPolicy": {
+      "@type": "MerchantReturnPolicy",
+      "applicableCountry": "US",
+      "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+      "merchantReturnDays": 30,
+      "returnMethod": "https://schema.org/ReturnByMail",
+      "returnFees": "https://schema.org/FreeReturn"
+    }
+  },
+  "description": {{ product.description | strip_html | strip_newlines | json }},
+  "brand": {
+    "@type": "Brand",
+    "name": {{ shop.name | json }}
+  }
+  {% if junip_rating != blank and junip_review_count != blank and junip_review_count > 0 %}
+,
+"aggregateRating": {
+"@type": "AggregateRating",
+"ratingValue": {{ junip_rating | json }},
+"reviewCount": {{ junip_review_count | json }},
+"bestRating": 5,
+"worstRating": 1
+}
+{% endif %}
+}
+</script>
+{% endif %}
+
+{% if article %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ shop.url }}{{ article.url }}"
+  },
+  "headline": {{ article.title | json }},
+  "description": {{ article.content | strip_html | json }},
+  "datePublished": "{{ article.published_at | date: "%Y-%m-%d" }}",
+  "dateModified": "{{ article.updated_at | date: "%Y-%m-%d" }}",
+  "image": [
+    "{{ article.image | image_url | replace_first: "//", "https://" }}"
+  ],
+  "author": {
+    "@type": "Organization",
+    "name": {{ shop.name | json }},
+    "url": "{{ shop.url }}"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": {{ shop.name | json }}
+  }
+}
+</script>
+{% endif %}

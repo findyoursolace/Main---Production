@@ -1,0 +1,182 @@
+<!doctype html>
+<html
+  class="no-js{% if request.design_mode %} shopify-design-mode{% endif %}"
+  lang="{{ request.locale.iso_code }}"
+>
+  <head>
+
+{% render 'replo-head' %}
+<!-- Start of Shoplift scripts -->
+{% render 'shoplift' %}
+<!-- End of Shoplift scripts -->
+
+<link rel="preconnect" href="https://use.typekit.net" crossorigin>
+<link rel="preload" href="https://use.typekit.net/nfe0ryo.css" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://use.typekit.net/nfe0ryo.css"></noscript>
+
+    {%- if settings.favicon != blank -%}
+      <link
+        rel="icon"
+        type="image/png"
+        href="{{ settings.favicon | image_url: width: 32, height: 32 }}"
+      >
+    {%- endif -%}
+
+    {% comment %} This a way to wait for main content to load when navigating to a new page so that the view transitions can work consistently {% endcomment %}
+    <link
+      rel="expect"
+      href="#MainContent"
+      blocking="render"
+      id="view-transition-render-blocker"
+    >
+
+    {%- render 'meta-tags' -%}
+    {%- render 'stylesheets' -%}
+    {%- render 'fonts' -%}
+    {%- render 'scripts' -%}
+    {%- render 'theme-styles-variables' -%}
+    {%- render 'color-schemes' -%}
+
+    {% if request.design_mode %}
+      {%- render 'theme-editor' -%}
+    {% endif %}
+    
+   <!-- JSON LD -->
+    {% render "theme-json-ld" %}
+    {{ content_for_header }}
+    <meta name="google-site-verification" content="l2QdFhRXnRXKRQvJ8Lt_WcgKeru4HRTwD5PXS63FjzA" />
+
+  </head>
+
+  <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}">
+    {% render 'skip-to-content-link', href: '#MainContent', text: 'accessibility.skip_to_text' %}
+    <div id="header-group">
+      {% sections 'header-group' %}
+    </div>
+
+<script
+  src="{{ 'critical.js' | asset_url }}"
+  type="module"
+  defer
+></script>
+
+    <main
+      id="MainContent"
+      class="content-for-layout"
+      role="main"
+      data-page-transition-enabled="{{ settings.page_transition_enabled }}"
+      data-product-transition="{{ settings.transition_to_main_product }}"
+      data-template="{{ template }}"
+    >
+      {{ content_for_layout }}
+    </main>
+
+    {% sections 'footer-group' %}
+
+    {% render 'search-modal' %}
+
+    {% if settings.quick_add or settings.mobile_quick_add %}
+      {% render 'quick-add-modal' %}
+    {% endif %}
+<script src="{{ 'minicart-promo.js' | asset_url }}" defer></script>
+
+
+    <!-- Clarity -->
+    <script type="text/javascript">
+        (function (c, l, a, r, i, t, y) {
+            c[a] = c[a] || function () {
+                (c[a].q = c[a].q || []).push(arguments)
+            };
+            t = l.createElement(r);
+            t.async = 1;
+            t.src = "https://www.clarity.ms/tag/" + i;
+            y = l.getElementsByTagName(r)[0];
+            y.parentNode.insertBefore(t, y);
+        })(window, document, "clarity", "script", "ktijcxh1bd");
+    </script>
+
+    <script nowprocket nitro-exclude type=“text/javascript” id=“sa-dynamic-optimization” data-uuid=“db6ce525-bc14-495e-9c83-992cab972357”
+            src=“data:text/javascript;base64,dmFyIHNjcmlwdCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoInNjcmlwdCIpO3NjcmlwdC5zZXRBdHRyaWJ1dGUoIm5vd3Byb2NrZXQiLCAiIik7c2NyaXB0LnNldEF0dHJpYnV0ZSgibml0cm8tZXhjbHVkZSIsICIiKTtzY3JpcHQuc3JjID0gImh0dHBzOi8vZGFzaGJvYXJkLm1pbmRzaGlmdHNlby5jb20vc2NyaXB0cy9keW5hbWljX29wdGltaXphdGlvbi5qcyI7c2NyaXB0LmRhdGFzZXQudXVpZCA9ICJkYjZjZTUyNS1iYzE0LTQ5NWUtOWM4My05OTJjYWI5NzIzNTciO3NjcmlwdC5pZCA9ICJzYS1keW5hbWljLW9wdGltaXphdGlvbi1sb2FkZXIiO2RvY3VtZW50LmhlYWQuYXBwZW5kQ2hpbGQoc2NyaXB0KTs=“></script>
+
+    <!-- Swal -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.2/sweetalert2.all.min.js"
+            integrity="sha512-SK3zv9THqmpMz5vgYjzMUplj1kKAkRC6j+xIC0XPcrGKntTmxhYQzgsysgwDq+WKG0CARR1YQKoqGsNlaNMvKg=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+    <!-- Aggregate Rating Schema Markup -->
+    {% if request.path == "/collections/apple-watch-bands" %}
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org/",
+                "@type": "Product",
+                "name": "Apple Watch Bands - Solace Bands",
+                "image": "",
+                "aggregateRating": {
+                    "@type": "AggregateRating",
+                    "ratingValue": "4.499",
+                    "bestRating": "5",
+                    "reviewCount": "10355"
+                }
+            }
+        </script>
+    {% elsif request.path == "/collections/smart-watch-bands" %}
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org/",
+                "@type": "Product",
+                "name": "Smart Watch Bands - Solace Bands",
+                "image": "",
+                "aggregateRating": {
+                    "@type": "AggregateRating",
+                    "ratingValue": "4.270",
+                    "bestRating": "5",
+                    "reviewCount": "195"
+                }
+            }
+        </script>
+    {% elsif request.path == "/" or request.path == "/pages/our-story" or request.path == "/pages/contact-us" %}
+        <script type="application/ld+json">
+            {
+                "@context": "http://schema.org",
+                "@type": "Organization",
+                "name": "Apple and Smart Watch Bands - Solace Bands",
+                "url": "https://solacebands.com/",
+                "logo": "https://www.google.com/s2/favicons?sz=256&domain_url=https://solacebands.com",
+                "contactPoint": {
+                    "@type": "ContactPoint",
+                    "contactType": "Customer Service",
+                    "url": "https://solacebands.com/pages/contact-us"
+                },
+                "sameAs": [
+                    "https://www.facebook.com/solacebands/",
+                    "https://www.instagram.com/solacebands/",
+                    "https://x.com/SolaceBands",
+                    "https://www.youtube.com/@solacebands9895",
+                    "https://www.tiktok.com/@solacebands"
+                ]
+            }
+        </script>
+    {% endif %}
+
+
+    {% comment %} site match {% endcomment %}
+<script type="text/javascript">
+var script = document.createElement('script');
+script.src = "https://xp2023-pix.s3.amazonaws.com/px_wWTHh.js";
+document.getElementsByTagName('head')[0].appendChild(script);
+</script>
+
+<script>
+    window.addEventListener("postscriptPopup", function (ev) {
+        if (ev.detail.type === 'subscriberCreated') {
+            setTimeout(function () {
+                window.location.href = "{{ Shopify.routes.root }}/products/free-mystery-loop-1";
+            }, 2000);
+        }
+    });
+
+</script>
+
+  </body>
+</html>

@@ -1,0 +1,400 @@
+<section class="vt" style="
+  --vt-bg: {{ section.settings.background_color }};
+  --vt-heading: {{ section.settings.heading_color }};
+  --vt-text: {{ section.settings.text_color }};
+  --vt-name: {{ section.settings.name_color }};
+  --vt-title: {{ section.settings.title_color }};
+  --vt-radius: {{ section.settings.video_border_radius }}px;
+  --vt-pad: {{ section.settings.section_padding }}px;
+  --vt-max: {{ section.settings.max_width }}px;
+  --vt-card-w: {{ section.settings.video_width }}px;
+">
+  <div class="vt__inner">
+    {% if section.settings.heading != blank or section.settings.subheading != blank %}
+      <header class="vt__header vt__header--{{ section.settings.text_alignment }}">
+       {% if section.settings.heading != blank %}
+        <h2>
+          {% render 'highlight-brackets',
+          text: section.settings.heading,
+          class: 'section-title-highlight'
+         %}
+         </h2>
+      {% endif %}
+        {% if section.settings.subheading != blank %}
+          <p class="vt__subheading">{{ section.settings.subheading }}</p>
+        {% endif %}
+      </header>
+    {% endif %}
+
+    {% assign has_videos = false %}
+    {% for i in (1..5) %}
+      {% assign key = 'video_' | append: i %}
+      {% if section.settings[key] != blank %}
+        {% assign has_videos = true %}
+        {% break %}
+      {% endif %}
+    {% endfor %}
+
+    {% if has_videos %}
+      <div class="vt__rail" aria-label="Video testimonials">
+        <div class="vt__scroller" data-vt-scroller>
+          {% for i in (1..5) %}
+            {% assign video_key = 'video_' | append: i %}
+            {% assign name_key  = 'name_'  | append: i %}
+            {% assign title_key = 'title_' | append: i %}
+            {% assign video = section.settings[video_key] %}
+            {% assign name  = section.settings[name_key] %}
+            {% assign title = section.settings[title_key] %}
+
+            {% if video != blank %}
+              <article class="vt__card" data-vt-card>
+                <div class="vt__video">
+                  {{ video | video_tag:
+                    autoplay: false,
+                    loop: false,
+                    controls: true,
+                    muted: false,
+                    playsinline: true,
+                    preload: "metadata",
+                    image_size: "2048x"
+                  }}
+                </div>
+
+                {% if name != blank or title != blank %}
+                  <div class="vt__meta">
+                    {% if name != blank %}<div class="vt__name">{{ name }}</div>{% endif %}
+                    {% if title != blank %}<div class="vt__title">{{ title }}</div>{% endif %}
+                  </div>
+                {% endif %}
+              </article>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="vt__controls" aria-hidden="false">
+        <button class="vt__btn" type="button" data-vt-prev aria-label="Previous">
+          ‹
+        </button>
+
+        <div class="vt__dots" data-vt-dots aria-label="Carousel pagination"></div>
+
+        <button class="vt__btn" type="button" data-vt-next aria-label="Next">
+          ›
+        </button>
+      </div>
+    {% else %}
+      <div class="vt__empty">Add video testimonials to get started.</div>
+    {% endif %}
+  </div>
+
+  <style>
+    /* --- Layout + safety (prevents page-wide horizontal scroll) --- */
+    .vt {
+      background: var(--vt-bg);
+      padding: var(--vt-pad) 0;
+      overflow-x: clip;
+    }
+    @supports not (overflow: clip) {
+      .vt { overflow-x: hidden; }
+    }
+    .vt * { box-sizing: border-box; }
+
+    .vt__inner {
+      max-width: var(--vt-max);
+      margin: 0 auto;
+      padding: 0 20px;
+      min-width: 0;
+    }
+
+    .vt__header { margin: 0 0 28px; }
+    .vt__header--left { text-align: left; }
+    .vt__header--center { text-align: center; }
+    .vt__header--right { text-align: right; }
+
+    .vt__heading {
+      margin: 0 0 10px;
+      color: var(--vt-heading);
+      font-size: {{ section.settings.heading_size }}px;
+      line-height: 1.1;
+      overflow-wrap: anywhere;
+    }
+
+    .vt__subheading {
+      margin: 0;
+      color: var(--vt-text);
+      font-size: {{ section.settings.subheading_size }}px;
+      line-height: 1.4;
+      overflow-wrap: anywhere;
+    }
+
+    /* --- Scroller --- */
+    .vt__rail {
+      /* isolates the scroller so transforms/scrollbars don't leak */
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .vt__scroller {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      padding: 6px 6px 14px;
+      margin: 0 -6px; /* lets cards breathe while still within clamp */
+      scrollbar-width: none; /* Firefox */
+      touch-action: pan-y;
+    }
+    .vt__scroller::-webkit-scrollbar { display: none; }
+
+    .vt__card {
+      flex: 0 0 auto;
+      width: var(--vt-card-w);
+      max-width: calc(100vw - 60px);
+      scroll-snap-align: start;
+      min-width: 0;
+    }
+
+    .vt__video {
+      width: 100%;
+      aspect-ratio: 9 / 16;
+      background: #000;
+      border-radius: var(--vt-radius);
+      overflow: hidden;
+    }
+    .vt__video video {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .vt__meta {
+      text-align: center;
+      padding-top: 12px;
+      min-width: 0;
+    }
+    .vt__name {
+      color: var(--vt-name);
+      font-weight: 500;
+      font-size: {{ section.settings.name_size }}px;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+    .vt__title {
+      color: var(--vt-title);
+      font-size: {{ section.settings.title_size }}px;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+
+    /* --- Controls --- */
+    .vt__controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .vt__btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      border: 0;
+      background: {{ section.settings.nav_button_color }};
+      color: {{ section.settings.nav_button_icon_color }};
+      font-size: 26px;
+      line-height: 1;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .vt__btn:hover { background: {{ section.settings.nav_button_hover_color }}; }
+    .vt__btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .vt__dots { display: flex; gap: 8px; align-items: center; }
+    .vt__dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      border: 0;
+      background: {{ section.settings.dot_color }};
+      padding: 0;
+      cursor: pointer;
+    }
+    .vt__dot.is-active {
+      background: {{ section.settings.dot_active_color }};
+      transform: scale(1.25);
+    }
+
+    .vt__empty {
+      text-align: center;
+      padding: 40px 0;
+      color: var(--vt-text);
+    }
+
+    /* Mobile tuning */
+    @media (max-width: 749px) {
+      .vt__heading { font-size: calc({{ section.settings.heading_size }}px * 0.78); }
+      .vt__subheading { font-size: calc({{ section.settings.subheading_size }}px * 0.95); }
+      .vt__card { width: min(calc(var(--vt-card-w) * 0.9), calc(100vw - 60px)); }
+    }
+  </style>
+
+  <script>
+    (function() {
+      const root = document.currentScript.closest(".vt");
+      if (!root) return;
+
+      const scroller = root.querySelector("[data-vt-scroller]");
+      const prev = root.querySelector("[data-vt-prev]");
+      const next = root.querySelector("[data-vt-next]");
+      const dotsWrap = root.querySelector("[data-vt-dots]");
+      const cards = [...root.querySelectorAll("[data-vt-card]")];
+
+      if (!scroller || cards.length === 0) return;
+
+      // Build dots
+      if (dotsWrap) {
+        dotsWrap.innerHTML = "";
+        cards.forEach((_, i) => {
+          const b = document.createElement("button");
+          b.className = "vt__dot" + (i === 0 ? " is-active" : "");
+          b.type = "button";
+          b.setAttribute("aria-label", "Go to video " + (i + 1));
+          b.addEventListener("click", () => scrollToIndex(i));
+          dotsWrap.appendChild(b);
+        });
+      }
+
+      const dots = dotsWrap ? [...dotsWrap.querySelectorAll(".vt__dot")] : [];
+
+      function cardStep() {
+        // distance from card start to next card start
+        const first = cards[0].getBoundingClientRect();
+        const second = cards[1] ? cards[1].getBoundingClientRect() : null;
+        return second ? (second.left - first.left) : first.width;
+      }
+
+      function scrollToIndex(i) {
+        const target = cards[i];
+        if (!target) return;
+        const left = target.offsetLeft - 6; // matches scroller padding/margin tweak
+        scroller.scrollTo({ left, behavior: "smooth" });
+      }
+
+      function scrollByStep(dir) {
+        scroller.scrollBy({ left: dir * cardStep(), behavior: "smooth" });
+      }
+
+      function activeIndex() {
+        // Find nearest card to scroller left
+        const x = scroller.scrollLeft + 10;
+        let best = 0;
+        let bestDist = Infinity;
+        cards.forEach((c, i) => {
+          const d = Math.abs(c.offsetLeft - x);
+          if (d < bestDist) { bestDist = d; best = i; }
+        });
+        return best;
+      }
+
+      function updateUI() {
+        const i = activeIndex();
+        dots.forEach((d, idx) => d.classList.toggle("is-active", idx === i));
+
+        // disable buttons at ends (since we aren't infinite looping)
+        if (prev) prev.disabled = (i === 0);
+        if (next) next.disabled = (i === cards.length - 1);
+      }
+
+      if (prev) prev.addEventListener("click", () => scrollByStep(-1));
+      if (next) next.addEventListener("click", () => scrollByStep(1));
+
+      scroller.addEventListener("scroll", () => {
+        window.requestAnimationFrame(updateUI);
+      });
+
+      // Initial state
+      updateUI();
+    })();
+  </script>
+</section>
+
+{% schema %}
+{
+  "name": "Video testimonials",
+  "settings": [
+    { "type": "header", "content": "Content" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "Customer Stories" },
+    { "type": "inline_richtext", "id": "subheading", "label": "Subheading", "default": "Hear what our customers have to say" },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+
+    { "type": "header", "content": "Videos" },
+    { "type": "video", "id": "video_1", "label": "Video 1" },
+    { "type": "text", "id": "name_1", "label": "Name 1" },
+    { "type": "text", "id": "title_1", "label": "Title 1" },
+
+    { "type": "video", "id": "video_2", "label": "Video 2" },
+    { "type": "text", "id": "name_2", "label": "Name 2" },
+    { "type": "text", "id": "title_2", "label": "Title 2" },
+
+    { "type": "video", "id": "video_3", "label": "Video 3" },
+    { "type": "text", "id": "name_3", "label": "Name 3" },
+    { "type": "text", "id": "title_3", "label": "Title 3" },
+
+    { "type": "video", "id": "video_4", "label": "Video 4" },
+    { "type": "text", "id": "name_4", "label": "Name 4" },
+    { "type": "text", "id": "title_4", "label": "Title 4" },
+
+    { "type": "video", "id": "video_5", "label": "Video 5" },
+    { "type": "text", "id": "name_5", "label": "Name 5" },
+    { "type": "text", "id": "title_5", "label": "Title 5" },
+
+    { "type": "header", "content": "Layout" },
+    { "type": "range", "id": "max_width", "min": 800, "max": 1600, "step": 50, "unit": "px", "label": "Max width", "default": 1200 },
+    { "type": "range", "id": "section_padding", "min": 0, "max": 120, "step": 4, "unit": "px", "label": "Section padding", "default": 60 },
+
+    { "type": "header", "content": "Video style" },
+    { "type": "range", "id": "video_width", "min": 200, "max": 420, "step": 10, "unit": "px", "label": "Card width", "default": 280 },
+    { "type": "range", "id": "video_border_radius", "min": 0, "max": 40, "step": 2, "unit": "px", "label": "Border radius", "default": 16 },
+
+    { "type": "header", "content": "Colors" },
+    { "type": "color", "id": "background_color", "label": "Background", "default": "#ffffff" },
+    { "type": "color", "id": "heading_color", "label": "Heading", "default": "#000000" },
+    { "type": "color", "id": "text_color", "label": "Text", "default": "#000000" },
+    { "type": "color", "id": "name_color", "label": "Name", "default": "#000000" },
+    { "type": "color", "id": "title_color", "label": "Title", "default": "#666666" },
+
+    { "type": "header", "content": "Typography" },
+    { "type": "range", "id": "heading_size", "min": 20, "max": 60, "step": 2, "unit": "px", "label": "Heading size", "default": 36 },
+    { "type": "range", "id": "subheading_size", "min": 12, "max": 24, "step": 1, "unit": "px", "label": "Subheading size", "default": 16 },
+    { "type": "range", "id": "name_size", "min": 12, "max": 24, "step": 1, "unit": "px", "label": "Name size", "default": 16 },
+    { "type": "range", "id": "title_size", "min": 10, "max": 20, "step": 1, "unit": "px", "label": "Title size", "default": 14 },
+
+    { "type": "header", "content": "Navigation" },
+    { "type": "color", "id": "nav_button_color", "label": "Button background", "default": "#000000" },
+    { "type": "color", "id": "nav_button_hover_color", "label": "Button hover background", "default": "#333333" },
+    { "type": "color", "id": "nav_button_icon_color", "label": "Button text color", "default": "#ffffff" },
+    { "type": "color", "id": "dot_color", "label": "Dot color", "default": "#cccccc" },
+    { "type": "color", "id": "dot_active_color", "label": "Active dot color", "default": "#000000" }
+  ],
+  "presets": [
+    { "name": "Video testimonials" }
+  ]
+}
+{% endschema %}

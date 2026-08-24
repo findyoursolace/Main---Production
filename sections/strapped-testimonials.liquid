@@ -1,0 +1,1432 @@
+{%- comment -%} ============================================================
+  STRAPPED — Section 6: Testimonials
+  sections/strapped-testimonials.liquid
+============================================================ {%- endcomment -%}
+
+{%- style -%}
+  #shopify-section-{{ section.id }} {
+    --sb-bg:         {{ section.settings.bg_color }};
+    --sb-text:       {{ section.settings.text_color }};
+    --sb-accent:     {{ section.settings.accent_color }};
+    --sb-champagne:  {{ section.settings.muted_color }};
+    --sb-mocha:      {{ section.settings.handle_color }};
+    --sb-gold:       {{ section.settings.star_color }};
+    padding-top:    {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+{%- render 'strapped-fonts' -%}
+
+<style>
+  .strapped-testimonials {
+    padding: {{ section.settings.section_pad_v }}px {{ section.settings.section_pad_h }}px;
+    background: var(--sb-bg);
+    color: var(--sb-text);
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: {{ section.settings.col_gap }}px;
+    align-items: center;
+  }
+
+  .strapped-testimonials__tag {
+    font-family: {{ section.settings.eyebrow_font }};
+    font-size: {{ section.settings.eyebrow_size }}px;
+    font-weight: {{ section.settings.eyebrow_weight }};
+    font-style: {{ section.settings.eyebrow_style }};
+    letter-spacing: {{ section.settings.eyebrow_tracking }};
+    text-transform: {{ section.settings.eyebrow_transform }};
+    color: {{ section.settings.eyebrow_color }};
+    margin-bottom: 1rem;
+  }
+
+  .strapped-testimonials__title {
+    font-family: {{ section.settings.heading_font }};
+    font-size: {{ section.settings.heading_size }}px;
+    font-weight: {{ section.settings.heading_weight }};
+    font-style: {{ section.settings.heading_style }};
+    letter-spacing: {{ section.settings.heading_tracking }};
+    text-transform: {{ section.settings.heading_transform }};
+    color: {{ section.settings.heading_color }};
+    line-height: {{ section.settings.heading_line_height }};
+  }
+
+  .strapped-testimonials__title em {
+    font-family: {{ section.settings.heading_em_font }};
+    font-style: {{ section.settings.heading_em_style }};
+    color: var(--sb-accent);
+  }
+
+  .strapped-testimonials__body {
+    font-family: {{ section.settings.body_font }};
+    font-size: {{ section.settings.body_size }}px;
+    font-weight: {{ section.settings.body_weight }};
+    font-style: {{ section.settings.body_style }};
+    letter-spacing: {{ section.settings.body_tracking }};
+    text-transform: {{ section.settings.body_transform }};
+    color: {{ section.settings.body_color }};
+    line-height: {{ section.settings.body_line_height }};
+    margin: {{ section.settings.body_margin_top }}px 0 {{ section.settings.body_margin_bottom }}px;
+  }
+
+  .strapped-testimonials__btn {
+    background: var(--sb-accent);
+    color: var(--sb-bg);
+    padding: {{ section.settings.btn_pad_v }}px {{ section.settings.btn_pad_h }}px;
+    font-family: {{ section.settings.btn_font }};
+    font-size: {{ section.settings.btn_size }}px;
+    font-weight: {{ section.settings.btn_weight }};
+    font-style: {{ section.settings.btn_style }};
+    letter-spacing: {{ section.settings.btn_tracking }};
+    text-transform: {{ section.settings.btn_transform }};
+    color: {{ section.settings.btn_color }};
+    border: {{ section.settings.btn_border_w }}px solid {{ section.settings.btn_border_c }};
+    border-radius: {{ section.settings.btn_radius }}px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+    text-decoration: none;
+    display: inline-block;
+    line-height: 1;
+  }
+
+  .strapped-testimonials__btn:hover {
+    opacity: 0.85;
+    transform: translateY(-2px);
+  }
+
+  .strapped-testimonials__cards {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .strapped-testimonials__card {
+    background: {{ section.settings.card_bg_color }};
+    border: 1px solid rgba(255,255,255,0.09);
+    padding: {{ section.settings.card_pad_v }}px {{ section.settings.card_pad_h }}px;
+    transition: background 0.3s;
+  }
+
+  .strapped-testimonials__card:hover {
+    background: {{ section.settings.card_hover_bg_color }};
+  }
+
+  .strapped-testimonials__quote {
+    font-family: {{ section.settings.quote_font }};
+    font-size: {{ section.settings.quote_size }}px;
+    font-weight: {{ section.settings.quote_weight }};
+    font-style: {{ section.settings.quote_style }};
+    letter-spacing: {{ section.settings.quote_tracking }};
+    text-transform: {{ section.settings.quote_transform }};
+    color: {{ section.settings.quote_color }};
+    line-height: {{ section.settings.quote_line_height }};
+    margin-bottom: 1rem;
+  }
+
+  .strapped-testimonials__author {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .strapped-testimonials__avatar {
+    width: {{ section.settings.avatar_size }}px;
+    height: {{ section.settings.avatar_size }}px;
+    border-radius: 50%;
+    background: var(--sb-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--sb-font-heading);
+    font-size: {{ section.settings.avatar_initial_size }}px;
+    color: var(--sb-bg);
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .strapped-testimonials__name {
+    font-family: {{ section.settings.author_name_font }};
+    font-size: {{ section.settings.author_name_size }}px;
+    font-weight: {{ section.settings.author_name_weight }};
+    font-style: {{ section.settings.author_name_style }};
+    letter-spacing: {{ section.settings.author_name_tracking }};
+    text-transform: {{ section.settings.author_name_transform }};
+    color: {{ section.settings.author_name_color }};
+  }
+
+  .strapped-testimonials__handle {
+    font-family: {{ section.settings.author_handle_font }};
+    font-size: {{ section.settings.author_handle_size }}px;
+    font-weight: {{ section.settings.author_handle_weight }};
+    font-style: {{ section.settings.author_handle_style }};
+    letter-spacing: {{ section.settings.author_handle_tracking }};
+    text-transform: {{ section.settings.author_handle_transform }};
+    color: {{ section.settings.author_handle_color }};
+    margin-top: 0.1rem;
+  }
+
+  .strapped-testimonials__stars {
+    font-size: {{ section.settings.star_size }}px;
+    color: var(--sb-gold);
+    letter-spacing: 0.1em;
+    margin-left: auto;
+  }
+
+  @media (max-width: 900px) {
+    .strapped-testimonials {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+      padding: {{ section.settings.mobile_pad_v }}px {{ section.settings.mobile_pad_h }}px;
+    }
+  }
+</style>
+
+<div class="strapped-testimonials" id="strapped-vibe">
+  <div>
+
+    {%- if section.settings.eyebrow != blank -%}
+      <div class="strapped-testimonials__tag">
+        {{ section.settings.eyebrow }}
+      </div>
+    {%- endif -%}
+
+    {%- assign strapped_heading_text = section.settings.heading | newline_to_br -%}
+
+    <h2 class="strapped-testimonials__title">
+      {% render 'highlight-brackets',
+        text: strapped_heading_text,
+        class: 'section-title-highlight'
+      %}
+    </h2>
+
+    {%- if section.settings.body != blank -%}
+      <p class="strapped-testimonials__body">
+        {{ section.settings.body }}
+      </p>
+    {%- endif -%}
+
+    {%- if section.settings.btn_label != blank and section.settings.btn_url != blank -%}
+      <a
+        href="{{ section.settings.btn_url }}"
+        class="strapped-testimonials__btn"
+      >
+        {{ section.settings.btn_label }}
+      </a>
+    {%- endif -%}
+
+  </div>
+
+  <div class="strapped-testimonials__cards">
+
+    {%- for block in section.blocks -%}
+
+      {%- if block.type == 'testimonial' -%}
+
+        <div
+          class="strapped-testimonials__card"
+          {{ block.shopify_attributes }}
+        >
+
+          <p class="strapped-testimonials__quote">
+            "{{ block.settings.quote }}"
+          </p>
+
+          <div class="strapped-testimonials__author">
+
+            <div class="strapped-testimonials__avatar">
+              {{ block.settings.name | slice: 0 | upcase }}
+            </div>
+
+            <div>
+
+              <div class="strapped-testimonials__name">
+                {{ block.settings.name }}
+              </div>
+
+              {%- if block.settings.handle != blank -%}
+                <div class="strapped-testimonials__handle">
+                  {{ block.settings.handle }}
+                </div>
+              {%- endif -%}
+
+            </div>
+
+            {%- if block.settings.show_stars -%}
+              <div class="strapped-testimonials__stars">
+                ★★★★★
+              </div>
+            {%- endif -%}
+
+          </div>
+
+        </div>
+
+      {%- endif -%}
+
+    {%- endfor -%}
+
+  </div>
+
+</div>
+
+{% schema %}
+{
+  "name": "Strapped — Testimonials",
+  "tag": "section",
+  "class": "strapped-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "— The Girls Are Talking"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Your wrist deserves a [main character] moment."
+    },
+    {
+      "type": "textarea",
+      "id": "body",
+      "label": "Body text",
+      "default": "We started Strapped because we were tired of boring bands. Your Apple Watch is already on your wrist 24/7 — it should be something you actually love staring at."
+    },
+    {
+      "type": "text",
+      "id": "btn_label",
+      "label": "Button label",
+      "default": "Find Your Band"
+    },
+    {
+      "type": "url",
+      "id": "btn_url",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Eyebrow Typography"
+    },
+    {
+      "type": "color",
+      "id": "eyebrow_color",
+      "label": "Eyebrow color",
+      "default": "#D4A5A5"
+    },
+    {
+      "type": "select",
+      "id": "eyebrow_font",
+      "label": "Eyebrow font family",
+      "options": [
+        {
+          "value": "var(--sb-font-heading)",
+          "label": "Heading"
+        },
+        {
+          "value": "var(--sb-font-display)",
+          "label": "Display / Italic"
+        },
+        {
+          "value": "var(--sb-font-body)",
+          "label": "Body"
+        },
+        {
+          "value": "var(--sb-font-mono)",
+          "label": "Mono"
+        }
+      ],
+      "default": "var(--sb-font-mono)"
+    },
+    {
+      "type": "range",
+      "id": "eyebrow_size",
+      "label": "Eyebrow size",
+      "min": 8,
+      "max": 56,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "select",
+      "id": "eyebrow_weight",
+      "label": "Eyebrow weight",
+      "options": [
+        {
+          "value": "300",
+          "label": "Light"
+        },
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "600",
+          "label": "Semibold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "eyebrow_style",
+      "label": "Eyebrow style",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "italic",
+          "label": "Italic"
+        }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow_tracking",
+      "label": "Eyebrow letter spacing",
+      "default": "0.2em"
+    },
+    {
+      "type": "select",
+      "id": "eyebrow_transform",
+      "label": "Eyebrow transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "header",
+      "content": "Heading Typography"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#FAF6F1"
+    },
+    {
+      "type": "select",
+      "id": "heading_font",
+      "label": "Heading font family",
+      "options": [
+        {
+          "value": "var(--sb-font-heading)",
+          "label": "Heading"
+        },
+        {
+          "value": "var(--sb-font-display)",
+          "label": "Display / Italic"
+        },
+        {
+          "value": "var(--sb-font-body)",
+          "label": "Body"
+        },
+        {
+          "value": "var(--sb-font-mono)",
+          "label": "Mono"
+        }
+      ],
+      "default": "var(--sb-font-heading)"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size",
+      "min": 8,
+      "max": 56,
+      "step": 1,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "select",
+      "id": "heading_weight",
+      "label": "Heading weight",
+      "options": [
+        {
+          "value": "300",
+          "label": "Light"
+        },
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "600",
+          "label": "Semibold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "select",
+      "id": "heading_style",
+      "label": "Heading style",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "italic",
+          "label": "Italic"
+        }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "text",
+      "id": "heading_tracking",
+      "label": "Heading letter spacing",
+      "default": "-0.01em"
+    },
+    {
+      "type": "select",
+      "id": "heading_transform",
+      "label": "Heading transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "text",
+      "id": "heading_line_height",
+      "label": "Heading line height",
+      "default": "1.1"
+    },
+    {
+      "type": "select",
+      "id": "heading_em_font",
+      "label": "Heading <em> font",
+      "options": [
+        {
+          "value": "var(--sb-font-display)",
+          "label": "Display / Italic (default)"
+        },
+        {
+          "value": "var(--sb-font-heading)",
+          "label": "Heading"
+        }
+      ],
+      "default": "var(--sb-font-display)"
+    },
+    {
+      "type": "select",
+      "id": "heading_em_style",
+      "label": "Heading <em> style",
+      "options": [
+        {
+          "value": "italic",
+          "label": "Italic"
+        },
+        {
+          "value": "normal",
+          "label": "Normal"
+        }
+      ],
+      "default": "italic"
+    },
+    {
+      "type": "header",
+      "content": "Body Typography"
+    },
+    {
+      "type": "color",
+      "id": "body_color",
+      "label": "Body color",
+      "default": "#E8D5C0"
+    },
+    {
+      "type": "select",
+      "id": "body_font",
+      "label": "Body font family",
+      "options": [
+        {
+          "value": "var(--sb-font-heading)",
+          "label": "Heading"
+        },
+        {
+          "value": "var(--sb-font-display)",
+          "label": "Display / Italic"
+        },
+        {
+          "value": "var(--sb-font-body)",
+          "label": "Body"
+        },
+        {
+          "value": "var(--sb-font-mono)",
+          "label": "Mono"
+        }
+      ],
+      "default": "var(--sb-font-body)"
+    },
+    {
+      "type": "range",
+      "id": "body_size",
+      "label": "Body size",
+      "min": 8,
+      "max": 56,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "body_weight",
+      "label": "Body weight",
+      "options": [
+        {
+          "value": "300",
+          "label": "Light"
+        },
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "600",
+          "label": "Semibold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "body_style",
+      "label": "Body style",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "italic",
+          "label": "Italic"
+        }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "text",
+      "id": "body_tracking",
+      "label": "Body letter spacing",
+      "default": "0em"
+    },
+    {
+      "type": "select",
+      "id": "body_transform",
+      "label": "Body transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "text",
+      "id": "body_line_height",
+      "label": "Body line height",
+      "default": "1.8"
+    },
+    {
+      "type": "range",
+      "id": "body_margin_top",
+      "label": "Body margin top",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "body_margin_bottom",
+      "label": "Body margin bottom",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "color",
+      "id": "btn_bg_color",
+      "label": "Button bg (uses accent by default)",
+      "default": "#D4A5A5",
+      "info": "Set in the accent color field above"
+    },
+    {
+      "type": "range",
+      "id": "btn_pad_v",
+      "label": "Vertical padding",
+      "min": 6,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "btn_pad_h",
+      "label": "Horizontal padding",
+      "min": 12,
+      "max": 64,
+      "step": 2,
+      "unit": "px",
+      "default": 38
+    },
+    {
+      "type": "color",
+      "id": "btn_border_c",
+      "label": "Border color",
+      "default": "#D4A5A5"
+    },
+    {
+      "type": "range",
+      "id": "btn_border_w",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "btn_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Button text Typography"
+    },
+    {
+      "type": "color",
+      "id": "btn_color",
+      "label": "Button text color",
+      "default": "#3D2B1F"
+    },
+    {
+      "type": "select",
+      "id": "btn_font",
+      "label": "Button text font family",
+      "options": [
+        {
+          "value": "var(--sb-font-heading)",
+          "label": "Heading"
+        },
+        {
+          "value": "var(--sb-font-display)",
+          "label": "Display / Italic"
+        },
+        {
+          "value": "var(--sb-font-body)",
+          "label": "Body"
+        },
+        {
+          "value": "var(--sb-font-mono)",
+          "label": "Mono"
+        }
+      ],
+      "default": "var(--sb-font-mono)"
+    },
+    {
+      "type": "range",
+      "id": "btn_size",
+      "label": "Button text size",
+      "min": 8,
+      "max": 56,
+      "step": 1,
+      "unit": "px",
+      "default": 11
+    },
+    {
+      "type": "select",
+      "id": "btn_weight",
+      "label": "Button text weight",
+      "options": [
+        {
+          "value": "300",
+          "label": "Light"
+        },
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "600",
+          "label": "Semibold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "btn_style",
+      "label": "Button text style",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "italic",
+          "label": "Italic"
+        }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "text",
+      "id": "btn_tracking",
+      "label": "Button text letter spacing",
+      "default": "0.15em"
+    },
+    {
+      "type": "select",
+      "id": "btn_transform",
+      "label": "Button text transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "header",
+      "content": "Quote text Typography"
+    },
+    {
+      "type": "color",
+      "id": "quote_color",
+      "label": "Quote text color",
+      "default": "#2d2d2d"
+    },
+    {
+      "type": "select",
+      "id": "quote_font",
+      "label": "Quote text font family",
+      "options": [
+        {
+          "value": "var(--sb-font-heading)",
+          "label": "Heading"
+        },
+        {
+          "value": "var(--sb-font-display)",
+          "label": "Display / Italic"
+        },
+        {
+          "value": "var(--sb-font-body)",
+          "label": "Body"
+        },
+        {
+          "value": "var(--sb-font-mono)",
+          "label": "Mono"
+        }
+      ],
+      "default": "var(--sb-font-body)"
+    },
+    {
+      "type": "range",
+      "id": "quote_size",
+      "label": "Quote text size",
+      "min": 8,
+      "max": 56,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "quote_weight",
+      "label": "Quote text weight",
+      "options": [
+        {
+          "value": "300",
+          "label": "Light"
+        },
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "600",
+          "label": "Semibold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "quote_style",
+      "label": "Quote text style",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "italic",
+          "label": "Italic"
+        }
+      ],
+      "default": "italic"
+    },
+    {
+      "type": "text",
+      "id": "quote_tracking",
+      "label": "Quote text letter spacing",
+      "default": "0em"
+    },
+    {
+      "type": "select",
+      "id": "quote_transform",
+      "label": "Quote text transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "text",
+      "id": "quote_line_height",
+      "label": "Quote text line height",
+      "default": "1.6"
+    },
+    {
+      "type": "header",
+      "content": "Author name Typography"
+    },
+    {
+      "type": "color",
+      "id": "author_name_color",
+      "label": "Author name color",
+      "default": "#FAF6F1"
+    },
+    {
+      "type": "select",
+      "id": "author_name_font",
+      "label": "Author name font family",
+      "options": [
+        {
+          "value": "var(--sb-font-heading)",
+          "label": "Heading"
+        },
+        {
+          "value": "var(--sb-font-display)",
+          "label": "Display / Italic"
+        },
+        {
+          "value": "var(--sb-font-body)",
+          "label": "Body"
+        },
+        {
+          "value": "var(--sb-font-mono)",
+          "label": "Mono"
+        }
+      ],
+      "default": "var(--sb-font-mono)"
+    },
+    {
+      "type": "range",
+      "id": "author_name_size",
+      "label": "Author name size",
+      "min": 8,
+      "max": 56,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "select",
+      "id": "author_name_weight",
+      "label": "Author name weight",
+      "options": [
+        {
+          "value": "300",
+          "label": "Light"
+        },
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "600",
+          "label": "Semibold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "author_name_style",
+      "label": "Author name style",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "italic",
+          "label": "Italic"
+        }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "text",
+      "id": "author_name_tracking",
+      "label": "Author name letter spacing",
+      "default": "0.1em"
+    },
+    {
+      "type": "select",
+      "id": "author_name_transform",
+      "label": "Author name transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "header",
+      "content": "Author handle Typography"
+    },
+    {
+      "type": "color",
+      "id": "author_handle_color",
+      "label": "Author handle color",
+      "default": "#FAF6F1"
+    },
+    {
+      "type": "select",
+      "id": "author_handle_font",
+      "label": "Author handle font family",
+      "options": [
+        {
+          "value": "var(--sb-font-heading)",
+          "label": "Heading"
+        },
+        {
+          "value": "var(--sb-font-display)",
+          "label": "Display / Italic"
+        },
+        {
+          "value": "var(--sb-font-body)",
+          "label": "Body"
+        },
+        {
+          "value": "var(--sb-font-mono)",
+          "label": "Mono"
+        }
+      ],
+      "default": "var(--sb-font-mono)"
+    },
+    {
+      "type": "range",
+      "id": "author_handle_size",
+      "label": "Author handle size",
+      "min": 8,
+      "max": 56,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "select",
+      "id": "author_handle_weight",
+      "label": "Author handle weight",
+      "options": [
+        {
+          "value": "300",
+          "label": "Light"
+        },
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "600",
+          "label": "Semibold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "300"
+    },
+    {
+      "type": "select",
+      "id": "author_handle_style",
+      "label": "Author handle style",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "italic",
+          "label": "Italic"
+        }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "text",
+      "id": "author_handle_tracking",
+      "label": "Author handle letter spacing",
+      "default": "0.05em"
+    },
+    {
+      "type": "select",
+      "id": "author_handle_transform",
+      "label": "Author handle transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "header",
+      "content": "Card Layout"
+    },
+    {
+      "type": "color",
+      "id": "card_bg_color",
+      "label": "Quote card background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "card_hover_bg_color",
+      "label": "Quote card hover background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "card_pad_v",
+      "label": "Card vertical padding",
+      "min": 12,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "card_pad_h",
+      "label": "Card horizontal padding",
+      "min": 12,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "avatar_size",
+      "label": "Avatar size",
+      "min": 24,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "avatar_initial_size",
+      "label": "Avatar initial size",
+      "min": 8,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "star_size",
+      "label": "Star size",
+      "min": 8,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background",
+      "default": "#3D2B1F"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#FAF6F1"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent color",
+      "default": "#D4A5A5"
+    },
+    {
+      "type": "color",
+      "id": "muted_color",
+      "label": "Quote color",
+      "default": "#E8D5C0"
+    },
+    {
+      "type": "color",
+      "id": "handle_color",
+      "label": "Handle color",
+      "default": "#8B6B5D"
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Star color",
+      "default": "#C9A96E"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "section_pad_v",
+      "min": 32,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "label": "Section vertical padding",
+      "default": 112
+    },
+    {
+      "type": "range",
+      "id": "section_pad_h",
+      "min": 16,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "label": "Section horizontal padding",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "col_gap",
+      "min": 16,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "label": "Column gap",
+      "default": 96
+    },
+    {
+      "type": "range",
+      "id": "mobile_pad_v",
+      "min": 32,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "label": "Mobile vertical padding",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "mobile_pad_h",
+      "min": 12,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "label": "Mobile horizontal padding",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Testimonial",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "Quote",
+          "default": "I have literally never gotten so many compliments on a watch band."
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "Maya Chen"
+        },
+        {
+          "type": "text",
+          "id": "handle",
+          "label": "Social handle",
+          "default": "@mayastylefiles"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_stars",
+          "label": "Show stars",
+          "default": true
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Strapped — Testimonials",
+      "blocks": [
+        {
+          "type": "testimonial",
+          "settings": {
+            "quote": "I have literally never gotten so many compliments on a watch band. Everyone asks where I got it.",
+            "name": "Maya Chen",
+            "handle": "@mayastylefiles",
+            "show_stars": true
+          }
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "quote": "Okay the blush satin one? I wear it every single day. It goes with literally everything and feels so luxe.",
+            "name": "Sofia R.",
+            "handle": "@sofiasthethird",
+            "show_stars": true
+          }
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "quote": "I ordered three. No regrets. The quality is insane for the price, and shipping was so fast.",
+            "name": "Jade Williams",
+            "handle": "@jadesgoldenratio",
+            "show_stars": true
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

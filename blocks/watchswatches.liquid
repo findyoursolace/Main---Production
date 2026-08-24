@@ -1,0 +1,192 @@
+
+
+{% unless product.has_only_default_variant %}
+    <div class="collectionItemVariants">
+      {% if product.metafields.maltertech.variant_swatch_override.value.count > 0 %}
+        {% comment %} SWATCH OVERRIDES {% endcomment %}
+        {% for image in product.metafields.maltertech.variant_swatch_override.value %}
+          <img
+            class="collectionItemVariantsImg"
+            src="{{ image | image_url: width: 200 }}"
+            alt="{{ image.alt }}"
+          >
+        {% endfor %}
+        {% if product.metafields.maltertech.more > 0 %}
+          <div class="collectionItemVariantsMore">
+            +{{ product.metafields.maltertech.more }}
+          </div>
+        {% endif %}
+      {% else %}
+        {% assign count = 0 %}
+        {% assign swatches = 0 %}
+        {% for swatch_variant in product.variants %}
+          {% if swatch_variant.metafields.maltertech.hidden %}
+            {% continue %}
+          {% endif %}
+          {% if swatch_variant.metafields.custom.swatch_image %}
+            {% if count < 3 %}
+              <img
+                class="collectionItemVariantsImg"
+                src="{{ swatch_variant.metafields.custom.swatch_image | image_url: width: 200 }}"
+                alt="{{ swatch_variant.metafields.custom.swatch_image.alt }}"
+              >
+              {% assign count = count | plus: 1 %}
+            {% endif %}
+            {% assign swatches = swatches | plus: 1 %}
+          {% endif %}
+        {% endfor %}
+        {% if swatches > 3 %}
+          <div class="collectionItemVariantsMore">
+            +{{ swatches | minus: 3 }}
+          </div>
+        {% endif %}
+      {% endif %}
+    </div>
+  {% endunless %}
+
+{% # theme-check-disable %}
+{% stylesheet %}
+  .collectionItemVariants {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 5px auto;
+  }
+
+  .collectionItemVariantsImg {
+    height: 30px;
+    width: 30px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 50%;
+    border: 1px solid #000;
+  }
+
+  .collectionItemVariantsMore {
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    border: 1px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:names.watchswatches",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:content.resource_reference_product_swatches"
+    },
+    {
+      "type": "select",
+      "id": "product_swatches_alignment",
+      "label": "t:settings.alignment",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "t:options.left"
+        },
+        {
+          "value": "center",
+          "label": "t:options.center"
+        },
+        {
+          "value": "flex-end",
+          "label": "t:options.right"
+        }
+      ],
+      "default": "flex-start"
+    },
+    {
+      "type": "select",
+      "id": "product_swatches_alignment_mobile",
+      "label": "t:settings.alignment_mobile",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "t:options.left"
+        },
+        {
+          "value": "center",
+          "label": "t:options.center"
+        },
+        {
+          "value": "flex-end",
+          "label": "t:options.right"
+        }
+      ],
+      "default": "flex-start"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding",
+      "visible_if": "{{ block.settings.hide_padding == false }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_padding",
+      "label": "t:settings.hide_padding",
+      "default": false,
+      "visible_if": "{{ false }}"
+    },
+    {
+      "type": "range",
+      "id": "product_swatches_padding_top",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 4,
+      "visible_if": "{{ block.settings.hide_padding == false }}"
+    },
+    {
+      "type": "range",
+      "id": "product_swatches_padding_bottom",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ block.settings.hide_padding == false }}"
+    },
+    {
+      "type": "range",
+      "id": "product_swatches_padding_left",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ block.settings.hide_padding == false }}"
+    },
+    {
+      "type": "range",
+      "id": "product_swatches_padding_right",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ block.settings.hide_padding == false }}"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.watchswatches",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}
+{% # theme-check-enable %}

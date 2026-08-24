@@ -1,0 +1,47 @@
+{%- comment -%} ============================================================
+  STRAPPED — Global Font & Typography Snippet
+  snippets/strapped-fonts.liquid
+  Usage: {%- render 'strapped-fonts' -%}
+  Place at the top of every strapped section, before its <style> block.
+  These fonts are served via Adobe Fonts (Typekit) — they are already
+  loaded by your Horizons theme. Do NOT add a <link> tag for them.
+  FONT ROLES
+  --sb-font-display  ivypresto-display, serif (italic accent / scripty)
+  --sb-font-heading  neue-haas-grotesk-display, sans-serif (headings)
+  --sb-font-body     neue-haas-grotesk-text, sans-serif (body / subtext)
+  --sb-font-mono     neue-haas-grotesk-text, sans-serif (labels / buttons)
+                     ↑ swap to a monospace face here if you prefer labels
+                       to feel more editorial/code-like
+============================================================ {%- endcomment -%}
+{%- unless strapped_fonts_loaded -%}
+  {%- assign strapped_fonts_loaded = true -%}
+  <style>
+    /* ─── Strapped global font tokens ───────────────────────────────────
+     * Edit values here to update typography across all sections at once.
+     * ------------------------------------------------------------------ */
+    :root {
+      /* Font families */
+      --sb-font-display: ivypresto-display, serif;
+      --sb-font-heading: "neue-haas-grotesk-display", sans-serif;
+      --sb-font-body:    "neue-haas-grotesk-text", sans-serif;
+      --sb-font-mono:    "neue-haas-grotesk-text", sans-serif;
+      /* Font weights */
+      --sb-weight-display: 400;   /* ivypresto is always 400 italic */
+      --sb-weight-heading: 700;
+      --sb-weight-body:    400;
+      --sb-weight-mono:    400;
+      /* Font styles */
+      --sb-style-display: italic;
+      --sb-style-heading: normal;
+      --sb-style-body:    normal;
+      --sb-style-mono:    normal;
+      /* Letter spacing */
+      --sb-tracking-heading: -0.01em;
+      --sb-tracking-body:     0em;
+      --sb-tracking-mono:     0.12em;  /* labels / buttons stay spaced out */
+      /* Text transform */
+      --sb-transform-heading: none;
+      --sb-transform-mono:    uppercase;
+    }
+  </style>
+{%- endunless -%}

@@ -1,0 +1,144 @@
+
+{%- style -%}
+  #shopify-section-{{ section.id }} .strapped-ticker {
+    --sb-bg: {{ section.settings.bg_color }};
+    --sb-text: {{ section.settings.text_color }};
+    --sb-dot: {{ section.settings.dot_color }};
+    height: {{ section.settings.height }}px;
+  }
+{%- endstyle -%}
+<style>
+  .strapped-ticker {
+    background: var(--sb-bg);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    font-family: 'DM Mono', monospace;
+  }
+  .strapped-ticker__inner {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    white-space: nowrap;
+    padding-right: 3rem;
+    animation: strapped-ticker-scroll {{ section.settings.speed }}s linear infinite;
+  }
+  @keyframes strapped-ticker-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+  .strapped-ticker__item {
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: var(--sb-text);
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .strapped-ticker__dot {
+    color: var(--sb-dot);
+    font-size: 1rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+</style>
+<div class="strapped-ticker">
+  <div class="strapped-ticker__inner" aria-hidden="true">
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'item' -%}
+        <span class="strapped-ticker__item" {{ block.shopify_attributes }}>{{ block.settings.text }}</span>
+        <span class="strapped-ticker__dot">{{ section.settings.separator }}</span>
+      {%- endif -%}
+    {%- endfor -%}
+    {%- comment -%}Duplicate set for seamless loop{%- endcomment -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'item' -%}
+        <span class="strapped-ticker__item">{{ block.settings.text }}</span>
+        <span class="strapped-ticker__dot">{{ section.settings.separator }}</span>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</div>
+{% schema %}
+{
+  "name": "Strapped — Ticker",
+  "tag": "section",
+  "class": "strapped-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#3D2B1F"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#E8D5C0"
+    },
+    {
+      "type": "color",
+      "id": "dot_color",
+      "label": "Separator color",
+      "default": "#D4A5A5"
+    },
+    {
+      "type": "text",
+      "id": "separator",
+      "label": "Separator character",
+      "default": "·"
+    },
+    {
+      "type": "range",
+      "id": "height",
+      "min": 32,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "label": "Bar height",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "speed",
+      "min": 8,
+      "max": 60,
+      "step": 2,
+      "unit": "s",
+      "label": "Scroll speed",
+      "default": 18
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Ticker item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Satin Bands"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Strapped — Ticker",
+      "blocks": [
+        { "type": "item", "settings": { "text": "Satin Bands" } },
+        { "type": "item", "settings": { "text": "Sport Loops" } },
+        { "type": "item", "settings": { "text": "Braided Luxury" } },
+        { "type": "item", "settings": { "text": "Milanese Mesh" } },
+        { "type": "item", "settings": { "text": "Leather Link" } },
+        { "type": "item", "settings": { "text": "All Series Compatible" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

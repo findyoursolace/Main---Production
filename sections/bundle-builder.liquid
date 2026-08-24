@@ -1,0 +1,388 @@
+{% comment %} 
+  Horizons Bundle - Global Cart Refresh for Horizon Theme
+{% endcomment %}
+
+<style>
+  :root {
+    --sb-bg: {{ section.settings.bg_color }};
+    --sb-accent: #000000;
+    --sb-text: #1a1a1a;
+    --sb-gray: #f4f4f4;
+    --sb-border: #e5e5e5;
+    --sb-green: #1a8911;
+  }
+
+  #sb-bundle-wrapper {
+    background-color: var(--sb-bg);
+    color: var(--sb-text);
+    padding: 40px 20px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  .sb-container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+  @media (min-width: 1024px) { .sb-container { flex-direction: row; align-items: flex-start; } }
+
+  /* --- SEARCH & FILTER BAR --- */
+  .sb-results-header { font-size: 14px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 15px; display: flex; align-items: center; }
+  .sb-filter-bar { display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px; width: 100%; }
+
+  @media (min-width: 768px) {
+    .sb-filter-bar { flex-direction: row; align-items: center; gap: 20px; }
+    .sb-results-header { margin-bottom: 0; white-space: nowrap; }
+  }
+
+  .sb-search-wrapper { position: relative; flex: 1; min-width: 200px; }
+  .sb-search-input { width: 100%; padding: 12px 40px 12px 15px; border: 1px solid var(--sb-border); border-radius: 12px; font-size: 15px; font-weight: 700; color: #000; outline: none; box-sizing: border-box; }
+  .sb-search-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 18px; font-weight: bold; color: #3e529a; display: none; }
+
+  .sb-filter-group { display: flex; gap: 10px; align-items: center; }
+  .sb-filter-select { appearance: none; -webkit-appearance: none; padding: 10px 35px 10px 15px; border: 1px solid var(--sb-border); border-radius: 12px; background: #fff; font-size: 14px; font-weight: 800; cursor: pointer; min-width: 120px; background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 15px center; }
+  .sb-clear-all { font-size: 13px; font-weight: 900; text-transform: uppercase; color: #9da3af; cursor: pointer; letter-spacing: 0.1em; display: none; }
+
+  /* --- GRID --- */
+  .sb-main-content { flex: 1; min-width: 0; }
+  .sb-product-grid { display: grid; gap: 15px; grid-template-columns: repeat(2, 1fr); width: 100%; }
+  @media (min-width: 768px) { .sb-product-grid { grid-template-columns: repeat(3, 1fr); } }
+  .sb-card { background: #fff; border: 1px solid var(--sb-border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+  .sb-image-area { aspect-ratio: 1/1; background: #fcfcfc; padding: 10px; display: flex; align-items: center; justify-content: center; position: relative; }
+  .sb-image-area img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .sb-info { padding: 12px; flex-grow: 1; display: flex; flex-direction: column; gap: 4px; }
+  .sb-info h3 { margin: 0; font-size: 10px; font-weight: 800; text-transform: uppercase; color: #999; }
+  .sb-variant-title { font-size: 13px; font-weight: 900; color: #000; margin-bottom: 0; }
+  .sb-variant-size-label { display: block; font-size: 10px; font-weight: 700; color: #888; margin-top: 0; text-transform: uppercase; }
+  
+  .sb-price-row { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 8px; }
+  .sb-card-price { font-weight: 900; font-size: 14px; color: #000; }
+  .sb-add-btn { background: var(--sb-accent); color: #fff; border: none; padding: 8px 15px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
+
+  /* --- SUMMARY CART ITEMS --- */
+  .sb-added-header { font-size: 14px; font-weight: 900; color: #9da3af; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 15px; display: none; }
+  
+  .sb-cart-item { display: flex; align-items: center; gap: 15px; background: #fff; padding: 15px; border-radius: 15px; border: 1px solid #f0f0f0; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+  .sb-cart-item img { width: 60px; height: 60px; object-fit: contain; }
+  .sb-cart-item-info { flex: 1; min-width: 0; }
+  .sb-cart-item-parent { font-size: 11px; font-weight: 800; color: #000; text-transform: uppercase; display: block; }
+  .sb-cart-item-title { font-size: 15px; font-weight: 800; color: #000; margin: 2px 0; display: block; }
+  .sb-cart-item-pricing { font-size: 13px; font-weight: 700; color: #666; display: flex; gap: 8px; align-items: center; }
+  .sb-cart-item-pricing .struck { text-decoration: line-through; color: #ccc; }
+  .sb-cart-item-pricing .free-label { color: var(--sb-green); font-weight: 900; }
+
+  .sb-qty-controls { display: flex; align-items: center; background: #f8f8f8; border-radius: 8px; padding: 4px 8px; gap: 12px; }
+  .sb-qty-btn { cursor: pointer; font-size: 16px; font-weight: bold; padding: 0 5px; user-select: none; }
+  .sb-qty-val { font-size: 13px; font-weight: 800; min-width: 12px; text-align: center; }
+  .sb-trash { cursor: pointer; color: #ccc; margin-left: 5px; transition: color 0.2s; }
+  .sb-trash:hover { color: #ff4d4d; }
+
+  /* --- PRICE SUMMARY --- */
+  .sb-price-summary { margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--sb-border); display: flex; flex-direction: column; gap: 8px; }
+  .sb-summary-line { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; }
+  .sb-summary-line.sub { display: none; }
+  .sb-summary-line.savings { color: var(--sb-green); display: none; }
+  .sb-summary-line.total { font-size: 22px; font-weight: 900; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--sb-border); }
+  .sb-checkout-btn { width: 100%; background: var(--sb-accent); color: #fff; border: none; padding: 16px; border-radius: 12px; font-weight: 900; font-size: 14px; cursor: pointer; margin-top: 15px; }
+
+  /* --- PROGRESS BAR --- */
+  .sb-progress-container { margin: 15px 0 45px; width: 90%; }
+  .sb-bar-bg { height: 10px; background: var(--sb-gray); border-radius: 10px; position: relative; }
+  .sb-bar-fill { height: 100%; background: var(--sb-accent); border-radius: 10px; width: 0%; transition: width 0.4s ease; }
+  .sb-dot { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 12px; height: 12px; background: #fff; border: 2px solid var(--sb-border); border-radius: 50%; }
+  .sb-dot.active { border-color: var(--sb-accent); background: var(--sb-accent); }
+  .sb-dot-label { position: absolute; top: 18px; transform: translateX(-50%); font-size: 8px; font-weight: 800; white-space: nowrap; }
+
+  /* --- MOBILE FOOTER DRAWER --- */
+  .sb-mobile-footer { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid var(--sb-border); z-index: 9999; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); }
+  @media (max-width: 1023px) { .sb-mobile-footer { display: block; } #sb-bundle-wrapper { padding-bottom: 140px; } }
+  .sb-m-drawer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background: #fcfcfc; }
+  .sb-m-drawer.open { max-height: 450px; overflow-y: auto; border-bottom: 1px solid #eee; padding: 15px 20px; }
+  .sb-m-bar-row { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 12px 20px; }
+  .sb-m-expand-trigger { display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #666; cursor: pointer; }
+  .sb-m-chevron { transition: transform 0.3s; }
+  .sb-m-chevron.up { transform: rotate(180deg); }
+
+  /* MODAL */
+  .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); justify-content: center; align-items: center; }
+  .modal img { max-width: 400px; }
+  .modal .close { position: absolute; top: 20px; right: 30px; font-size: 32px; color: #fff; cursor: pointer; }
+</style>
+
+<div id="sb-bundle-wrapper">
+  <div class="sb-container">
+    {% assign selected_collection = section.settings.collection %}
+    {% if selected_collection == blank %}
+      <div style="text-align: center; padding: 60px; width: 100%;"><h2>Setup Required</h2></div>
+    {% else %}
+    <div class="sb-main-content">
+      <div class="sb-step">
+        <h2 class="sb-step-title" style="font-size: 18px; font-weight: 900; text-transform: uppercase; border-bottom: 3px solid #000; width: fit-content;">1. Select Your Apple Watch Size</h2>
+        <div style="margin: 10px 0 20px;"><a href="#" id="openModal" style="color:#00000050; font-size: 14px;">What's my size?</a></div>
+        <div id="imageModal" class="modal"><span class="close">&times;</span><img src="https://solacebands.com/cdn/shop/files/IMG-001_1.jpg?v=1721154326&width=800"></div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 450px; margin-bottom: 40px;">
+          <div class="sb-size-btn active" id="size-SMALL" onclick="updateSize('SMALL')" style="background: #fff; border: 2px solid var(--sb-border); border-radius: 12px; padding: 15px; cursor: pointer; display: flex; flex-direction: column; align-items: center;">
+            <img src="https://cdn.shopify.com/s/files/1/0558/0976/9626/files/small_band.png?v=1762185807" style="width:60px; margin-bottom:10px;">
+            <span style="font-weight: 900; font-size: 13px;">38/40/41/42MM</span>
+          </div>
+          <div class="sb-size-btn" id="size-LARGE" onclick="updateSize('LARGE')" style="background: #fff; border: 2px solid var(--sb-border); border-radius: 12px; padding: 15px; cursor: pointer; display: flex; flex-direction: column; align-items: center; opacity: 0.4; filter: grayscale(1);">
+            <img src="https://cdn.shopify.com/s/files/1/0558/0976/9626/files/large_band.png?v=1762185818" style="width:60px; margin-bottom:10px;">
+            <span style="font-weight: 900; font-size: 13px;">44/45/46/49MM</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sb-step">
+        <h2 class="sb-step-title" style="font-size: 18px; font-weight: 900; text-transform: uppercase; border-bottom: 3px solid #000; width: fit-content; margin-bottom: 20px;">2. Choose Your Bands</h2>
+        <div class="sb-filter-bar">
+          <div class="sb-results-header"><span id="sb-result-count">0</span>&nbsp;RESULTS</div>
+          <div class="sb-search-wrapper">
+            <input type="text" id="sb-search-box" class="sb-search-input" placeholder="Search..." onkeyup="renderGrid()">
+            <span id="sb-search-x" class="sb-search-clear" onclick="clearSearch()">&times;</span>
+          </div>
+          <div class="sb-filter-group">
+            <select id="filter-material" class="sb-filter-select" onchange="renderGrid()">
+              <option value="all">Material</option>
+              <option value="Woven">Nylon</option>
+              <option value="Links">Links</option>
+              <option value="Leather">Leather</option>
+              <option value="Metal">Metal</option>
+            </select>
+            <select id="filter-design" class="sb-filter-select" onchange="renderGrid()">
+              <option value="all">Designs</option>
+              <option value="Prints">Prints & Patterns</option>
+              <option value="Solids">Solids</option>
+            </select>
+            <span id="sb-clear-filters" class="sb-clear-all" onclick="resetFilters()">CLEAR</span>
+          </div>
+        </div>
+        <div id="sb-grid" class="sb-product-grid"></div>
+      </div>
+    </div>
+
+    <aside class="sb-sidebar">
+      <div class="sb-bundle-box">
+        <h3 id="sb-progress-msg" style="margin: 0; font-size: 14px; font-weight: 900; text-transform: uppercase;">Add a band to get started</h3>
+        <div class="sb-progress-container">
+          <div class="sb-bar-bg">
+            <div id="bar-fill" class="sb-bar-fill"></div>
+            <div id="dot-2" class="sb-dot" style="left: 40%;"></div>
+            <div class="sb-dot-label" style="left: 40%;">BUY 2 GET 1</div>
+            <div id="dot-5" class="sb-dot" style="left: 100%;"></div>
+            <div class="sb-dot-label" style="left: 100%;">5 FOR $99</div>
+          </div>
+        </div>
+        <div id="added-header" class="sb-added-header">Added to Bundle</div>
+        <div id="sb-cart-list"></div>
+        <div class="sb-price-summary">
+          <div id="sub-row" class="sb-summary-line sub"><span>Subtotal</span><span id="sum-subtotal">$0.00</span></div>
+          <div class="sb-summary-line savings" id="sb-savings-row"><span>Bundle Savings</span><span id="sum-savings">-$0.00</span></div>
+          <div class="sb-summary-line total"><span>Total</span><span id="sum-total">$0.00</span></div>
+          <button class="sb-checkout-btn" id="sb-main-checkout" onclick="window.location='/checkout'">CHECKOUT NOW</button>
+        </div>
+      </div>
+    </aside>
+    {% endif %}
+  </div>
+</div>
+
+<div class="sb-mobile-footer">
+  <div id="sb-mobile-drawer" class="sb-m-drawer">
+    <div class="sb-added-header" style="display:block;">Added to Bundle</div>
+    <div id="sb-m-cart-items"></div>
+    <div id="sb-m-price-summary" style="margin-top:15px; border-top:1px solid #eee; padding-top:15px;"></div>
+  </div>
+  <div class="sb-m-bar-row">
+    <div style="flex: 1;" onclick="toggleMobileDrawer()">
+      <div class="sb-m-expand-trigger">
+        <span id="sb-m-status">Add a band to get started</span>
+        <svg class="sb-m-chevron" id="sb-m-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div style="height: 6px; background: #eee; border-radius: 10px; margin-top: 4px; overflow: hidden;"><div id="sb-m-fill" style="height: 100%; background: #000; width: 0%; transition: 0.3s;"></div></div>
+    </div>
+    <div id="sb-m-price" style="font-weight: 900; font-size: 15px;">$0.00</div>
+    <button class="sb-add-btn" style="padding: 10px 15px;" onclick="window.location='/checkout'">CHECKOUT</button>
+  </div>
+</div>
+
+<script>
+  const PRODUCTS = [
+    {% if selected_collection != blank %}
+      {% assign first_variant_output = true %}
+
+      {% for product in selected_collection.products %}
+        {% assign non_v = "" %}
+
+        {% for image in product.images %}
+          {% unless image.attached_to_variant? %}
+            {% capture url %}{{ image | img_url: '400x400' }}{% endcapture %}
+            {% if non_v == "" %}
+              {% assign non_v = url %}
+            {% else %}
+              {% assign non_v = non_v | append: "," | append: url %}
+            {% endif %}
+          {% endunless %}
+        {% endfor %}
+
+        {% assign clean = non_v | split: "," %}
+
+        {% for v in product.variants %}
+          {% if v.inventory_quantity > 0 %}
+            {% unless first_variant_output %},{% endunless %}
+            {
+              id: "{{ v.id }}",
+              url: "{{ product.url }}?variant={{ v.id }}",
+              parentTitle: {{ product.title | json }},
+              variantTitle: {{ v.title | json }},
+              price: {{ v.price | divided_by: 100.0 }},
+              productId: {{ product.id }},
+              tags: {{ product.tags | json }},
+              img: {{ v.image | default: product.featured_image | img_url: '400x400' | json }},
+              sizeGroup: (function() {
+                const o = "{{ v.title | downcase }}";
+                if (o.includes("38") || o.includes("40") || o.includes("41") || o.includes("42")) return "SMALL";
+                if (o.includes("44") || o.includes("45") || o.includes("46") || o.includes("49")) return "LARGE";
+                return "UNIVERSAL";
+              })()
+            }
+            {% assign first_variant_output = false %}
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+    {% endif %}
+  ];
+
+  function clearSearch() { document.getElementById('sb-search-box').value = ''; renderGrid(); }
+  function resetFilters() { document.getElementById('filter-material').value = 'all'; document.getElementById('filter-design').value = 'all'; renderGrid(); }
+  function toggleMobileDrawer() { document.getElementById('sb-mobile-drawer').classList.toggle('open'); document.getElementById('sb-m-chevron').classList.toggle('up'); }
+  function updateSize(s) { state.size = s; document.getElementById('size-SMALL').style.opacity = s==='SMALL'?'1':'0.4'; document.getElementById('size-LARGE').style.opacity = s==='LARGE'?'1':'0.4'; renderGrid(); }
+
+  function renderGrid() {
+    const q = document.getElementById('sb-search-box').value.toLowerCase();
+    const m = document.getElementById('filter-material').value;
+    const d = document.getElementById('filter-design').value;
+    const filtered = PRODUCTS.filter(p => (p.sizeGroup === state.size || p.sizeGroup === "UNIVERSAL") && (p.parentTitle.toLowerCase().includes(q) || p.variantTitle.toLowerCase().includes(q)) && (m==='all'||p.tags.includes(m)) && (d==='all'||p.tags.includes(d)));
+    document.getElementById('sb-result-count').innerText = filtered.length;
+    document.getElementById('sb-grid').innerHTML = filtered.map(p => `
+      <div class="sb-card">
+        <a href="${p.url}" class="sb-image-area"><img src="${p.img}"></a>
+        <div class="sb-info">
+          <h3>${p.parentTitle}</h3>
+          <span class="sb-variant-title">${p.variantTitle.split(' / ')[0]}</span>
+          <span class="sb-variant-size-label">${p.variantTitle.split(' / ')[1] ? 'Size: '+p.variantTitle.split(' / ')[1] : ''}</span>
+          <div class="sb-price-row"><span class="sb-card-price" data-sl-attribute-p="${p.productId}">$${p.price.toFixed(2)}</span><button class="sb-add-btn" onclick="modifyBundle('${p.id}', 1)">Add</button></div>
+        </div>
+      </div>`).join('');
+  }
+
+  function modifyBundle(id, delta) {
+    const item = state.cart.find(x => x.id === id);
+    if(item) { item.qty += delta; if(item.qty <= 0) state.cart = state.cart.filter(x => x.id !== id); }
+    else if(delta > 0) { state.cart.push({...PRODUCTS.find(x => x.id === id), qty: 1}); }
+    updateSummary();
+    fetch(delta > 0 ? '/cart/add.js' : '/cart/change.js', { 
+      method: 'POST', 
+      headers: {'Content-Type': 'application/json'}, 
+      body: JSON.stringify(delta > 0 ? {items: [{id, quantity: 1}]} : {id, quantity: item ? item.qty : 0}) 
+    }).then(() => {
+      document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true }));
+    });
+  }
+
+  function updateSummary() {
+    const count = state.cart.reduce((n, x) => n + x.qty, 0);
+
+    // Calculate subtotal from each item's actual price
+    const subtotal = state.cart.reduce((sum, x) => sum + (x.price * x.qty), 0);
+
+    // Use the first item's price as the per-unit price for bundle tier logic
+    const unitPrice = state.cart.length > 0 ? state.cart[0].price : 0;
+
+    let total = subtotal;
+    if (count >= 5) { total = 99.00 + (count - 5) * unitPrice; } else if (count >= 3) { total = subtotal - unitPrice; }
+    let savings = subtotal - total;
+
+    document.getElementById('sb-progress-msg').innerText = count === 0 ? "Add a band to get started" : (count === 1 ? "Add 1 more for a free band" : (count === 2 ? "Add your free band!" : (count === 3 ? "Checkout now or add more for additional savings" : (count === 4 ? "Add 1 more band for 5 for $99" : "All rewards unlocked"))));
+    document.getElementById('sb-m-status').innerText = document.getElementById('sb-progress-msg').innerText;
+    document.getElementById('bar-fill').style.width = (Math.min(count, 5)/5*100)+'%';
+    document.getElementById('sb-m-fill').style.width = (Math.min(count, 5)/5*100)+'%';
+    document.getElementById('added-header').style.display = count > 0 ? 'block' : 'none';
+    document.getElementById('sub-row').style.display = count > 0 ? 'flex' : 'none';
+    document.getElementById('sb-savings-row').style.display = count >= 3 ? 'flex' : 'none';
+
+    let globalCounter = 0;
+    let itemsToRender = [];
+
+    state.cart.forEach(item => {
+      const p = item.price;
+      if (count >= 5) {
+        let discountedQty = 0; let fullPriceQty = 0;
+        for (let q = 0; q < item.qty; q++) { globalCounter++; if (globalCounter <= 5) discountedQty++; else fullPriceQty++; }
+        if (discountedQty > 0) itemsToRender.push({ ...item, displayQty: discountedQty, pricing: `<span class="struck">$${p.toFixed(2)}</span> $19.80` });
+        if (fullPriceQty > 0) itemsToRender.push({ ...item, displayQty: fullPriceQty, pricing: `$${p.toFixed(2)}` });
+      } else if (count >= 3) {
+        let pricingHtml = "";
+        if (state.cart.length === 1) { pricingHtml = `<span class="struck">$${p.toFixed(2)}</span> $${(total/count).toFixed(2)}`; } else {
+          let foundFree = false; for (let q = 0; q < item.qty; q++) { globalCounter++; if (globalCounter === 3) foundFree = true; }
+          pricingHtml = foundFree ? `<span class="struck">$${p.toFixed(2)}</span> <span class="free-label">FREE</span>` : `$${p.toFixed(2)}`;
+        }
+        itemsToRender.push({ ...item, displayQty: item.qty, pricing: pricingHtml });
+      } else { itemsToRender.push({ ...item, displayQty: item.qty, pricing: `$${p.toFixed(2)}` }); }
+    });
+
+    const cartHtml = itemsToRender.map(i => `
+      <div class="sb-cart-item">
+        <img src="${i.img}">
+        <div class="sb-cart-item-info">
+          <span class="sb-cart-item-parent">${i.parentTitle}</span>
+          <span class="sb-cart-item-title">${i.variantTitle.split(' / ')[0]}</span>
+          <div class="sb-cart-item-pricing" data-sl-attribute-p="${i.productId}">${i.pricing}</div>
+        </div>
+        <div class="sb-qty-controls"><div class="sb-qty-btn" onclick="modifyBundle('${i.id}', -1)">-</div><span class="sb-qty-val">${i.displayQty}</span><div class="sb-qty-btn" onclick="modifyBundle('${i.id}', 1)">+</div></div>
+        <div class="sb-trash" onclick="modifyBundle('${i.id}', -${i.qty})"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></div>
+      </div>`).join('');
+
+    document.getElementById('sb-cart-list').innerHTML = cartHtml;
+    document.getElementById('sb-m-cart-items').innerHTML = cartHtml;
+    document.getElementById('sum-subtotal').innerText = '$'+subtotal.toFixed(2);
+    document.getElementById('sum-savings').innerText = '-$'+savings.toFixed(2);
+    document.getElementById('sum-total').innerText = '$'+total.toFixed(2);
+    document.getElementById('sb-m-price').innerText = '$'+total.toFixed(2);
+    document.getElementById('sb-m-price-summary').innerHTML = `<div class="sb-summary-line"><span>Subtotal</span><span style="${savings > 0 ? 'text-decoration: line-through; color: #999;' : ''}">$${subtotal.toFixed(2)}</span></div>` + (savings > 0 ? `<div class="sb-summary-line" style="color: var(--sb-green);"><span>Bundle Savings</span><span>-$${savings.toFixed(2)}</span></div>` : "") + `<div class="sb-summary-line" style="font-weight: 900; font-size: 1.2em; border-top: 1px dashed #eee; padding-top: 10px; margin-top: 10px;"><span>Total</span><span>$${total.toFixed(2)}</span></div>`;
+  }
+
+  let state = { size: 'SMALL', cart: [] };
+
+  document.getElementById('openModal').onclick = e => { e.preventDefault(); document.getElementById('imageModal').style.display = 'flex'; };
+  document.querySelector('.close').onclick = () => document.getElementById('imageModal').style.display = 'none';
+  
+  fetch('/cart.js').then(res => res.json()).then(cart => {
+    cart.items.forEach(cartItem => {
+      const match = PRODUCTS.find(p => p.id == cartItem.id);
+      if (match) state.cart.push({...match, qty: cartItem.quantity});
+    });
+    updateSummary();
+  });
+
+  renderGrid();
+</script>
+
+{% schema %}
+{
+  "name": "Horizons Bundle Rebuild",
+  "settings": [
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Bundle Collection"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Horizons Bundle Rebuild"
+    }
+  ]
+}
+{% endschema %}

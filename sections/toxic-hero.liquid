@@ -1,0 +1,306 @@
+<div id="solace-hero-{{ section.id }}" class="solace-hero-outer">
+  <style>
+    /* 1. SCOPED RESET & WRAPPER */
+    #solace-hero-{{ section.id }} {
+      all: unset;
+      display: block;
+      position: relative;
+      background-color: #ffffff;
+      overflow: hidden;
+      padding: 40px 20px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      box-sizing: border-box;
+    }
+
+    #solace-hero-{{ section.id }} * { 
+      box-sizing: border-box; 
+      margin: 0 auto; 
+      line-height: 1.2; 
+    }
+
+    /* 2. LAYOUT GRID - Mobile First */
+    .solace-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column; /* Image first on mobile */
+      gap: 40px;
+      position: relative;
+      z-index: 5;
+    }
+
+    @media (min-width: 1024px) {
+      .solace-container { 
+        flex-direction: row-reverse; /* Text first on desktop */
+        align-items: center;
+        padding: 60px 0;
+        gap: 80px;
+      }
+      .solace-text-content { flex: 1.1; }
+      .solace-image-wrapper { flex: 0.9; }
+    }
+
+    /* 3. TYPOGRAPHY */
+    .solace-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      background: #fef2f2;
+      border-radius: 9999px;
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: #000;
+      margin-bottom: 24px;
+    }
+
+    .solace-heading {
+      font-size: clamp(2rem, 8vw, 4rem);
+      font-weight: 900;
+      color: #0f172a;
+      text-transform: uppercase;
+      letter-spacing: -0.04em;
+      margin-bottom: 16px;
+      line-height: 1.05;
+    }
+
+    .solace-heading-accent { 
+      color: #a6bf76; 
+      font-style: italic; 
+    }
+
+    .solace-subheading {
+      font-size: 18px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: #000;
+      margin-bottom: 30px;
+      display: block;
+      opacity: 0.9;
+    }
+
+    .solace-p {
+      color: #64748b;
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+      line-height: 1.5;
+    }
+
+    /* 4. CTA & TRUST BADGES */
+    .solace-cta-group {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    @media (min-width: 640px) {
+      .solace-cta-group { flex-direction: row; align-items: center; }
+    }
+
+    .solace-cta {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      background: #000 !important;
+      color: #fff !important;
+      padding: 22px 40px;
+      border-radius: 16px;
+      text-decoration: none !important;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-size: 13px;
+      transition: transform 0.2s ease;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .solace-cta:hover { transform: translateY(-3px); }
+
+    .solace-trust-stack {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .trust-circles { display: flex; }
+    .circle {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 900;
+      padding:10px !important;
+
+    }
+
+    /* 5. IMAGE & FLOATING CARDS */
+    .solace-image-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .solace-main-img-frame {
+      width: 100%;
+      aspect-ratio: 1/1;
+      border-radius: 40px;
+      overflow: hidden;
+      background: #f8fafc;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+    }
+
+    @media (min-width: 1024px) {
+      .solace-main-img-frame { aspect-ratio: 4/5; border-radius: 60px; }
+    }
+
+    .solace-main-img-frame img { width: 100%; height: 100%; object-fit: cover; }
+
+    .solace-glass-card {
+      position: absolute;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 15px 20px;
+      border-radius: 30px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      z-index: 20;
+      padding:10px !important;
+    }
+
+    .card-top { 
+      top: 10px; 
+      left: -15px; 
+      background: rgba(255,255,255,0.9);
+      border: 1px solid #fff;
+      text-align: center;
+    }
+
+    .card-bottom { 
+      bottom: 10px; 
+      right: -15px; 
+      background: rgba(22, 28, 45, 0.95); 
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .solace-icon-bg {
+      background: #3F5C7E;
+      width: 36px; height: 36px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .bg-text-watermark {
+      position: absolute;
+      bottom: -20px;
+      left: -10px;
+      font-size: 120px;
+      font-weight: 900;
+      color: #f1f5f9;
+      z-index: -1;
+      opacity: 0.7;
+    }
+
+    /* 6. GLOWS */
+    .glow { position: absolute; border-radius: 100%; filter: blur(100px); pointer-events: none; z-index: 1; opacity: 0.4; }
+    .glow-1 { top: 0; right: 0; width: 400px; height: 400px; background: #dbeafe; }
+    .glow-2 { bottom: 0; left: 0; width: 300px; height: 300px; background: #fee2e2; }
+  </style>
+
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+
+  <div class="solace-container">
+    
+    <div class="solace-image-wrapper">
+      <div class="solace-main-img-frame">
+        {% if section.settings.hero_image %}
+          <img src="{{ section.settings.hero_image | img_url: '1200x' }}" alt="Solace Product">
+        {% else %}
+          <div style="height:100%; display:flex; align-items:center; justify-content:center; color:#cbd5e1; font-weight:900;">IMAGE</div>
+        {% endif %}
+      </div>
+
+      <div class="solace-glass-card card-top">
+        <div style="font-size:9px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:2px;">Purity Score</div>
+        <div style="font-size:24px; font-weight:900; color:#0f172a;">100/100</div>
+      </div>
+
+      <div class="solace-glass-card card-bottom">
+        <div class="solace-icon-bg">
+          <svg style="width:18px; height:18px; color:#fff;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <div>
+          <div style="font-size:9px; font-weight:800; color:#60a5fa; text-transform:uppercase; letter-spacing:0.05em;">{{ section.settings.card_2_label }}</div>
+          <div style="font-size:16px; font-weight:900;">{{ section.settings.card_2_value }}</div>
+        </div>
+      </div>
+
+      <div class="bg-text-watermark">S.01</div>
+    </div>
+
+    <div class="solace-text-content">
+      <div class="solace-badge" style="margin-bottom:20px;">
+        <span style="width:6px; height:6px; background:#c0392b; border-radius:50%;"></span>
+        {{ section.settings.badge_text }}
+      </div>
+      
+      <h1 class="solace-heading">
+        {{ section.settings.title_line_1 }} 
+        <span class="solace-heading-accent">{{ section.settings.title_line_2 }}</span><br>
+        <span style="font-size: 0.6em; display: block; margin-top: 5px; color: #334155; letter-spacing:0;">{{ section.settings.title_line_3 }}</span>
+      </h1>
+
+      <span class="solace-subheading" style=" margin-bottom:20px;">{{ section.settings.sub_header_text }}</span>
+      
+      <p class="solace-p" style="margin-bottom:20px;">{{ section.settings.subtitle }}</p>
+
+      <div class="solace-cta-group">
+        <a href="{{ section.settings.cta_link }}" class="solace-cta">
+          {{ section.settings.cta_text }}
+        </a>
+        
+        <div class="solace-trust-stack">
+           <div class="trust-circles">
+              <div class="circle" style="background:#f1f5f9;">{{ section.settings.trust_badge_1_text }}</div>
+              <div class="circle" style="background:#dbeafe; color:#3F5C7E; margin-left:-15px;">{{ section.settings.trust_badge_2_text }}</div>
+           </div>
+           <span style="font-size:14px; font-weight:600; text-transform:uppercase; color:#94a3b8; letter-spacing:0.1em; line-height:1.1;">{{ section.settings.trust_label_text }}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Solace Hero 2026",
+  "settings": [
+    { "type": "text", "id": "badge_text", "label": "Badge Text", "default": "Special Health Report: 2026" },
+    { "type": "text", "id": "title_line_1", "label": "Heading Line 1", "default": "5 Harmful" },
+    { "type": "text", "id": "title_line_2", "label": "Heading Word (Colored)", "default": "Toxins" },
+    { "type": "text", "id": "title_line_3", "label": "Heading Line 2", "default": "Hiding in your smartwatch band" },
+    { "type": "text", "id": "sub_header_text", "label": "Sub-Header", "default": "(And a guaranteed safe alternative)" },
+    { "type": "textarea", "id": "subtitle", "label": "Subtitle", "default": "You wear it 24/7, but could it be slowly poisoning your skin? Read below to see 5 dangerous toxins." },
+    { "type": "text", "id": "trust_badge_1_text", "label": "Badge 1", "default": "99%" },
+    { "type": "text", "id": "trust_badge_2_text", "label": "Badge 2", "default": "✓" },
+    { "type": "text", "id": "trust_label_text", "label": "Trust Label", "default": "Dermatologically Certified" },
+    { "type": "text", "id": "card_2_label", "label": "Card Label", "default": "Breathability" },
+    { "type": "text", "id": "card_2_value", "label": "Card Value", "default": "Zero-Rash Tech" },
+    { "type": "text", "id": "cta_text", "label": "CTA Text", "default": "Audit My Health" },
+    { "type": "url", "id": "cta_link", "label": "CTA Link" },
+    { "type": "image_picker", "id": "hero_image", "label": "Main Image" }
+  ],
+  "presets": [{ "name": "Solace Hero 2026" }]
+}
+{% endschema %}

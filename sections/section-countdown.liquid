@@ -1,0 +1,267 @@
+<style class="countdown">
+    [id="{{ section.id }}"] {
+        padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;
+    }
+
+    .countdown {
+    }
+
+    .countdownTotal {
+        text-align: center;
+        font-size: 46px;
+    }
+
+    .countdownBody {
+        max-width: 500px;
+        margin: 20px auto 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .countdownBodyInfo {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .countdownBodyBar {
+        height: 40px;
+        width: 100%;
+        background-color: #e1e1e1;
+        border-radius: 50px;
+        padding: 4px;
+    }
+
+    .countdownBodyBarInner {
+        height: 100%;
+        border-radius: 50px;
+        background: linear-gradient(270deg, #ff4d94, #ff66cc, #ff1493, #ff3399);
+        background-size: 600% 600%;
+        animation: pinkGradient 8s ease infinite, pulseWidth 5s ease-in-out infinite;
+        transform-origin: left;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        padding-left: 10px;
+        color: white;
+        min-width: 40px;
+    }
+
+    @keyframes pinkGradient {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    @keyframes pulseWidth {
+        0%, 100% {
+            transform: scaleX(1);
+        }
+        25% {
+            transform: scaleX(1.01);
+        }
+        50% {
+            transform: scaleX(0.99);
+        }
+        75% {
+            transform: scaleX(1.01);
+        }
+    }
+
+    .countdownDonation {
+        text-align: center;
+        margin-top: 10px;
+    }
+
+
+    @media (max-width: 800px) {
+        [id="{{ section.id }}"] {
+            padding: {{ section.settings.padding_top_mobile }}px 0 {{ section.settings.padding_bottom_mobile }}px;
+        }
+
+        .countdownTotal {
+            font-size: 36px;
+        }
+    }
+</style>
+
+{% liquid
+    assign remaining_quantity = 0
+    assign total_price_sold = 0
+    assign total_quanity_sold = 0 | plus: section.settings.override_sold_count
+    assign initial_donation_checkpoint = 15000
+    assign later_checkpoint = 1000
+    assign next_checkpoint = initial_donation_checkpoint
+    assign checkpoints_passed = 0
+
+    for product in collection.products
+        for variant in product.variants
+            assign original_quantity = variant.metafields.maltertech.original_stock
+            unless original_quantity
+                continue
+            endunless
+
+            comment
+            Calculate quantity sold
+            endcomment
+            assign variant_quanity_sold = original_quantity | minus: variant.inventory_quantity | plus: 0 | abs
+            assign total_quanity_sold = total_quanity_sold | plus: variant_quanity_sold
+            assign remaining_quantity = remaining_quantity | plus: variant.inventory_quantity
+
+            assign total_variant_price_sold = variant_quanity_sold | times: variant.price
+            assign total_price_sold = total_price_sold | plus: total_variant_price_sold
+
+        endfor
+    endfor
+
+    comment
+    Calculate donation info
+
+    1st tier: Pass 15000 bands sold
+    After that, count every 1000 bands sold
+
+    Starts at $25,000 and increases in $1,000 increments each time another 1,000 bands are sold after the initial 15K.
+
+    endcomment
+
+    if total_quanity_sold >= initial_donation_checkpoint
+        assign next_checkpoint = later_checkpoint
+        assign checkpoints_passed = 1
+    endif
+    assign bands_mod_checkpoint = total_quanity_sold | modulo: next_checkpoint | times: 1.0
+    assign countdown_bar_width = bands_mod_checkpoint | divided_by: next_checkpoint | times: 100 | round
+    if countdown_bar_width > 99
+        assign countdown_bar_width = 99
+    endif
+
+    assign additional_checkpoints = total_quanity_sold | minus: initial_donation_checkpoint
+    assign additional_checkpoints = additional_checkpoints | divided_by: later_checkpoint
+    assign checkpoints_passed = checkpoints_passed | plus: additional_checkpoints
+
+    if checkpoints_passed <= 0
+        assign checkpoints_passed = 0
+    endif
+
+    assign total_dontations = 0
+    if checkpoints_passed == 1
+        assign total_dontations = 25000
+    elsif checkpoints_passed > 1
+        assign additional_donations = checkpoints_passed | minus: 1 | times: 1000
+        assign total_dontations = 25000 | plus: additional_donations
+    endif
+%}
+
+
+<section id="{{ section.id }}">
+    <div class="countdown container">
+        <div class="countdownTotal">
+            {{ total_quanity_sold | times: 100 | money_without_trailing_zeros | replace: "$", "" }} Bands Sold!
+        </div>
+
+        {% comment %} Next Donation Countdown {% endcomment %}
+        <div class="countdownBody">
+            <div class="countdownBodyInfo">
+                <div class="countdownBodyInfoLeft">
+                    {{ bands_mod_checkpoint | times: 100 | money_without_trailing_zeros | replace: "$", "" }} / {{ next_checkpoint | times: 100 | money_without_trailing_zeros | replace: "$", "" }}
+                </div>
+                <div class="countdownBodyInfoRight">
+                    {{ next_checkpoint | minus: bands_mod_checkpoint | times: 100 | money_without_trailing_zeros | replace: "$", "" }} Until Next Donation
+                </div>
+            </div>
+
+            <div class="countdownBodyBar">
+                <div class="countdownBodyBarInner" style="width: {{ countdown_bar_width }}%">
+                    {{ countdown_bar_width }}%
+                </div>
+            </div>
+        </div>
+
+        <div class="countdownDonation">
+            Total Donations: <strong>{{ total_dontations | times: 100 | money_without_trailing_zeros }}</strong>
+        </div>
+    </div>
+
+
+</section>
+
+{% schema %}
+{
+  "name": "Countdown",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Spacing (Desktop)"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding Top",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding Bottom",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Spacing (Mobile)"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding Top",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding Bottom",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "number",
+      "id": "override_sold_count",
+      "label": "Add Sold Count",
+      "default": 0,
+      "info": "Use this to manually increase the sold count if needed."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Countdown"
+    }
+  ]
+}
+{% endschema %}

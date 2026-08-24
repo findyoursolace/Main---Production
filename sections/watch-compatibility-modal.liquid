@@ -1,0 +1,256 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+<style>
+    #compatibility {
+        top: 0; right: 0; width: 100%; height: 100%;
+        transition: 0.4s; z-index: 2147483648;
+        max-width: none; max-height: none; border: none;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none; justify-content: center; align-items: center;
+        padding: 0; margin: 0;
+    }
+    #compatibility[open] { display: flex; position: fixed; animation: appear 0.4s ease; }
+    @keyframes appear { from { opacity: 0; } to { opacity: 1; } }
+
+    #compatibilityBody {
+        background-color: white; padding: 40px 20px;
+        border-radius: 12px; max-width: 400px; width: 90%;
+        position: relative; color: #000;
+    }
+    #compatibilityBodyClose {
+        position: absolute; top: 10px; right: 15px;
+        background: none; border: none; font-size: 24px; cursor: pointer;
+    }
+    .compatibilitySwiperSlide { display: flex; flex-direction: column; align-items: center; min-height: 250px; }
+    .compatibilitySwiperSlideTitle { font-size: 1.2rem; margin-bottom: 15px; text-align: center; font-weight: bold;}
+    .compatibilitySwiperSlideSelect { width: 100%; padding: 12px; border-radius: 4px; border: 1px solid #ccc; margin-bottom: 20px; }
+    
+    .buttonV2 { 
+        background: #000; color: #fff; padding: 12px 24px; 
+        border: none; border-radius: 4px; cursor: pointer; width: 100%; text-align: center; text-decoration: none;
+    }
+    .buttonV2:disabled { background: #ccc; cursor: not-allowed; }
+    
+    .compatibilitySwiperSlideControls { margin-top: 20px; display: flex; gap: 10px; }
+    .compatibilitySwiperSlideControlsBtn { background: none; border: 1px solid #000; padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; }
+    
+    .watchInfo.active { display: block !important; }
+    .watchCompatibility.active { display: inline-flex !important; }
+    
+    .swiper-wrapper { height: auto !important; }
+</style>
+
+<script>
+  window.pageVariants = [
+    {%- for variant in product.variants -%}
+      {%- assign bandwidth_value = nil -%}
+      {%- for option in product.options_with_values -%}
+        {%- if option.name == 'Bandwidth' -%}
+          {%- assign bandwidth_value = variant.options[forloop.index0] -%}
+          {%- break -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {
+        "id": {{ variant.id }},
+        "title": {{ variant.title | json }},
+        "bandwidth": {{ bandwidth_value | json }},
+        "product": {
+          "id": {{ product.id }},
+          "title": {{ product.title | json }},
+          "handle": {{ product.handle | json }}
+        }
+      }{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+  ];
+</script>
+
+<dialog id="compatibility">
+    <div id="compatibilityBody">
+        <button id="compatibilityBodyClose" class="compatibilityClose">×</button>
+        
+        <div id="compatibilitySwiper" class="swiper">
+            <div class="swiper-wrapper">
+                <!-- Step 1: Brand -->
+                <div class="compatibilitySwiperSlide swiper-slide">
+                    <div class="compatibilitySwiperSlideTitle">Select watch manufacturer</div>
+                    <select class="compatibilitySwiperSlideSelect" name="manufacturer">
+                        <option value="" disabled selected>Loading...</option>
+                    </select>
+                    <button class="compatibilitySwiperSlideNext manufacturer buttonV2" disabled>Continue</button>
+                    <div class="compatibilitySwiperSlideControls">
+                        <button class="compatibilitySwiperSlideControlsBtn compatibilityClose">close</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Model -->
+                <div class="compatibilitySwiperSlide swiper-slide">
+                    <div class="compatibilitySwiperSlideTitle model">Select Model</div>
+                    <select class="compatibilitySwiperSlideSelect" name="model">
+                        <option value="" disabled selected>Select Manufacturer First</option>
+                    </select>
+                    <button class="compatibilitySwiperSlideNext model buttonV2" disabled>Continue</button>
+                    <div class="compatibilitySwiperSlideControls">
+                        <button class="compatibilitySwiperSlideControlsBtn back">back</button>
+                        <button class="compatibilitySwiperSlideControlsBtn compatibilityClose">close</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Result -->
+                <div class="compatibilitySwiperSlide swiper-slide">
+                    <div class="compatibilitySwiperSlideTitle center title">Checking...</div>
+                    <div class="compatibilitySwiperSlideSize" style="font-size: 1.5rem; font-weight: bold; margin: 10px 0;"></div>
+                    <a class="compatibilitySwiperSlideLink buttonV2" style="display:none;" href="">View Product</a>
+                    <button class="compatibilitySwiperSlideContinue buttonV2 compatibilityClose" style="margin-top:10px;">Set My Watch & Continue</button>
+                    <div class="compatibilitySwiperSlideControls">
+                        <button class="compatibilitySwiperSlideControlsBtn back">back</button>
+                        <button class="compatibilitySwiperSlideControlsBtn restart">start over</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</dialog>
+
+<script src="{{ 'watch-compatibility.js' | asset_url }}" defer></script>
+
+<script>
+document.addEventListener("watchesLoaded", function () {
+    const section = document.querySelector("#compatibility");
+    const manufacturerSelect = section.querySelector("select[name='manufacturer']");
+    const modelSelect = section.querySelector("select[name='model']");
+    
+    const compatibilitySwiper = new Swiper('#compatibilitySwiper', {
+        slidesPerView: 1,
+        spaceBetween: 30,
+        allowTouchMove: false
+    });
+
+    function initDropdowns() {
+        let manufacturers = [...new Set(watches.map(w => w.manufacturer))].sort();
+        populateSelect(manufacturerSelect, manufacturers, "Select Manufacturer");
+    }
+
+    function populateSelect(selectElement, options, initialText) {
+        selectElement.innerHTML = `<option value="" disabled selected>${initialText}</option>`;
+        options.forEach(val => {
+            const opt = document.createElement("option");
+            opt.value = val;
+            opt.innerText = val;
+            selectElement.appendChild(opt);
+        });
+    }
+
+    manufacturerSelect.addEventListener("change", function () {
+        let filteredModels = [...new Set(watches.filter(w => w.manufacturer === this.value).map(w => w.model))].sort();
+        populateSelect(modelSelect, filteredModels, "Select Model");
+        section.querySelector(".compatibilitySwiperSlideNext.manufacturer").disabled = false;
+    });
+
+    modelSelect.addEventListener("change", function() {
+        section.querySelector(".compatibilitySwiperSlideNext.model").disabled = false;
+        updateCompatibilityResult();
+    });
+
+    function updateCompatibilityResult() {
+        const mfr = manufacturerSelect.value;
+        const mod = modelSelect.value;
+
+        const foundWatch = watches.find(w => w.manufacturer === mfr && w.model === mod);
+        if (!foundWatch) return;
+
+        selectedWatch = foundWatch;
+
+        const pageVariants = window.pageVariants || [];
+
+        const match = pageVariants.find(v =>
+            v.bandwidth && v.bandwidth.toUpperCase() === foundWatch.size.toUpperCase()
+        );
+
+        const titleEl = section.querySelector('.compatibilitySwiperSlideTitle.title');
+        const sizeEl = section.querySelector('.compatibilitySwiperSlideSize');
+        const linkEl = section.querySelector('.compatibilitySwiperSlideLink');
+
+        if (match) {
+            titleEl.textContent = `Compatible! You need the ${match.product.title}`;
+            sizeEl.textContent = `${foundWatch.size} Band`;
+            linkEl.href = `/products/${match.product.handle}?variant=${match.id}`;
+            linkEl.style.display = "block";
+        } else {
+            titleEl.textContent = "Your watch is incompatible with this specific band.";
+            sizeEl.textContent = "";
+            linkEl.style.display = "none";
+        }
+    }
+
+    section.querySelectorAll(".compatibilitySwiperSlideNext").forEach(btn => {
+        btn.addEventListener("click", () => compatibilitySwiper.slideNext());
+    });
+    section.querySelectorAll(".back").forEach(btn => {
+        btn.addEventListener("click", () => compatibilitySwiper.slidePrev());
+    });
+    section.querySelector(".restart").addEventListener("click", () => {
+        manufacturerSelect.value = "";
+        modelSelect.innerHTML = '<option value="" disabled selected>Select Manufacturer First</option>';
+        compatibilitySwiper.slideTo(0);
+    });
+
+    section.querySelector(".compatibilitySwiperSlideContinue").addEventListener("click", () => {
+        if (selectedWatch) {
+            localStorage.setItem('watch', JSON.stringify(selectedWatch));
+            updateWatchHTML();
+        }
+    });
+
+    initDropdowns();
+    updateWatchHTML();
+});
+
+function updateWatchHTML() {
+    let watch = JSON.parse(localStorage.getItem('watch'));
+    const infoWrappers = document.querySelectorAll(".watchInfo");
+    const buttons = document.querySelectorAll(".watchCompatibility");
+
+    if (!watch) {
+        infoWrappers.forEach(el => el.classList.remove('active'));
+        buttons.forEach(el => el.classList.add('active'));
+        return;
+    }
+
+    buttons.forEach(el => el.classList.remove('active'));
+    infoWrappers.forEach(el => {
+        el.querySelector('.watchInfoTitleName').textContent = watch.model;
+        el.classList.add('active');
+
+        el.querySelector(".change").onclick = (e) => {
+            e.preventDefault();
+            document.querySelector('.openCompatibility').click();
+        };
+        el.querySelector(".remove").onclick = (e) => {
+            e.preventDefault();
+            localStorage.removeItem('watch');
+            updateWatchHTML();
+        };
+    });
+}
+
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('openCompatibility')) {
+        e.preventDefault();
+        document.querySelector("#compatibility").showModal();
+        document.body.style.overflow = 'hidden';
+    }
+    if (e.target.classList.contains('compatibilityClose') || e.target === document.querySelector("#compatibility")) {
+        document.querySelector("#compatibility").close();
+        document.body.style.overflow = '';
+    }
+});
+</script>
+
+{% schema %}
+{
+  "name": "Watch Compatibility Modal",
+  "settings": [],
+  "presets": [{ "name": "Watch Compatibility Modal" }]
+}
+{% endschema %}

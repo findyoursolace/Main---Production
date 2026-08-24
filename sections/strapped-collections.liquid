@@ -1,0 +1,823 @@
+{%- comment -%} ============================================================
+  STRAPPED — Section 4: Shop the Collection
+  sections/strapped-collections.liquid
+============================================================ {%- endcomment -%}
+
+{%- style -%}
+  #shopify-section-{{ section.id }} {
+    --sb-warm-white: {{ section.settings.bg_color }};
+    --sb-cream:      {{ section.settings.card_bg }};
+    --sb-espresso:   {{ section.settings.text_color }};
+    --sb-dusty-rose: {{ section.settings.accent_color }};
+    --sb-mocha:      {{ section.settings.muted_color }};
+    --sb-champagne:  {{ section.settings.border_color }};
+
+    /* Section-level CTA button tokens */
+    --sb-cta-bg:        {{ section.settings.cta_bg_color }};
+    --sb-cta-text:      {{ section.settings.cta_text_color }};
+    --sb-cta-border-c:  {{ section.settings.cta_border_color }};
+    --sb-cta-border-w:  {{ section.settings.cta_border_width }}px;
+    --sb-cta-radius:    {{ section.settings.cta_border_radius }}px;
+    --sb-cta-pad-v:     {{ section.settings.cta_padding_v }}px;
+    --sb-cta-pad-h:     {{ section.settings.cta_padding_h }}px;
+
+    padding-top:    {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+{%- render 'strapped-fonts' -%}
+
+<style>
+  .strapped-collections {
+    padding: 7rem 5rem;
+    background: var(--sb-warm-white);
+    font-family: var(--sb-font-body);
+    color: var(--sb-espresso);
+  }
+
+  .strapped-collections__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 4rem;
+  }
+
+  .strapped-collections__tag {
+    font-family: var(--sb-font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: var(--sb-dusty-rose);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .strapped-collections__title {
+    font-family: var(--sb-font-heading);
+    font-size: clamp(2.2rem, 3.5vw, 3.8rem);
+    font-weight: 700;
+    line-height: 1.05;
+  }
+
+  .strapped-collections__title em {
+    color: var(--sb-dusty-rose);
+  }
+
+  .strapped-collections__desc {
+    max-width: 280px;
+    font-size: 1rem;
+    font-weight: 300;
+    color: var(--sb-mocha);
+    line-height: 1.7;
+    text-align: right;
+  }
+
+
+  /* ── Grid ── */
+
+  .strapped-collections__grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 1.5rem;
+  }
+
+  .strapped-collections__card {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .strapped-collections__card:first-child {
+    grid-row: 1 / 3;
+  }
+
+
+  /* ── Card image / visual ── */
+
+  .strapped-collections__card-visual {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    flex-shrink: 0;
+  }
+
+  .strapped-collections__card:first-child .strapped-collections__card-visual {
+    aspect-ratio: 3/5;
+  }
+
+  .strapped-collections__card:not(:first-child) .strapped-collections__card-visual {
+    aspect-ratio: 1/1;
+  }
+
+  .strapped-collections__card:hover .strapped-collections__card-visual {
+    transform: scale(1.03);
+  }
+
+  .strapped-collections__card-media {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+
+  /* ── Hover overlay (Quick Add) ── */
+
+  .strapped-collections__card-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(61,43,31,0.06);
+    opacity: 0;
+    transition: opacity 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .strapped-collections__card:hover .strapped-collections__card-overlay {
+    opacity: 1;
+  }
+
+  .strapped-collections__hover-btn {
+    background: var(--sb-espresso);
+    color: var(--sb-cream);
+    padding: 0.7rem 1.5rem;
+    font-family: var(--sb-font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transform: translateY(10px);
+    transition: transform 0.3s 0.05s;
+  }
+
+  .strapped-collections__card:hover .strapped-collections__hover-btn {
+    transform: translateY(0);
+  }
+
+
+  /* ── Card info ── */
+
+  .strapped-collections__card-info {
+    padding: 1rem 0 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .strapped-collections__card-name {
+    font-family: var(--sb-font-heading);
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  .strapped-collections__card-material {
+    font-family: var(--sb-font-mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    color: var(--sb-mocha);
+    text-transform: uppercase;
+    margin-top: 0.2rem;
+  }
+
+  .strapped-collections__card-price {
+    font-family: var(--sb-font-body);
+    font-size: 1rem;
+    color: var(--sb-dusty-rose);
+    margin-top: 0.3rem;
+    flex: 1;
+  }
+
+
+  /* ── Per-card CTA button (below the card info) ── */
+
+  .strapped-collections__card-cta {
+    display: block;
+    width: 100%;
+    margin-top: 0.9rem;
+    background: var(--sb-cta-bg);
+    color: var(--sb-cta-text);
+    padding: var(--sb-cta-pad-v) var(--sb-cta-pad-h);
+    font-family: var(--sb-font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    border: var(--sb-cta-border-w) solid var(--sb-cta-border-c);
+    border-radius: var(--sb-cta-radius);
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    transition: opacity 0.2s, transform 0.2s;
+    line-height: 1;
+  }
+
+  .strapped-collections__card-cta:hover {
+    opacity: 0.82;
+    transform: translateY(-1px);
+  }
+
+
+  /* ── Responsive ── */
+
+  @media (max-width: 900px) {
+    .strapped-collections {
+      padding: 5rem 1.5rem;
+    }
+
+    .strapped-collections__header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .strapped-collections__desc {
+      text-align: left;
+    }
+
+    .strapped-collections__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .strapped-collections__card:first-child {
+      grid-row: auto;
+    }
+  }
+</style>
+
+<div class="strapped-collections" id="strapped-collections">
+
+  <div class="strapped-collections__header">
+    <div>
+
+      {%- if section.settings.eyebrow != blank -%}
+        <div class="strapped-collections__tag">
+          {{ section.settings.eyebrow }}
+        </div>
+      {%- endif -%}
+
+      {%- assign strapped_collections_heading = section.settings.heading | newline_to_br -%}
+
+      <h2 class="strapped-collections__title">
+        {% render 'highlight-brackets',
+          text: strapped_collections_heading,
+          class: 'section-title-highlight'
+        %}
+      </h2>
+
+    </div>
+
+    {%- if section.settings.description != blank -%}
+      <p class="strapped-collections__desc">
+        {{ section.settings.description }}
+      </p>
+    {%- endif -%}
+
+  </div>
+
+
+  <div class="strapped-collections__grid">
+
+    {%- for block in section.blocks -%}
+
+      {%- if block.type == 'card' -%}
+
+        {%- comment -%}
+          Resolve the card link:
+          custom_url > product.url > nil
+        {%- endcomment -%}
+
+        {%- liquid
+          if block.settings.custom_url != blank
+            assign card_url = block.settings.custom_url
+          elsif block.settings.product != blank
+            assign card_url = block.settings.product.url
+          else
+            assign card_url = nil
+          endif
+
+          if block.settings.hover_label != blank
+            assign hover_label = block.settings.hover_label
+          else
+            assign hover_label = section.settings.card_hover_label
+          endif
+
+          if block.settings.cta_label != blank
+            assign cta_label = block.settings.cta_label
+          else
+            assign cta_label = section.settings.cta_label
+          endif
+        -%}
+
+
+        <div
+          class="strapped-collections__card"
+          {{ block.shopify_attributes }}
+        >
+
+          {%- comment -%}
+            Image / visual
+          {%- endcomment -%}
+
+          <div class="strapped-collections__card-visual">
+
+            {%- if block.settings.image != blank -%}
+
+              {{
+                block.settings.image
+                | image_url: width: 800
+                | image_tag:
+                  class: 'strapped-collections__card-media',
+                  loading: 'lazy'
+              }}
+
+            {%- else -%}
+
+              <div
+                style="
+                  width:100%;
+                  height:100%;
+                  background:{{ block.settings.fallback_color }};
+                  display:flex;
+                  align-items:center;
+                  justify-content:center;
+                "
+              >
+                {{ 'product-1' | placeholder_svg_tag }}
+              </div>
+
+            {%- endif -%}
+
+
+            {%- comment -%}
+              Hover overlay with customisable label
+            {%- endcomment -%}
+
+            <div class="strapped-collections__card-overlay">
+
+              {%- if card_url != nil -%}
+
+                <a
+                  href="{{ card_url }}"
+                  class="strapped-collections__hover-btn"
+                >
+                  {{ hover_label }}
+                </a>
+
+              {%- else -%}
+
+                <span class="strapped-collections__hover-btn">
+                  {{ hover_label }}
+                </span>
+
+              {%- endif -%}
+
+            </div>
+
+          </div>
+
+
+          {%- comment -%}
+            Card info: name, material, price
+          {%- endcomment -%}
+
+          <div class="strapped-collections__card-info">
+
+            <div class="strapped-collections__card-name">
+
+              {%- if block.settings.product != blank -%}
+
+                {{ block.settings.product.title }}
+
+              {%- else -%}
+
+                {{ block.settings.name }}
+
+              {%- endif -%}
+
+            </div>
+
+
+            {%- if block.settings.material != blank -%}
+
+              <div class="strapped-collections__card-material">
+                {{ block.settings.material }}
+              </div>
+
+            {%- endif -%}
+
+
+            <div class="strapped-collections__card-price">
+
+              {%- if block.settings.product != blank -%}
+
+                {{ block.settings.product.price_min | money }}
+
+              {%- elsif block.settings.price != blank -%}
+
+                {{ block.settings.price }}
+
+              {%- endif -%}
+
+            </div>
+
+
+            {%- comment -%}
+              Optional below-card CTA button
+            {%- endcomment -%}
+
+            {%- if block.settings.show_cta -%}
+
+              {%- if card_url != nil -%}
+
+                <a
+                  href="{{ card_url }}"
+                  class="strapped-collections__card-cta"
+                  {%- if block.settings.cta_bg != blank %}
+                    style="
+                      background:{{ block.settings.cta_bg }};
+                      color:{{ block.settings.cta_text }};
+                      border-color:{{ block.settings.cta_border }};
+                    "
+                  {% endif %}
+                >
+                  {{ cta_label }}
+                </a>
+
+              {%- else -%}
+
+                <span
+                  class="strapped-collections__card-cta"
+                  {%- if block.settings.cta_bg != blank %}
+                    style="
+                      background:{{ block.settings.cta_bg }};
+                      color:{{ block.settings.cta_text }};
+                      border-color:{{ block.settings.cta_border }};
+                    "
+                  {% endif %}
+                >
+                  {{ cta_label }}
+                </span>
+
+              {%- endif -%}
+
+            {%- endif -%}
+
+          </div>
+
+        </div>
+
+      {%- endif -%}
+
+    {%- endfor -%}
+
+  </div>
+
+</div>
+
+
+{% schema %}
+{
+  "name": "Strapped — Collections",
+  "tag": "section",
+  "class": "strapped-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Header"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow tag",
+      "default": "— The Edit"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop the [Collection]"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description (right side)",
+      "default": "Every band is a mood. Pick the one that matches your energy today."
+    },
+    {
+      "type": "header",
+      "content": "Hover Overlay Button"
+    },
+    {
+      "type": "text",
+      "id": "card_hover_label",
+      "label": "Default hover label",
+      "default": "Quick Add",
+      "info": "Shown on all cards unless overridden per-card"
+    },
+    {
+      "type": "header",
+      "content": "Below-Card CTA Button (section defaults)"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Default CTA label",
+      "default": "Shop Now",
+      "info": "Shown on cards where the CTA is enabled, unless overridden per-card"
+    },
+    {
+      "type": "color",
+      "id": "cta_bg_color",
+      "label": "CTA background",
+      "default": "#2D2D2D"
+    },
+    {
+      "type": "color",
+      "id": "cta_text_color",
+      "label": "CTA text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "cta_border_color",
+      "label": "CTA border color",
+      "default": "#2D2D2D",
+      "info": "Match background to hide border"
+    },
+    {
+      "type": "range",
+      "id": "cta_border_width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "label": "CTA border width",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "cta_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "CTA border radius",
+      "default": 0,
+      "info": "0 = square, 50 = pill shape"
+    },
+    {
+      "type": "range",
+      "id": "cta_padding_v",
+      "min": 6,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "CTA vertical padding",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "cta_padding_h",
+      "min": 12,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "CTA horizontal padding",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Section Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Section background",
+      "default": "#F8F5F0"
+    },
+    {
+      "type": "color",
+      "id": "card_bg",
+      "label": "Hover button background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text / hover button color",
+      "default": "#2D2D2D"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent / price color",
+      "default": "#E0C0B8"
+    },
+    {
+      "type": "color",
+      "id": "muted_color",
+      "label": "Muted text color",
+      "default": "#8B6B5D"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#E8D5C0"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Band card",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Product"
+        },
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product (auto-fills name & price)"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Card image (overrides product image)"
+        },
+        {
+          "type": "color",
+          "id": "fallback_color",
+          "label": "Fallback background color",
+          "default": "#E0C0B8"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name (if no product linked)",
+          "default": "Rosette Satin"
+        },
+        {
+          "type": "text",
+          "id": "material",
+          "label": "Material / subtitle",
+          "default": "Premium Satin Weave · All Series"
+        },
+        {
+          "type": "text",
+          "id": "price",
+          "label": "Price (if no product linked)",
+          "default": "from $38"
+        },
+        {
+          "type": "header",
+          "content": "Link"
+        },
+        {
+          "type": "url",
+          "id": "custom_url",
+          "label": "Custom link (optional)",
+          "info": "Overrides the product link — use for a specific color variant URL."
+        },
+        {
+          "type": "header",
+          "content": "Hover Label Override"
+        },
+        {
+          "type": "text",
+          "id": "hover_label",
+          "label": "Hover button label",
+          "info": "Leave blank to use the section default (Quick Add)"
+        },
+        {
+          "type": "header",
+          "content": "Below-Card CTA Button"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_cta",
+          "label": "Show CTA button",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "CTA button label",
+          "info": "Leave blank to use the section default (Shop Now)"
+        },
+        {
+          "type": "header",
+          "content": "CTA Color Overrides"
+        },
+        {
+          "type": "color",
+          "id": "cta_bg",
+          "label": "CTA background",
+          "default": "#2D2D2D",
+          "info": "Leave as section default or set a custom color for this card"
+        },
+        {
+          "type": "color",
+          "id": "cta_text",
+          "label": "CTA text color",
+          "default": "#ffffff"
+        },
+        {
+          "type": "color",
+          "id": "cta_border",
+          "label": "CTA border color",
+          "default": "#2D2D2D"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Strapped — Collections",
+      "blocks": [
+        {
+          "type": "card",
+          "settings": {
+            "name": "Rosette Satin",
+            "material": "Premium Satin Weave · All Series",
+            "price": "from $38",
+            "fallback_color": "#E0C0B8",
+            "show_cta": false
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "name": "Powder Blue",
+            "material": "Sport Silicone · 38/40/41mm",
+            "price": "from $28",
+            "fallback_color": "#C5CDD8",
+            "show_cta": false
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "name": "Gold Mesh",
+            "material": "Milanese Steel · All Series",
+            "price": "from $52",
+            "fallback_color": "#C9A96E",
+            "show_cta": false
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "name": "Midnight",
+            "material": "Braided Loop · 42/44/45mm",
+            "price": "from $34",
+            "fallback_color": "#2D2D2D",
+            "show_cta": false
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "name": "Latte Dream",
+            "material": "Leather Link · All Series",
+            "price": "from $48",
+            "fallback_color": "#D4C5B2",
+            "show_cta": false
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

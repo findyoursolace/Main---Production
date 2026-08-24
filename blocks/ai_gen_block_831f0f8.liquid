@@ -1,0 +1,422 @@
+{% doc %}
+  @prompt
+    image banner with image selectors for mobile and desktop, it should have a full-width toggle so that there is no padding and the image is truly full width, the full-width toggle did not work, the image is off center over to the left. it should be 100% width, display block in the center of the page, it is still showing a gap on each side of the image. make it display block so that doesn't happen
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-image-banner-{{ ai_gen_id }} {
+    display: block;
+    margin: 0;
+    padding: 0;
+  }
+
+  {% if block.settings.full_width %}
+    .ai-image-banner-{{ ai_gen_id }} {
+      width: 100vw;
+      max-width: 100vw;
+      margin-left: calc(50% - 50vw);
+      margin-right: calc(50% - 50vw);
+    }
+  {% else %}
+    .ai-image-banner-{{ ai_gen_id }} {
+      width: {{ block.settings.desktop_width_percent }}%;
+      max-width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  {% endif %}
+
+  .ai-image-banner-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    display: block;
+    overflow: hidden;
+    border-radius: {{ block.settings.border_radius }}px;
+    margin: 0;
+    padding: 0;
+  }
+
+  .ai-image-banner-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    margin: 0;
+    padding: 0;
+  }
+
+  .ai-image-banner-desktop-{{ ai_gen_id }} {
+    display: block;
+    margin: 0;
+    padding: 0;
+  }
+
+  .ai-image-banner-mobile-{{ ai_gen_id }} {
+    display: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .ai-image-banner-placeholder-{{ ai_gen_id }} {
+    background-color: #f4f4f4;
+    width: 100%;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin: 0;
+    padding: 0;
+  }
+
+  .ai-image-banner-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    max-width: 500px;
+    max-height: 500px;
+    display: block;
+  }
+
+  .ai-image-banner-empty-state-{{ ai_gen_id }} {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 20px;
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .ai-image-banner-content-{{ ai_gen_id }} {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: {{ block.settings.text_color }};
+    width: 90%;
+    max-width: 800px;
+    z-index: 2;
+  }
+
+  .ai-image-banner-overlay-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: {{ block.settings.overlay_color }};
+    opacity: {{ block.settings.overlay_opacity }};
+    z-index: 1;
+  }
+
+  .ai-image-banner-heading-{{ ai_gen_id }} {
+    font-size: {{ block.settings.heading_size }}px;
+    margin: 0 0 16px;
+    font-weight: 700;
+  }
+
+  .ai-image-banner-text-{{ ai_gen_id }} {
+    font-size: {{ block.settings.text_size }}px;
+    margin: 0 0 24px;
+  }
+
+  .ai-image-banner-button-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: 14px 32px;
+    background-color: {{ block.settings.button_color }};
+    color: {{ block.settings.button_text_color }};
+    text-decoration: none;
+    border-radius: {{ block.settings.button_border_radius }}px;
+    font-size: {{ block.settings.button_text_size }}px;
+    transition: background-color 0.3s ease;
+  }
+
+  .ai-image-banner-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_color }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-image-banner-desktop-{{ ai_gen_id }} {
+      display: none;
+    }
+
+    .ai-image-banner-mobile-{{ ai_gen_id }} {
+      display: block;
+    }
+
+    .ai-image-banner-placeholder-{{ ai_gen_id }} {
+      min-height: 300px;
+    }
+
+    .ai-image-banner-heading-{{ ai_gen_id }} {
+      font-size: {{ block.settings.heading_size | times: 0.7 }}px;
+    }
+
+    .ai-image-banner-text-{{ ai_gen_id }} {
+      font-size: {{ block.settings.text_size | times: 0.9 }}px;
+    }
+
+    .ai-image-banner-button-{{ ai_gen_id }} {
+      padding: 12px 24px;
+      font-size: {{ block.settings.button_text_size | times: 0.9 }}px;
+    }
+  }
+{% endstyle %}
+
+<div class="ai-image-banner-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-image-banner-wrapper-{{ ai_gen_id }}">
+    {% if block.settings.show_overlay %}
+      <div class="ai-image-banner-overlay-{{ ai_gen_id }}"></div>
+    {% endif %}
+
+    {% if block.settings.desktop_image %}
+      <div class="ai-image-banner-desktop-{{ ai_gen_id }}">
+        <img
+          src="{{ block.settings.desktop_image | image_url: width: 2000 }}"
+          alt="{{ block.settings.desktop_image.alt | escape }}"
+          loading="lazy"
+          width="{{ block.settings.desktop_image.width }}"
+          height="{{ block.settings.desktop_image.height }}"
+          class="ai-image-banner-image-{{ ai_gen_id }}"
+        >
+      </div>
+    {% else %}
+      <div class="ai-image-banner-desktop-{{ ai_gen_id }}">
+        <div class="ai-image-banner-placeholder-{{ ai_gen_id }}">
+          {{ 'hero-apparel-1' | placeholder_svg_tag }}
+          <div class="ai-image-banner-empty-state-{{ ai_gen_id }}">
+            Add a desktop image
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if block.settings.mobile_image %}
+      <div class="ai-image-banner-mobile-{{ ai_gen_id }}">
+        <img
+          src="{{ block.settings.mobile_image | image_url: width: 1000 }}"
+          alt="{{ block.settings.mobile_image.alt | escape }}"
+          loading="lazy"
+          width="{{ block.settings.mobile_image.width }}"
+          height="{{ block.settings.mobile_image.height }}"
+          class="ai-image-banner-image-{{ ai_gen_id }}"
+        >
+      </div>
+    {% else %}
+      <div class="ai-image-banner-mobile-{{ ai_gen_id }}">
+        <div class="ai-image-banner-placeholder-{{ ai_gen_id }}">
+          {{ 'hero-apparel-1' | placeholder_svg_tag }}
+          <div class="ai-image-banner-empty-state-{{ ai_gen_id }}">
+            Add a mobile image
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if block.settings.show_content %}
+      <div class="ai-image-banner-content-{{ ai_gen_id }}">
+        {% if block.settings.heading != blank %}
+          <h2 class="ai-image-banner-heading-{{ ai_gen_id }}">{{ block.settings.heading }}</h2>
+        {% endif %}
+
+        {% if block.settings.text != blank %}
+          <div class="ai-image-banner-text-{{ ai_gen_id }}">{{ block.settings.text }}</div>
+        {% endif %}
+
+        {% if block.settings.button_label != blank and block.settings.button_link != blank %}
+          <a href="{{ block.settings.button_link }}" class="ai-image-banner-button-{{ ai_gen_id }}">
+            {{ block.settings.button_label }}
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Image banner",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Images"
+    },
+    {
+      "type": "image_picker",
+      "id": "desktop_image",
+      "label": "Desktop image"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "Mobile image"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Make banner full width",
+      "info": "Banner will break out to full viewport width",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Overlay"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_overlay",
+      "label": "Show overlay",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Overlay color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay opacity",
+      "min": 0,
+      "max": 1,
+      "step": 0.1,
+      "default": 0.3
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_content",
+      "label": "Show content",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Image banner"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size",
+      "min": 20,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Text",
+      "default": "Give customers details about the banner image or content on the template."
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "label": "Text size",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "range",
+      "id": "button_text_size",
+      "label": "Button text size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Button color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_color",
+      "label": "Button hover color",
+      "default": "#f0f0f0"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Button border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 4
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image banner"
+    }
+  ]
+}
+{% endschema %}

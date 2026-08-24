@@ -1,0 +1,72 @@
+{%- doc -%}
+  Renders a swatch
+
+  @param {object} swatch - a swatch object
+  @param {object} [variant_image] - an alternate image (Media/Image)
+  @param {object} [variant] - Variant; if provided, prefers variant.metafields.custom.swatch_image
+  @param {string} [mode] - 'unscaled' | 'filter' | 'pill'
+{%- enddoc -%}
+
+{% liquid
+  assign swatch_value = null
+  assign swatch_image_url = null
+
+  # 1) Prefer variant metafield image if a variant is passed
+  assign mf_img = null
+  if variant and variant.metafields and variant.metafields.custom and variant.metafields.custom.swatch_image
+    assign mf_img = variant.metafields.custom.swatch_image
+  endif
+
+  if mf_img != blank
+    assign swatch_image_width = settings.variant_swatch_width | default: 40 | times: 2
+    assign swatch_image_url = mf_img | image_url: width: swatch_image_width
+    assign swatch_value = 'url(' | append: swatch_image_url | append: ')'
+
+  # 2) Fallback to a passed-in variant_image (theme’s normal behavior)
+  elsif variant_image
+    assign swatch_image_width = settings.variant_swatch_width | default: 40 | times: 2
+    assign swatch_image_url = variant_image | image_url: width: swatch_image_width
+    assign swatch_value = 'url(' | append: swatch_image_url | append: ')'
+
+  # 3) Option-level swatch image
+  elsif swatch and swatch.image
+    assign swatch_image_url = swatch.image | image_url: width: 80
+    assign swatch_value = 'url(' | append: swatch_image_url | append: ')'
+
+  # 4) Raw color value
+  elsif swatch and swatch.color
+    assign swatch_value = 'rgb(' | append: swatch.color.rgb | append: ')'
+  endif
+
+  case mode
+    when 'unscaled'
+      assign extra_classes = ' swatch--unscaled'
+    when 'filter'
+      assign extra_classes = ' swatch--filter'
+    when 'pill'
+      assign extra_classes = ' swatch--pill'
+    else
+      assign extra_classes = ''
+  endcase
+%}
+{% for value in option.values %}
+                                        {%- comment -%}
+                                          Determine if this color has ANY non-hidden, available variant
+                                        {%- endcomment -%}
+                                        {% assign color_available = false %}
+                                        {% for variant in product.variants %}
+                                            {% if variant.metafields.maltertech.hidden %}
+                                                {% continue %}
+                                            {% endif %}
+                                            {% if variant.option1 == value and variant.available %}
+                                                {% assign color_available = true %}
+                                                {% break %}
+                                            {% endif %}
+                                        {% endfor %}
+                                         {% endfor %}
+<span
+  class="swatch{{ extra_classes }}{% if swatch_value == null %} swatch--unavailable{% endif %} "
+  style="--swatch-background: {{ swatch_value }};{% if swatch and swatch.image %}{% unless variant_image %} --swatch-focal-point: {{ swatch.image.presentation.focal_point }};{% endunless %}{% endif %}"
+  title="{% if mf_img != blank %}metafield{% elsif variant_image %}variant_image{% elsif swatch and swatch.image %}swatch.image{% elsif swatch and swatch.color %}swatch.color{% else %}none{% endif %}"
+>
+</span>

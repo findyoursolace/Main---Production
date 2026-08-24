@@ -1,0 +1,494 @@
+<section
+  class="sb-hero-split newstyles{% if section.settings.use_bg_image and section.settings.bg_image != blank %} sb-hero-split--has-media{% endif %}"
+  data-right-disabled="{% if section.settings.show_right_panel %}false{% else %}true{% endif %}"
+>
+  {% if section.settings.use_bg_image and section.settings.bg_image != blank %}
+    {% if section.settings.primary_link != blank %}
+      <a
+        href="{{ section.settings.primary_link }}"
+        class="sb-hero__media sb-hero__media--link"
+        aria-label="{{ section.settings.primary_label | escape }}"
+      >
+        {{
+          section.settings.bg_image
+          | image_url: width: 2400
+          | image_tag:
+            widths: '480, 640, 750, 960, 1200, 1440, 1800, 2400',
+            sizes: '100vw',
+            loading: 'eager',
+            fetchpriority: 'high',
+            class: 'sb-hero__media-img'
+        }}
+      </a>
+    {% else %}
+      <div class="sb-hero__media">
+        {{
+          section.settings.bg_image
+          | image_url: width: 2400
+          | image_tag:
+            widths: '480, 640, 750, 960, 1200, 1440, 1800, 2400',
+            sizes: '100vw',
+            loading: 'eager',
+            fetchpriority: 'high',
+            class: 'sb-hero__media-img'
+        }}
+      </div>
+    {% endif %}
+
+    {% if section.settings.bg_use_overlay %}
+      <div class="sb-hero__overlay" aria-hidden="true"></div>
+    {% endif %}
+
+    {% if section.settings.bg_keep_default_gradient %}
+      <div class="sb-hero__gradient" aria-hidden="true"></div>
+    {% endif %}
+  {% endif %}
+
+  <div class="sb-hero__wrap">
+    <div class="sb-hero__grid">
+
+      <div class="sb-hero__left">
+        {% if section.settings.eyebrow_text != blank %}
+          <div class="sb-eyebrow sb-font-text">
+            {% if section.settings.eyebrow_badge != blank %}
+              <span class="sb-eyebrow__badge">{{ section.settings.eyebrow_badge }}</span>
+            {% endif %}
+            <span class="sb-eyebrow__text">{{ section.settings.eyebrow_text }}</span>
+          </div>
+        {% endif %}
+
+        <h1 class="sb-hero__title">
+          {{ section.settings.h1_line1 }}<br>
+          <span class="sb-hero__accent">{{ section.settings.h1_accent1 }}</span><br>
+          {{ section.settings.h1_line3 }}
+          {% if section.settings.h1_accent2 != blank %}
+            <span class="sb-hero__accent"> {{ section.settings.h1_accent2 }}</span>
+          {% endif %}
+        </h1>
+
+        {% if section.settings.body_text != blank %}
+          <div class="sb-hero__body rte">{{ section.settings.body_text }}</div>
+        {% endif %}
+
+        <div class="sb-hero__ctas">
+          {% if section.settings.primary_label != blank and section.settings.primary_link != blank %}
+            <a class="sb-btn sb-btn--primary" href="{{ section.settings.primary_link }}">
+              {{ section.settings.primary_label }}
+            </a>
+          {% endif %}
+
+          {% if section.settings.secondary_label != blank and section.settings.secondary_link != blank %}
+            <a class="sb-btn sb-btn--ghost" href="{{ section.settings.secondary_link }}">
+              {{ section.settings.secondary_label }}
+            </a>
+          {% endif %}
+        </div>
+
+        {% if section.settings.meta_1 != blank or section.settings.meta_2 != blank or section.settings.meta_3 != blank %}
+          <ul class="sb-hero__meta" role="list">
+            {% if section.settings.meta_1 != blank %}<li><span class="sb-dot" aria-hidden="true"></span>{{ section.settings.meta_1 }}</li>{% endif %}
+            {% if section.settings.meta_2 != blank %}<li><span class="sb-dot" aria-hidden="true"></span>{{ section.settings.meta_2 }}</li>{% endif %}
+            {% if section.settings.meta_3 != blank %}<li><span class="sb-dot" aria-hidden="true"></span>{{ section.settings.meta_3 }}</li>{% endif %}
+          </ul>
+        {% endif %}
+
+        {% if section.settings.trust_line != blank %}
+          <div class="sb-hero__trust">
+            <div class="sb-hero__trustline">{{ section.settings.trust_line }}</div>
+            <div class="sb-hero__pills">
+              {% if section.settings.pill_1 != blank %}<span class="sb-pill">{{ section.settings.pill_1 }}</span>{% endif %}
+              {% if section.settings.pill_2 != blank %}<span class="sb-pill">{{ section.settings.pill_2 }}</span>{% endif %}
+              {% if section.settings.pill_3 != blank %}<span class="sb-pill">{{ section.settings.pill_3 }}</span>{% endif %}
+              {% if section.settings.pill_4 != blank %}<span class="sb-pill">{{ section.settings.pill_4 }}</span>{% endif %}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      {% if section.settings.show_right_panel %}
+        <aside class="sb-hero__right">
+          <div class="sb-card">
+            {% if section.settings.card_title != blank %}
+              <div class="sb-card__title">{{ section.settings.card_title }}</div>
+            {% endif %}
+
+            <div class="sb-stats">
+              {% if section.settings.stat1_value != blank or section.settings.stat1_label != blank %}
+                <div class="sb-stat">
+                  <div class="sb-stat__kpi">{{ section.settings.stat1_value }}</div>
+                  <div class="sb-stat__label">{{ section.settings.stat1_label }}</div>
+                </div>
+              {% endif %}
+
+              {% if section.settings.stat2_value != blank or section.settings.stat2_label != blank %}
+                <div class="sb-stat">
+                  <div class="sb-stat__kpi">{{ section.settings.stat2_value }}</div>
+                  <div class="sb-stat__label">{{ section.settings.stat2_label }}</div>
+                </div>
+              {% endif %}
+
+              {% if section.settings.stat3_value != blank or section.settings.stat3_label != blank %}
+                <div class="sb-stat">
+                  <div class="sb-stat__kpi">{{ section.settings.stat3_value }}</div>
+                  <div class="sb-stat__label">{{ section.settings.stat3_label }}</div>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </aside>
+      {% endif %}
+
+    </div>
+  </div>
+
+  <style>
+    .sb-hero-split{
+      position: relative;
+      overflow: hidden;
+      padding: 60px 0;
+      background: #0B0C10;
+      color: rgba(255,255,255,.92);
+    }
+
+    .sb-hero__media{
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: block;
+    }
+
+    .sb-hero__media-img{
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .sb-hero__overlay{
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,{{ section.settings.overlay_opacity }});
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .sb-hero__gradient{
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background:
+        radial-gradient(1200px 800px at 20% 0%, rgba(233,255,122,.18), transparent 55%),
+        radial-gradient(900px 700px at 90% 20%, rgba(120,180,255,.12), transparent 55%);
+    }
+
+    .sb-hero__wrap{
+      position: relative;
+      z-index: 3;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .sb-hero__grid{
+      display: grid;
+      gap: 28px;
+      align-items: start;
+      grid-template-columns: 1.25fr 0.75fr;
+    }
+
+    .sb-hero-split[data-right-disabled="true"] .sb-hero__grid{
+      grid-template-columns: 1fr;
+    }
+
+    @media (max-width: 940px){
+      .sb-hero__grid{
+        grid-template-columns: 1fr;
+      }
+
+      .sb-hero__right{
+        display: none;
+      }
+
+      .sb-hero__media--link{
+        pointer-events: auto;
+        cursor: pointer;
+      }
+
+      .sb-hero__wrap{
+        pointer-events: none;
+      }
+
+      .sb-hero__wrap a,
+      .sb-hero__wrap button,
+      .sb-hero__wrap input,
+      .sb-hero__wrap select,
+      .sb-hero__wrap textarea,
+      .sb-hero__wrap summary,
+      .sb-hero__wrap [role="button"]{
+        pointer-events: auto;
+      }
+    }
+
+    @media (min-width: 941px){
+      .sb-hero__media--link{
+        pointer-events: none;
+        cursor: default;
+      }
+    }
+
+    .sb-hero__title{
+      margin: 14px 0 12px;
+      font-size: clamp(2.4rem, 4vw + 1rem, 4.75rem);
+      line-height: 0.95;
+      text-transform: uppercase;
+    }
+
+    .sb-hero__accent{
+      color: {{ section.settings.accent_color | default: '#a3b5a0' }};
+    }
+
+    .sb-hero__body{
+      max-width: 56ch;
+      line-height: 1.5;
+      color: rgba(255,255,255,.7);
+    }
+
+    .sb-hero__ctas{
+      margin-top: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .sb-btn{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .sb-btn--primary{
+      background: {{ section.settings.accent_color | default: '#a3b5a0' }};
+      color: #0B0C10;
+      border-color: transparent;
+    }
+
+    .sb-btn--ghost{
+      background: rgba(0,0,0,.2);
+      color: rgba(255,255,255,.92);
+    }
+
+    .sb-hero__meta{
+      margin: 14px 0 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 8px;
+      color: rgba(255,255,255,.82);
+      font-size: 14px;
+    }
+
+    .sb-hero__meta li{
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .sb-dot{
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #9ab5ae;
+      display: inline-block;
+    }
+
+    .sb-hero__trust{
+      margin-top: 34px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255,255,255,.14);
+      color: rgba(255,255,255,.55);
+    }
+
+    .sb-hero__trustline{
+      margin-bottom: 10px;
+    }
+
+    .sb-hero__pills{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .sb-pill{
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.03);
+      font-size: .9rem;
+      color: rgba(255,255,255,.78);
+    }
+
+    .sb-card{
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.12);
+      border-radius: 20px;
+      padding: 18px;
+      overflow: hidden;
+    }
+
+    .sb-card__title{
+      font-size: 1rem;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    .sb-stats{
+      display: grid;
+      gap: 12px;
+    }
+
+    .sb-stat{
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(0,0,0,.20);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+
+    .sb-stat__kpi{
+      font-size: 2.2rem;
+      line-height: 1;
+      margin: 0;
+    }
+
+    .sb-stat__label{
+      margin-top: 8px;
+      color: rgba(255,255,255,.7);
+      font-size: .95rem;
+      line-height: 1.35;
+    }
+  </style>
+</section>
+
+{% schema %}
+{
+  "name": "Hero Split",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent color",
+      "default": "#a3b5a0"
+    },
+
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_right_panel",
+      "label": "Show right highlight card",
+      "default": true
+    },
+
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_bg_image",
+      "label": "Use background image override",
+      "default": false
+    },
+    {
+      "type": "image_picker",
+      "id": "bg_image",
+      "label": "Background image"
+    },
+    {
+      "type": "checkbox",
+      "id": "bg_keep_default_gradient",
+      "label": "Keep default gradients on top of image",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "bg_use_overlay",
+      "label": "Add overlay on top of image",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Overlay color",
+      "default": "#0B0C10"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay opacity",
+      "min": 0,
+      "max": 0.9,
+      "step": 0.1,
+      "default": 0.6
+    },
+
+    {
+      "type": "header",
+      "content": "Content"
+    },
+
+    { "type": "text", "id": "eyebrow_badge", "label": "Eyebrow badge", "default": "Limited Offer:" },
+    { "type": "text", "id": "eyebrow_text", "label": "Eyebrow text", "default": "Buy 2 Get 1 Free" },
+
+    { "type": "text", "id": "h1_line1", "label": "Heading line 1 (Display, uppercase)", "default": "AN APPLE WATCH" },
+    { "type": "text", "id": "h1_accent1", "label": "Heading accent 1 (IvyPresto, Title Case)", "default": "Premium Upgrade" },
+    { "type": "text", "id": "h1_line3", "label": "Heading line 3 (Display, uppercase)", "default": "For" },
+    { "type": "text", "id": "h1_accent2", "label": "Heading accent 2 (IvyPresto, Title Case)", "default": "All-Day Comfort" },
+
+    { "type": "richtext", "id": "body_text", "label": "Body text", "default": "<p>Elevate your wristwear with unmatched fit, breathability, and lasting performance.</p>" },
+
+    { "type": "text", "id": "primary_label", "label": "Primary CTA label", "default": "Shop Bands" },
+    { "type": "url", "id": "primary_link", "label": "Primary CTA link" },
+    { "type": "text", "id": "secondary_label", "label": "Secondary CTA label", "default": "See How It Works" },
+    { "type": "url", "id": "secondary_link", "label": "Secondary CTA link" },
+
+    { "type": "text", "id": "meta_1", "label": "Meta line 1", "default": "Lifetime Warranty" },
+    { "type": "text", "id": "meta_2", "label": "Meta line 2", "default": "Money-Back Guarantee" },
+    { "type": "text", "id": "meta_3", "label": "Meta line 3", "default": "Over 1 Million Sold" },
+
+    { "type": "text", "id": "trust_line", "label": "Trust line", "default": "Trusted by athletes, commuters, and everyday doers." },
+    { "type": "text", "id": "pill_1", "label": "Pill 1", "default": "Breathable" },
+    { "type": "text", "id": "pill_2", "label": "Pill 2", "default": "Secure Fit" },
+    { "type": "text", "id": "pill_3", "label": "Pill 3", "default": "Sweat-Ready" },
+    { "type": "text", "id": "pill_4", "label": "Pill 4", "default": "Skin-Friendly" },
+
+    { "type": "text", "id": "card_title", "label": "Highlight card title (Display, uppercase)", "default": "The Solace Difference" },
+
+    { "type": "text", "id": "stat1_value", "label": "Stat 1 value (Display, uppercase)", "default": "3X" },
+    { "type": "text", "id": "stat1_label", "label": "Stat 1 label", "default": "Softer feel vs. typical bands" },
+
+    { "type": "text", "id": "stat2_value", "label": "Stat 2 value (Display, uppercase)", "default": "100%" },
+    { "type": "text", "id": "stat2_label", "label": "Stat 2 label", "default": "Free of PFAS And Toxic Chemicals" },
+
+    { "type": "text", "id": "stat3_value", "label": "Stat 3 value (Display, uppercase)", "default": "24/7" },
+    { "type": "text", "id": "stat3_label", "label": "Stat 3 label", "default": "All-day, all-night comfort" }
+  ],
+  "presets": [
+    { "name": "Hero Split" }
+  ]
+}
+{% endschema %}
