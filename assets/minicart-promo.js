@@ -7,6 +7,7 @@
   let refreshTimer = null;
   let drawerObserver = null;
   let lastCart = null;
+  let refreshQueued = false;
 
   function normalizeFit(value) {
     const fit = String(value || '').trim().toLowerCase().replace(/\s+/g, '');
@@ -111,8 +112,11 @@
     updateUpsells(cart);
   }
 
-  function fetchCart() {
-    if (cartRequest) return cartRequest;
+  function fetchCart(force = false) {
+    if (cartRequest) {
+      if (force) refreshQueued = true;
+      return cartRequest;
+    }
     cartRequest = fetch(`${window.Shopify?.routes?.root || '/'}cart.js`, { headers: { Accept: 'application/json' } })
       .then((response) => {
         if (!response.ok) throw new Error('Unable to load cart');
@@ -120,13 +124,19 @@
       })
       .then(apply)
       .catch((error) => console.warn('[MinicartOffers]', error.message))
-      .finally(() => { cartRequest = null; });
+      .finally(() => {
+        cartRequest = null;
+        if (refreshQueued) {
+          refreshQueued = false;
+          fetchCart();
+        }
+      });
     return cartRequest;
   }
 
   function scheduleFetch(delay = 80) {
     window.clearTimeout(refreshTimer);
-    refreshTimer = window.setTimeout(fetchCart, delay);
+    refreshTimer = window.setTimeout(() => fetchCart(true), delay);
   }
 
   function observeDrawer() {
@@ -134,8 +144,12 @@
     const drawer = document.querySelector('cart-drawer-component');
     if (!drawer) return;
     drawerObserver = new MutationObserver((mutations) => {
-      if (lastCart && mutations.some((mutation) => mutation.addedNodes.length)) {
+      const hasAddedElement = mutations.some((mutation) =>
+        Array.from(mutation.addedNodes).some((node) => node.nodeType === Node.ELEMENT_NODE)
+      );
+      if (lastCart && hasAddedElement) {
         requestAnimationFrame(() => apply(lastCart));
+        scheduleFetch(30);
       }
     });
     drawerObserver.observe(drawer, { childList: true, subtree: true });
@@ -146,8 +160,10 @@
     fetchCart();
     document.addEventListener('cart:update', (event) => {
       const data = event?.detail?.data || event?.detail;
-      if (data?.items) apply(data);
-      scheduleFetch(data?.items ? 180 : 60);
+      const resource = event?.detail?.resource;
+      const cart = data?.items ? data : resource?.items ? resource : null;
+      if (cart) apply(cart);
+      scheduleFetch(cart ? 180 : 30);
     });
     document.addEventListener('cart:refresh', () => scheduleFetch());
     document.addEventListener('shopify:section:load', () => {

@@ -723,6 +723,10 @@
   width: 100%;
   min-width: 0;
 }
+.cart-drawer__dialog #miniCartUpsellVariant[data-card-alignment='center'] .miniCartUpsellItemWrap { text-align: center; align-items: center; }
+.cart-drawer__dialog #miniCartUpsellVariant[data-card-alignment='right'] .miniCartUpsellItemWrap { text-align: right; align-items: flex-end; }
+.cart-drawer__dialog #miniCartUpsellVariant[data-card-alignment='center'] .miniCartUpsellItemBtn { margin-inline: auto; }
+.cart-drawer__dialog #miniCartUpsellVariant[data-card-alignment='right'] .miniCartUpsellItemBtn { margin-left: auto; }
 .cart-drawer__dialog .miniCartUpsellItemWrapTitle {
   font-weight: 700;
   font-size: 13px;
@@ -1378,15 +1382,20 @@
 },
 {
   "type": "text",
-  "id": "upsell_badge_text",
-  "label": "Upsell badge",
-  "default": "Popular"
-},
-{
-  "type": "text",
   "id": "upsell_button_text",
   "label": "Add button text",
   "default": "Add"
+},
+{
+  "type": "select",
+  "id": "upsell_text_alignment",
+  "label": "Card text alignment",
+  "options": [
+    { "value": "left", "label": "Left" },
+    { "value": "center", "label": "Center" },
+    { "value": "right", "label": "Right" }
+  ],
+  "default": "left"
 },
 {
   "type": "select",
@@ -1442,16 +1451,22 @@
   "content": "Upsell items (auto-matches cart Bandwidth)"
 },
 { "type": "product", "id": "upsell_item_1_product", "label": "Upsell item #1 product" },
+{ "type": "select", "id": "upsell_item_1_badge", "label": "Badge #1", "options": [{ "value": "", "label": "None" }, { "value": "Popular", "label": "Popular" }, { "value": "Running low", "label": "Running low" }, { "value": "New", "label": "New" }, { "value": "Limited edition", "label": "Limited edition" }], "default": "Popular" },
 { "type": "text", "id": "upsell_item_1_color", "label": "Color option value (optional) #1" },
 { "type": "product", "id": "upsell_item_2_product", "label": "Upsell item #2 product" },
+{ "type": "select", "id": "upsell_item_2_badge", "label": "Badge #2", "options": [{ "value": "", "label": "None" }, { "value": "Popular", "label": "Popular" }, { "value": "Running low", "label": "Running low" }, { "value": "New", "label": "New" }, { "value": "Limited edition", "label": "Limited edition" }], "default": "Popular" },
 { "type": "text", "id": "upsell_item_2_color", "label": "Color option value (optional) #2" },
 { "type": "product", "id": "upsell_item_3_product", "label": "Upsell item #3 product" },
+{ "type": "select", "id": "upsell_item_3_badge", "label": "Badge #3", "options": [{ "value": "", "label": "None" }, { "value": "Popular", "label": "Popular" }, { "value": "Running low", "label": "Running low" }, { "value": "New", "label": "New" }, { "value": "Limited edition", "label": "Limited edition" }], "default": "Popular" },
 { "type": "text", "id": "upsell_item_3_color", "label": "Color option value (optional) #3" },
 { "type": "product", "id": "upsell_item_4_product", "label": "Upsell item #4 product" },
+{ "type": "select", "id": "upsell_item_4_badge", "label": "Badge #4", "options": [{ "value": "", "label": "None" }, { "value": "Popular", "label": "Popular" }, { "value": "Running low", "label": "Running low" }, { "value": "New", "label": "New" }, { "value": "Limited edition", "label": "Limited edition" }], "default": "Popular" },
 { "type": "text", "id": "upsell_item_4_color", "label": "Color option value (optional) #4" },
 { "type": "product", "id": "upsell_item_5_product", "label": "Upsell item #5 product" },
+{ "type": "select", "id": "upsell_item_5_badge", "label": "Badge #5", "options": [{ "value": "", "label": "None" }, { "value": "Popular", "label": "Popular" }, { "value": "Running low", "label": "Running low" }, { "value": "New", "label": "New" }, { "value": "Limited edition", "label": "Limited edition" }], "default": "Popular" },
 { "type": "text", "id": "upsell_item_5_color", "label": "Color option value (optional) #5" },
 { "type": "product", "id": "upsell_item_6_product", "label": "Upsell item #6 product" },
+{ "type": "select", "id": "upsell_item_6_badge", "label": "Badge #6", "options": [{ "value": "", "label": "None" }, { "value": "Popular", "label": "Popular" }, { "value": "Running low", "label": "Running low" }, { "value": "New", "label": "New" }, { "value": "Limited edition", "label": "Limited edition" }], "default": "Popular" },
 { "type": "text", "id": "upsell_item_6_color", "label": "Color option value (optional) #6" }
 
 

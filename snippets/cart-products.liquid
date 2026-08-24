@@ -375,6 +375,7 @@
     class="miniCartUpsellVariantSection"
     data-max-visible="{{ upsell.upsell_max_visible | default: 3 }}"
     data-hide-existing-product="{{ upsell.upsell_hide_existing_product | default: false }}"
+    data-card-alignment="{{ upsell.upsell_text_alignment | default: 'left' }}"
     style="--upsell-card-radius: {{ upsell.upsell_card_radius | default: 10 }}px;"
   >
     <div id="miniCartUpsellVariantTitle">
@@ -386,10 +387,12 @@
       {%- for i in (1..6) -%}
         {%- capture p_key -%}upsell_item_{{ i }}_product{%- endcapture -%}
         {%- capture c_key -%}upsell_item_{{ i }}_color{%- endcapture -%}
+        {%- capture b_key -%}upsell_item_{{ i }}_badge{%- endcapture -%}
 
         {%- assign upsell_product = upsell[p_key] -%}
         {%- if upsell_product == blank -%}{%- continue -%}{%- endif -%}
         {%- assign desired_color = upsell[c_key] | strip -%}
+        {%- assign upsell_badge = upsell[b_key] | strip -%}
 
         {%- assign bandwidth_index = nil -%}
         {%- assign color_index = nil -%}
@@ -545,8 +548,8 @@
           {%- endif -%}
 
           <div class="miniCartUpsellItemWrap">
-            {%- if upsell.upsell_badge_text != blank -%}
-              <span class="miniCartUpsellItemBadge">{{ upsell.upsell_badge_text }}</span>
+            {%- if upsell_badge != blank -%}
+              <span class="miniCartUpsellItemBadge miniCartUpsellItemBadge--{{ upsell_badge | handleize }}">{{ upsell_badge }}</span>
             {%- endif -%}
             <div class="miniCartUpsellItemWrapTitle">
               {{ upsell_product.title }}

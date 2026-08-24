@@ -160,7 +160,7 @@ class CartItemsComponent extends Component {
         this.#updateQuantitySelectors(parsedResponseText);
 
         this.dispatchEvent(
-          new CartUpdateEvent({}, this.sectionId, {
+          new CartUpdateEvent(parsedResponseText, this.sectionId, {
             itemCount: newCartItemCount,
             source: 'cart-items-component',
             sections: parsedResponseText.sections,
