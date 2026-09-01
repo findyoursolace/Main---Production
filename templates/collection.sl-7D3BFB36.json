@@ -135,64 +135,6 @@
         "padding-block-end": 0
       }
     },
-    "strapped_ticker_QD879A": {
-      "type": "strapped-ticker",
-      "blocks": {
-        "item_BVzgee": {
-          "type": "item",
-          "settings": {
-            "text": "Any 5 bands for $99"
-          }
-        },
-        "item_fnWiah": {
-          "type": "item",
-          "settings": {
-            "text": "Buy 2, Get 1 Free"
-          }
-        },
-        "item_ArRQwc": {
-          "type": "item",
-          "settings": {
-            "text": "PFAS-Free"
-          }
-        },
-        "item_yDCNXW": {
-          "type": "item",
-          "settings": {
-            "text": "Lifetime Warranty"
-          }
-        },
-        "item_gaEyzT": {
-          "type": "item",
-          "settings": {
-            "text": "Styles For Every Day"
-          }
-        },
-        "item_BQe4cp": {
-          "type": "item",
-          "settings": {
-            "text": "Superior Comfort"
-          }
-        }
-      },
-      "block_order": [
-        "item_BVzgee",
-        "item_fnWiah",
-        "item_ArRQwc",
-        "item_yDCNXW",
-        "item_gaEyzT",
-        "item_BQe4cp"
-      ],
-      "name": "Strapped — Ticker",
-      "settings": {
-        "bg_color": "#2d2d2d",
-        "text_color": "#ffffff",
-        "dot_color": "#ffffff",
-        "separator": "·",
-        "height": 56,
-        "speed": 18
-      }
-    },
     "section": {
       "type": "section",
       "blocks": {
@@ -457,6 +399,64 @@
         "color_scheme": "scheme-1",
         "padding-block-start": 0,
         "padding-block-end": 32
+      }
+    },
+    "strapped_ticker_QD879A": {
+      "type": "strapped-ticker",
+      "blocks": {
+        "item_BVzgee": {
+          "type": "item",
+          "settings": {
+            "text": "Any 5 bands for $99"
+          }
+        },
+        "item_fnWiah": {
+          "type": "item",
+          "settings": {
+            "text": "Buy 2, Get 1 Free"
+          }
+        },
+        "item_ArRQwc": {
+          "type": "item",
+          "settings": {
+            "text": "PFAS-Free"
+          }
+        },
+        "item_yDCNXW": {
+          "type": "item",
+          "settings": {
+            "text": "Lifetime Warranty"
+          }
+        },
+        "item_gaEyzT": {
+          "type": "item",
+          "settings": {
+            "text": "Styles For Every Day"
+          }
+        },
+        "item_BQe4cp": {
+          "type": "item",
+          "settings": {
+            "text": "Superior Comfort"
+          }
+        }
+      },
+      "block_order": [
+        "item_BVzgee",
+        "item_fnWiah",
+        "item_ArRQwc",
+        "item_yDCNXW",
+        "item_gaEyzT",
+        "item_BQe4cp"
+      ],
+      "name": "Strapped — Ticker",
+      "settings": {
+        "bg_color": "#2d2d2d",
+        "text_color": "#ffffff",
+        "dot_color": "#ffffff",
+        "separator": "·",
+        "height": 56,
+        "speed": 18
       }
     },
     "split_hero_banner_DQRdBb": {
@@ -1311,10 +1311,10 @@
   "order": [
     "section_QbazgT",
     "custom_liquid_6whUFm",
-    "strapped_ticker_QD879A",
     "section",
     "main",
     "split_hero_banner_DQRdBb",
+    "strapped_ticker_QD879A",
     "watch_benefits_eg9HLr",
     "section_UmTyrq",
     "strapped_collections_kP6ifK",
