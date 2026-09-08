@@ -996,6 +996,7 @@
         "image_X8iGjM": {
           "type": "image",
           "settings": {
+            "media_type": "image",
             "image": "{{ closest.product.metafields.custom.featured_story_image.value }}",
             "link": "",
             "image_ratio": "square",
@@ -1280,6 +1281,7 @@
         "image_8YmPTR": {
           "type": "image",
           "settings": {
+            "media_type": "image",
             "image": "{{ closest.product.metafields.custom.story_1_image.value }}",
             "link": "",
             "image_ratio": "square",
@@ -1340,6 +1342,7 @@
         "image_Rjewkj": {
           "type": "image",
           "settings": {
+            "media_type": "image",
             "image": "{{ closest.product.metafields.custom.story_2_image.value }}",
             "link": "",
             "image_ratio": "square",
@@ -1624,6 +1627,7 @@
         "image_xMi83J": {
           "type": "image",
           "settings": {
+            "media_type": "image",
             "image": "shopify://shop_images/Untitled_design_10_b2cded08-ef77-4467-9b80-42c9f5149d88.png",
             "link": "",
             "image_ratio": "square",
@@ -1648,6 +1652,7 @@
         "group_YRmjTB",
         "image_xMi83J"
       ],
+      "disabled": true,
       "name": "t:names.image_with_text",
       "settings": {
         "content_direction": "row",
@@ -1889,6 +1894,7 @@
         "text_Ex4nVb",
         "ai_gen_block_96600a2_ARpbJb"
       ],
+      "disabled": true,
       "name": "Comparison Chart",
       "settings": {
         "content_direction": "column",
