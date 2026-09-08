@@ -79,15 +79,15 @@
         "mobile_section_padding_top": 0,
         "mobile_section_padding_bottom": 10,
         "bg_mode": "solid",
-        "bg_color": "#2D2D2D",
+        "bg_color": "#2d2d2d",
         "gradient_color_1": "#9ab2a5",
         "gradient_stop_1": 100,
         "gradient_color_2": "#88a796",
         "gradient_stop_2": 100,
         "gradient_angle": 135,
-        "subheading_color": "#BCB3D1",
-        "title_color": "#FFFFFF",
-        "description_color": "#FFFFFF",
+        "subheading_color": "#bcb3d1",
+        "title_color": "#ffffff",
+        "description_color": "#ffffff",
         "desktop_subheading_size": 13,
         "desktop_title_size": 56,
         "desktop_description_size": 16,
@@ -100,8 +100,8 @@
         "description": "<p>5 new limited-edition designs to get you in the mood for the season, available for Apple Watch and other smartwatches.</p>",
         "btn1_label": "Shop Now",
         "btn1_link": "shopify://collections/halloween-collection",
-        "btn1_bg": "#FFFFFF",
-        "btn1_text": "#2D2D2D",
+        "btn1_bg": "#ffffff",
+        "btn1_text": "#2d2d2d",
         "btn2_label": "",
         "btn2_link": "shopify://collections/watch-bands",
         "btn2_bg": "#f8f5f0",
@@ -155,6 +155,15 @@
             "title": "",
             "overlay_opacity": 10
           }
+        },
+        "collection_block_JHjRrf": {
+          "type": "collection_block",
+          "settings": {
+            "show_on": "all_devices",
+            "collection": "iphone-cases",
+            "title": "iPhone Cases",
+            "overlay_opacity": 10
+          }
         }
       },
       "block_order": [
@@ -162,7 +171,8 @@
         "collection_block_Dra3mc",
         "collection_block_7M3LLd",
         "collection_block_9fBQ8k",
-        "collection_block_yWDLxz"
+        "collection_block_yWDLxz",
+        "collection_block_JHjRrf"
       ],
       "custom_css": [
         ".collection-tabs__container {padding-bottom: 20px;}"
@@ -185,10 +195,10 @@
         "pattern_select": "7a47b688-19ea-4ff4-9079-46209f56f078",
         "title_color": "#2d2d2d",
         "border_color": "#2d2d2d",
-        "background_color": "#F8F5F0",
+        "background_color": "#f8f5f0",
         "hover_color": "#a8b5a0",
         "selected_color": "rgba(0,0,0,0)",
-        "section_background_color": "#FFFFFF",
+        "section_background_color": "#ffffff",
         "section_border_color": "rgba(0,0,0,0)"
       }
     },
