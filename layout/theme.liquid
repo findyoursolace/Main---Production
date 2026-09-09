@@ -177,6 +177,19 @@ document.getElementsByTagName('head')[0].appendChild(script);
     });
 
 </script>
-
+<script>
+fetch('/cart/update.js', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  },
+  body: JSON.stringify({
+    attributes: {
+      ab_promo_aov_test: ''
+    }
+  })
+});
+</script>
   </body>
 </html>
