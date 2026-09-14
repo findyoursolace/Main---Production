@@ -209,8 +209,9 @@
         },
         "item_fnWiah": {
           "type": "item",
+          "disabled": true,
           "settings": {
-            "text": "Buy 2, Get 1 Free"
+            "text": ""
           }
         }
       },
